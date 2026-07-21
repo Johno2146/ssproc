@@ -1,6 +1,7 @@
 import { createClient } from "@libsql/client";
 import ProductDetailClient from "./ProductDetailClient";
 import { notFound } from "next/navigation";
+import { productSpecs, quantityTiers, tierColours } from "@/lib/productData";
 
 function getClient() {
   return createClient({
@@ -22,19 +23,25 @@ export default async function ProductPage(props: {
   if (result.rows.length === 0) notFound();
 
   const row = result.rows[0] as any;
-  const product = {
-    id: row.id ?? "unknown",
-    name: row.name ?? "",
-    slug: row.slug ?? "",
-    description: row.description ?? "",
-    category: row.category ?? "",
-    price: Number(row.price ?? 0),
-    unit: row.unit ?? "each",
-    minOrder: Number(row.minOrder ?? 1),
-    stock: Number(row.stock ?? 0),
-    imageUrl: row.imageUrl ?? null,
-    isActive: row.isActive ? true : false,
-  };
+  const specs = productSpecs[slug];
+  const tiers = quantityTiers[slug] || null;
+  const tc = tierColours[slug] || undefined;
 
-  return <ProductDetailClient product={product} />;
+  return (
+    <ProductDetailClient
+      productId={row.id}
+      name={row.name}
+      price={Number(row.price)}
+      unit={row.unit}
+      imageUrl={row.imageUrl}
+      minOrder={Number(row.minOrder)}
+      colours={specs?.colours || []}
+      tiers={tiers}
+      tierColours={tc}
+      weightKg={specs?.weightKg}
+      lengthCm={specs?.lengthCm}
+      widthCm={specs?.widthCm}
+      heightCm={specs?.heightCm}
+    />
+  );
 }
