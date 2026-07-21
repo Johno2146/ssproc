@@ -84,6 +84,8 @@ model Order {
   shippingName  String?
   shippingPhone String?
   shippingEmail String?
+  shippingMethod String?
+  shippingTrackingNumber String?
   notes         String?
   payfastId     String?
   paidAt        DateTime?

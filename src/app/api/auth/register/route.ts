@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
+import crypto from "crypto";
+import { sendOtpEmail } from "@/lib/email";
 
 export async function POST(req: Request) {
   try {
@@ -38,14 +40,35 @@ export async function POST(req: Request) {
         phone,
         company,
         role: "customer",
+        emailVerified: null, // Not verified yet
       },
     });
+
+    // Generate 6-digit OTP
+    const otp = crypto.randomInt(100000, 999999).toString();
+    const expires = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes
+
+    // Store verification token
+    await prisma.verificationToken.create({
+      data: {
+        identifier: email,
+        token: otp,
+        expires,
+      },
+    });
+
+    // Send OTP email
+    const emailSent = await sendOtpEmail(email, name || "Valued Customer", otp);
 
     return NextResponse.json(
       {
         id: user.id,
         name: user.name,
         email: user.email,
+        emailSent,
+        message: emailSent
+          ? "Account created. Please verify your email with the OTP sent to your inbox."
+          : "Account created. To complete verification, please contact sales to receive your OTP.",
       },
       { status: 201 }
     );

@@ -63,7 +63,7 @@ export default function DashboardProductsPage() {
                   {product.category}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  R{product.price.toFixed(2)}
+                  R{product.price.toFixed(2)} excl. VAT
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                   {product.stock}

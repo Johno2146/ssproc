@@ -2,16 +2,34 @@
 
 import { useSession, signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 
 export default function DashboardPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
+  const [stats, setStats] = useState({
+    totalOrders: 0,
+    pendingOrders: 0,
+    shippedOrders: 0,
+    totalUsers: 0,
+    totalProducts: 0,
+    totalRevenue: 0,
+  });
 
   useEffect(() => {
     if (status === "unauthenticated") {
       router.push("/auth/login");
+    }
+
+    if (status === "authenticated") {
+      fetch("/api/dashboard/stats")
+        .then((res) => res.json())
+        .then((data) => {
+          if (!data.error) {
+            setStats(data);
+          }
+        });
     }
   }, [status, router]);
 
@@ -58,10 +76,10 @@ export default function DashboardPage() {
         {/* Stats Overview */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
           {[
-            { label: "Total Orders", value: "0", color: "bg-brand-100 text-brand-800" },
-            { label: "Pending", value: "0", color: "bg-amber-100 text-amber-800" },
-            { label: "Shipped", value: "0", color: "bg-green-100 text-green-800" },
-            { label: "Quotes", value: "0", color: "bg-purple-100 text-purple-800" },
+            { label: "Total Orders", value: stats.totalOrders.toString(), color: "bg-brand-100 text-brand-800" },
+            { label: "Pending", value: stats.pendingOrders.toString(), color: "bg-amber-100 text-amber-800" },
+            { label: "Shipped", value: stats.shippedOrders.toString(), color: "bg-green-100 text-green-800" },
+            { label: "Revenue (incl. VAT)", value: `R${stats.totalRevenue.toFixed(2)}`, color: "bg-purple-100 text-purple-800" },
           ].map((stat) => (
             <div
               key={stat.label}

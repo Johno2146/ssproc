@@ -9,7 +9,7 @@ export async function GET() {
 
     const products = await prisma.product.findMany({
       where: isAdmin ? {} : { isActive: true },
-      orderBy: { createdAt: "desc" },
+      orderBy: { createdAt: "asc" },
     });
     return NextResponse.json(products);
   } catch (error) {
