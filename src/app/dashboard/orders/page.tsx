@@ -66,7 +66,7 @@ export default function DashboardOrdersPage() {
                   {new Date(order.createdAt).toLocaleDateString()}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  R{order.total.toFixed(2)}
+                  R{order.total.toFixed(2)} incl. VAT
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                   <span
