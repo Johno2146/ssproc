@@ -53,7 +53,7 @@ export default function RegisterPage() {
       if (!res.ok) {
         setError(data.error || "Registration failed");
       } else {
-        router.push(`/auth/verify?email=${encodeURIComponent(form.email)}`);
+        router.push(`/auth/login?registered=true`);
       }
     } catch {
       setError("An error occurred. Please try again.");
