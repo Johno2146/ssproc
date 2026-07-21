@@ -1,6 +1,14 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { createClient } from "@libsql/client";
 import bcrypt from "bcryptjs";
+import crypto from "crypto";
+
+function getClient() {
+  return createClient({
+    url: process.env.DATABASE_URL || "",
+    authToken: process.env.TURSO_AUTH_TOKEN,
+  });
+}
 
 export async function POST(req: Request) {
   try {
@@ -13,30 +21,33 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Password must be at least 8 characters" }, { status: 400 });
     }
 
-    const existing = await prisma.user.findUnique({ where: { email } });
-    if (existing) {
+    const client = getClient();
+
+    // Check existing
+    const existing = await client.execute({
+      sql: "SELECT id FROM User WHERE email = ?",
+      args: [email],
+    });
+    if (existing.rows.length > 0) {
       return NextResponse.json({ error: "An account with this email already exists" }, { status: 409 });
     }
 
     const passwordHash = await bcrypt.hash(password, 12);
-    const user = await prisma.user.create({
-      data: {
-        name: name || email.split("@")[0],
-        email,
-        passwordHash,
-        phone: phone || "",
-        company: company || "",
-        role: "customer",
-        emailVerified: new Date(),
-      },
+    const id = crypto.randomUUID();
+    const now = new Date().toISOString();
+    const displayName = name || email.split("@")[0];
+
+    await client.execute({
+      sql: `INSERT INTO User (id, name, email, "emailVerified", image, passwordHash, phone, company, role) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      args: [id, displayName, email, now, null, passwordHash, phone || "", company || "", "customer"],
     });
 
     return NextResponse.json({
-      id: user.id, name: user.name, email: user.email,
+      id, name: displayName, email,
       message: "Account created successfully. You can now sign in.",
     }, { status: 201 });
-  } catch (error) {
+  } catch (error: any) {
     console.error("Registration error:", error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    return NextResponse.json({ error: "Internal server error: " + (error?.message || "unknown") }, { status: 500 });
   }
 }
