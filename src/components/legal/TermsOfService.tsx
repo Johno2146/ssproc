@@ -7,7 +7,7 @@ const TermsOfService: React.FC = () => {
       <section className="space-y-8">
         <div>
           <h2 className="text-xl font-bold text-gray-900 border-b border-gray-100 pb-2">1. About Us</h2>
-          <p className="mt-4">Sealed and Secured (Pty) Ltd (Registration No: 2026/XXXXXX/07) is a South African company with its registered office at Eastwood Business Park, 23 Wright Street, Nuffield, Springs, Gauteng. These terms govern your use of our website and the purchase of our products.</p>
+          <p className="mt-4">Sealed and Secured (Pty) Ltd (Registration No: 2024/182314/07) is a South African company with its registered office at Eastwood Business Park, 23 Wright Street, Nuffield, Springs, Gauteng. These terms govern your use of our website and the purchase of our products.</p>
         </div>
 
         <div>
