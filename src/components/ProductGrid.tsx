@@ -12,19 +12,19 @@ const categories = [
   },
   {
     id: 2,
-    name: 'High-Security Cable Seals',
+    name: 'Barrier Seals',
     href: '/shop',
     imageSrc: '/assets/cable-lock.jpg',
-    imageAlt: 'Metallic cable seal with braided steel wire.',
-    description: 'Adjustable & Heavy Duty protection.',
+    imageAlt: 'High-security barrier seals for containers and doors.',
+    description: 'Heavy-duty barrier seals for maximum security.',
   },
   {
     id: 3,
-    name: 'Container Bolt Seals',
+    name: 'Cable Ties',
     href: '/shop',
     imageSrc: '/assets/bolt-seal.jpg',
-    imageAlt: 'High-security bolt seal for shipping containers.',
-    description: 'High-security bolt seal for shipping containers.',
+    imageAlt: 'Durable cable ties for security applications.',
+    description: 'Versatile cable ties for industrial and security use.',
   },
 ];
 
