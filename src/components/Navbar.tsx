@@ -106,7 +106,7 @@ const Navbar: React.FC = () => {
                   Logout
                 </button>
               </>
-            )}
+            ) : null}
             <Link href="/contact" className="bg-brand-blue text-white px-6 py-2.5 rounded-xl font-bold hover:bg-brand-600 transition-all shadow-md shadow-brand-100">
               Contact Sales
             </Link>
