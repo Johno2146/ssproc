@@ -56,7 +56,7 @@ const Footer: React.FC = () => {
         </div>
         <div className="text-center text-brand-400 text-sm">
           © 2026 Sealed and Secured (Pty) Ltd. All rights reserved.<br />
-          <span className="text-xs">Registration No: 2026/XXXXXX/07 | Eastwood Business Park, 23 Wright Street, Nuffield, Springs, Gauteng</span>
+          <span className="text-xs">Registration No: 2024/182314/07 | Eastwood Business Park, 23 Wright Street, Nuffield, Springs, Gauteng</span>
         </div>
         <div className="flex justify-center mt-8">
           <img src="/assets/bbee-level2.png" alt="B-BBEE Level 2 Contributor" className="h-24 w-auto" />
