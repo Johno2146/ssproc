@@ -44,6 +44,11 @@ const colourHexMap: Record<string, string> = {
   'Yellow': '#eab308',
   'Pink': '#ec4899',
   'Grey': '#6b7280',
+  'Blue': '#2563eb',
+  'Green': '#16a34a',
+  'Navy': '#1e3a5f',
+  'Lime': '#84cc16',
+  'Silver': '#c0c0c0',
 };
 
 const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ productId, name, price, unit, imageUrl, minOrder, colours, tiers, tierColours, weightKg, lengthCm, widthCm, heightCm }) => {
