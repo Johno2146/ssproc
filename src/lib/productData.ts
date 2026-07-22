@@ -348,5 +348,4 @@ export const tierColours: Record<string, Record<string, string[]>> = {
   'ct-heavy-duty-colour-500mm': { material: 'PA66 (Nylon 6/6)', pullStrength: 'N/A', dimensions: '500 × 7.6 × 1.9 mm', colours: ['Black, White, Red, Blue, Green, Yellow, Orange, Purple, Pink, Brown, Navy, Lime, Silver'], applications: ['Cable management', 'General purpose'], features: ['UV resistant'], securityLevel: 'Medium', boxSize: '58 × 30 × 33 cm', boxWeight: '15 kg/carton', weightKg: 0.01, lengthCm: 10, widthCm: 10, heightCm: 4 },
   'ct-extra-heavy-duty-black-540mm': { material: 'PA66 (Nylon 6/6)', pullStrength: 'N/A', dimensions: '540 × 13 × 2.3 mm', colours: ['Black'], applications: ['Cable management', 'General purpose'], features: ['UV resistant'], securityLevel: 'High', boxSize: '58 × 30 × 33 cm', boxWeight: '18.5 kg/carton', weightKg: 0.01, lengthCm: 10, widthCm: 10, heightCm: 4 },
   'ct-extra-heavy-duty-colour-540mm': { material: 'PA66 (Nylon 6/6)', pullStrength: 'N/A', dimensions: '540 × 13 × 2.3 mm', colours: ['Black, White, Red, Blue, Green, Yellow, Orange, Purple, Pink, Brown, Navy, Lime, Silver'], applications: ['Cable management', 'General purpose'], features: ['UV resistant'], securityLevel: 'High', boxSize: '58 × 30 × 33 cm', boxWeight: '18.5 kg/carton', weightKg: 0.01, lengthCm: 10, widthCm: 10, heightCm: 4 },
-
-;
+};
