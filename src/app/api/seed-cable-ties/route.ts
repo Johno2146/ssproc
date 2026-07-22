@@ -1,4 +1,4 @@
-iimport { NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { createClient } from "@libsql/client";
 
 const PRODUCTS = [
@@ -25,51 +25,35 @@ const PRODUCTS = [
   ["CT Extra Heavy Duty Black 540mm","ct-extra-heavy-duty-black-540mm","CT Extra Heavy Duty Black 540mm - PA66 (Nylon 6/6), 540 x 13 x 2.3 mm, Black","Plastic Cable Ties",149.0,"Pack of 50",50],
   ["CT Extra Heavy Duty Colour 540mm","ct-extra-heavy-duty-colour-540mm","CT Extra Heavy Duty Colour 540mm - PA66 (Nylon 6/6), 540 x 13 x 2.3 mm, Black, White, Red, Blue, Green, Yellow, Orange, Purple, Pink, Brown, Navy, Lime, Silver","Plastic Cable Ties",159.0,"Pack of 50",50]
 ];
-import { NextResponse } from "next/server";
+
 import { createClient } from "@libsql/client";
 
-const PRODUCTS = [
-  ["CT Black 100mm","ct-black-100mm","Black nylon cable tie, 100mm length","Plastic Cable Ties",29.00,"Per 100",100],
-  ["CT Colour 100mm","ct-colour-100mm","Assorted colour nylon cable tie, 100mm length","Plastic Cable Ties",32.00,"Per 100",100],
-  ["CT Black 150mm","ct-black-150mm","Black nylon cable tie, 150mm length","Plastic Cable Ties",39.00,"Per 100",100],
-  ["CT Colour 150mm","ct-colour-150mm","Assorted colour nylon cable tie, 150mm length","Plastic Cable Ties",42.00,"Per 100",100],
-  ["CT Black 200mm","ct-black-200mm","Black nylon cable tie, 200mm length","Plastic Cable Ties",49.00,"Per 100",100],
-  ["CT Colour 200mm","ct-colour-200mm","Assorted colour nylon cable tie, 200mm length","Plastic Cable Ties",52.00,"Per 100",100],
-  ["CT Black Slim 200mm","ct-black-slim-200mm","Black slim nylon cable tie, 200mm length","Plastic Cable Ties",39.00,"Per 100",100],
-  ["CT Colour Slim 200mm","ct-colour-slim-200mm","Assorted colour slim nylon cable tie, 200mm length","Plastic Cable Ties",42.00,"Per 100",100],
-  ["CT Heavy Duty Black 200mm","ct-hd-black-200mm","Heavy duty black nylon cable tie, 200mm length","Plastic Cable Ties",69.00,"Per 100",100],
-  ["CT Heavy Duty Colour 200mm","ct-hd-colour-200mm","Heavy duty assorted colour nylon cable tie, 200mm length","Plastic Cable Ties",75.00,"Per 100",100],
-  ["CT Black 300mm","ct-black-300mm","Black nylon cable tie, 300mm length","Plastic Cable Ties",59.00,"Per 100",100],
-  ["CT Colour 300mm","ct-colour-300mm","Assorted colour nylon cable tie, 300mm length","Plastic Cable Ties",62.00,"Per 100",100],
-  ["CT Heavy Duty Black 300mm","ct-hd-black-300mm","Heavy duty black nylon cable tie, 300mm length","Plastic Cable Ties",89.00,"Per 100",100],
-  ["CT Heavy Duty Colour 300mm","ct-hd-colour-300mm","Heavy duty assorted colour nylon cable tie, 300mm length","Plastic Cable Ties",95.00,"Per 100",100],
-  ["CT Black 400mm","ct-black-400mm","Black nylon cable tie, 400mm length","Plastic Cable Ties",69.00,"Per 100",100],
-  ["CT Colour 400mm","ct-colour-400mm","Assorted colour nylon cable tie, 400mm length","Plastic Cable Ties",72.00,"Per 100",100],
-  ["CT Heavy Duty Black 400mm","ct-hd-black-400mm","Heavy duty black nylon cable tie, 400mm length","Plastic Cable Ties",99.00,"Per 100",100],
-  ["CT Heavy Duty Colour 400mm","ct-hd-colour-400mm","Heavy duty assorted colour nylon cable tie, 400mm length","Plastic Cable Ties",105.00,"Per 100",100],
-  ["CT Heavy Duty Black 500mm","ct-hd-black-500mm","Heavy duty black nylon cable tie, 500mm length","Plastic Cable Ties",119.00,"Per 100",100],
-  ["CT Heavy Duty Colour 500mm","ct-hd-colour-500mm","Heavy duty assorted colour nylon cable tie, 500mm length","Plastic Cable Ties",125.00,"Per 100",100],
-  ["CT Extra Heavy Duty Black 540mm","ct-ehd-black-540mm","Extra heavy duty black nylon cable tie, 540mm length","Plastic Cable Ties",149.00,"Per 100",100],
-  ["CT Extra Heavy Duty Colour 540mm","ct-ehd-colour-540mm","Extra heavy duty assorted colour nylon cable tie, 540mm length","Plastic Cable Ties",159.00,"Per 100",100],
-];
+const turso = createClient({
+  url: process.env.TURSO_DATABASE_URL || "",
+  authToken: process.env.TURSO_AUTH_TOKEN || "",
+});
 
 export async function GET() {
-  const client = createClient({
-    url: process.env.DATABASE_URL || "",
-    authToken: process.env.TURSO_AUTH_TOKEN,
-  });
-
-  let added = 0;
-  for (const p of PRODUCTS) {
-    const [name, slug, desc, cat, price, unit, minOrder] = p;
-    const exist = await client.execute({ sql: "SELECT id FROM Product WHERE slug = ?", args: [slug] });
-    if (exist.rows.length > 0) continue;
-    await client.execute({
-      sql: "INSERT INTO Product (name, slug, description, category, price, unit, minOrder, stock, isActive, imageUrl) VALUES (?,?,?,?,?,?,?,100,1,'')",
-      args: [name, slug, desc, cat, price, unit, minOrder],
-    });
-    added++;
+  try {
+    const results = [];
+    for (const [name, slug, description, category, price, unit, stock] of PRODUCTS) {
+      const existing = await turso.execute({
+        sql: "SELECT id FROM Product WHERE slug = ?",
+        args: [slug],
+      });
+      if (existing.rows.length === 0) {
+        await turso.execute({
+          sql: `INSERT INTO Product (name, slug, description, category, price, unit, minOrder, stock, isActive, imageUrl, createdAt, updatedAt)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1, '', datetime('now'), datetime('now'))`,
+          args: [name, slug, description, category, price, unit, stock, stock],
+        });
+        results.push(`Seeded: ${slug}`);
+      } else {
+        results.push(`Skipped: ${slug} (exists)`);
+      }
+    }
+    return NextResponse.json({ seeded: results });
+  } catch (e: any) {
+    return NextResponse.json({ error: e.message }, { status: 500 });
   }
-
-  return NextResponse.json({ added, total: PRODUCTS.length });
 }
