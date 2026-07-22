@@ -349,5 +349,4 @@ export const tierColours: Record<string, Record<string, string[]>> = {
     'Per 80': limitedColours,
     'Per 1000': productSpecs['nylock-seal']?.colours || limitedColours,
   },
-;
-}
+};
