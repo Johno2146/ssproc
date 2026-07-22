@@ -7,6 +7,10 @@ const nextConfig = {
   },
   webpack: (config) => {
     config.parallelism = 1;
+    config.module.rules.push({
+      test: /\.(md|LICENSE)$/,
+      type: 'asset/source',
+    });
     return config;
   },
 };
