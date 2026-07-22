@@ -11,21 +11,7 @@ function getClient() {
 export async function GET() {
   try {
     const client = getClient();
-    const result = await client.execute("SELECT * FROM Product WHERE isActive = 1 ORDER BY
-    CASE slug
-      WHEN 'ct-100mm' THEN 1
-      WHEN 'ct-150mm' THEN 2
-      WHEN 'ct-slim-200mm' THEN 3
-      WHEN 'ct-200mm' THEN 4
-      WHEN 'ct-heavy-duty-200mm' THEN 5
-      WHEN 'ct-300mm' THEN 6
-      WHEN 'ct-heavy-duty-300mm' THEN 7
-      WHEN 'ct-400mm' THEN 8
-      WHEN 'ct-heavy-duty-400mm' THEN 9
-      WHEN 'ct-heavy-duty-500mm' THEN 10
-      WHEN 'ct-extra-heavy-duty-540mm' THEN 11
-      ELSE 100
-    END, createdAt DESC");
+    const result = await client.execute("SELECT * FROM Product WHERE isActive = 1 ORDER BY CASE slug WHEN 'ct-100mm' THEN 1 WHEN 'ct-150mm' THEN 2 WHEN 'ct-slim-200mm' THEN 3 WHEN 'ct-200mm' THEN 4 WHEN 'ct-heavy-duty-200mm' THEN 5 WHEN 'ct-300mm' THEN 6 WHEN 'ct-heavy-duty-300mm' THEN 7 WHEN 'ct-400mm' THEN 8 WHEN 'ct-heavy-duty-400mm' THEN 9 WHEN 'ct-heavy-duty-500mm' THEN 10 WHEN 'ct-extra-heavy-duty-540mm' THEN 11 ELSE 100 END, createdAt DESC");
     const products = result.rows.map((row: any) => ({
       id: row.id,
       name: row.name,
