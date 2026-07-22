@@ -7,7 +7,7 @@ const PrivacyPolicy: React.FC = () => {
       <section className="space-y-8">
         <div>
           <h2 className="text-xl font-bold text-gray-900 border-b border-gray-100 pb-2">1. Who We Are</h2>
-          <p className="mt-4">Sealed and Secured (Pty) Ltd (Registration No: 2026/XXXXXX/07) is responsible for the collection and processing of your personal information. We are committed to protecting your privacy in accordance with the Protection of Personal Information Act 4 of 2013 (POPIA).</p>
+          <p className="mt-4">Sealed and Secured (Pty) Ltd (Registration No: 2024/182314/07) is responsible for the collection and processing of your personal information. We are committed to protecting your privacy in accordance with the Protection of Personal Information Act 4 of 2013 (POPIA).</p>
         </div>
 
         <div>
