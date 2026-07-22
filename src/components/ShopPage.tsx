@@ -35,7 +35,7 @@ const productImages: Record<string, string> = {
 
 // Category definitions: slug -> product slugs
 const categories: Record<string, { label: string; slugs: string[] }> = {
-  'all': { label: 'All Seals', slugs: [] },
+  'all': { label: 'All Products', slugs: [] },
   'plastic': { label: 'Plastic Seals', slugs: ['suretite-230mm', 'suretite-320mm', 'suretite-barcoded', 'twinlock', 'twinlock-barcoded', 'padlock-seal', 'nylock-seal'] },
   'barrier': { label: 'Barrier Seals', slugs: ['bolt-seal', 'cable-lock-500mm', 'abs-cable-lock', 'cable-seal-300mm', 'cable-seal-500mm'] },
   'plastic-cable-ties': { label: 'Plastic Cable Ties', slugs: [] },
@@ -88,7 +88,7 @@ const ShopPage: React.FC<ShopPageProps> = async ({ selectedCategory }) => {
             <h2 className="text-2xl font-bold text-brand-950 mb-4">No products in this category</h2>
             <p className="text-gray-500 mb-8">Try selecting a different category.</p>
             <Link href="/shop" className="bg-brand-blue text-white px-8 py-3 rounded-xl font-bold hover:bg-brand-600 transition-all inline-block">
-              View All Seals
+              View All Products
             </Link>
           </div>
         ) : (
