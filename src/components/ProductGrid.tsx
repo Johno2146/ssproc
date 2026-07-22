@@ -22,8 +22,8 @@ const categories = [
     id: 3,
     name: 'Cable Ties',
     href: '/shop',
-    imageSrc: '/assets/bolt-seal.jpg',
-    imageAlt: 'Durable cable ties for security applications.',
+    imageSrc: '/assets/CT black.jpg',
+    imageAlt: 'Black cable ties for security applications.',
     description: 'Versatile cable ties for industrial and security use.',
   },
 ];
