@@ -24,6 +24,7 @@ interface ProductDetailClientProps {
   colours: string[];
   tiers: QuantityTier[] | null;
   tierColours?: Record<string, string[]>;
+  colourImages?: Record<string, string>;
   weightKg?: number;
   lengthCm?: number;
   widthCm?: number;
@@ -51,11 +52,12 @@ const colourHexMap: Record<string, string> = {
   'Silver': '#c0c0c0',
 };
 
-const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ productId, name, price, unit, imageUrl, minOrder, colours, tiers, tierColours, weightKg, lengthCm, widthCm, heightCm }) => {
+const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ productId, name, price, unit, imageUrl, minOrder, colours, tiers, tierColours, colourImages, weightKg, lengthCm, widthCm, heightCm }) => {
   const [added, setAdded] = useState(false);
   const [selectedColour, setSelectedColour] = useState<string | null>(null);
   const [selectedTierIndex, setSelectedTierIndex] = useState(0);
   const [quantity, setQuantity] = useState(1);
+  const [displayImage, setDisplayImage] = useState<string | null>(imageUrl);
 
   const hasTiers = tiers && tiers.length > 0;
   const activeTier = hasTiers ? tiers[selectedTierIndex] : null;
@@ -97,7 +99,7 @@ const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ productId, na
       quantity,
       unit: displayUnit,
       tierLabel: displayLabel,
-      imageUrl,
+      imageUrl: displayImage,
       colour: hasColourOptions ? selectedColour : undefined,
       weightKg: activeTier?.shipping?.weightKg ?? weightKg,
       lengthCm: activeTier?.shipping?.lengthCm ?? lengthCm,
@@ -122,6 +124,15 @@ const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ productId, na
 
   return (
     <div className="space-y-4">
+      {/* Product Image - updates when colour changes */}
+      <div className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100 flex items-center justify-center aspect-square">
+        {displayImage ? (
+          <img src={displayImage} alt={name} className="w-full h-full object-contain" />
+        ) : (
+          <div className="text-8xl">🔒</div>
+        )}
+      </div>
+
       {/* Colour Options - Selectable */}
       {hasColourOptions && (
         <div>
@@ -135,7 +146,12 @@ const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ productId, na
               return (
                 <button
                   key={colour}
-                  onClick={() => setSelectedColour(colour)}
+                  onClick={() => {
+                    setSelectedColour(colour);
+                    if (colourImages && colourImages[colour]) {
+                      setDisplayImage(colourImages[colour]);
+                    }
+                  }}
                   className="group relative"
                   title={colour}
                 >

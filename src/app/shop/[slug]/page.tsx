@@ -79,6 +79,31 @@ const ProductDetailPage: React.FC<ProductPageProps> = async ({ params }) => {
   const spec = productSpecs[product.slug] || null;
   const imageUrl = productImages[product.slug] || product.imageUrl || null;
 
+  // Build colour images map for CT (cable tie) products
+  // Filename capitalisation: most lowercase, but Lime, Navy, Orange, Silver, Yellow keep capital first letter
+  const colourImages: Record<string, string> | undefined = product.slug.startsWith('ct-') ? (() => {
+    const map: Record<string, string> = {};
+    const colourNames = spec?.colours || [];
+    colourNames.forEach(colour => {
+      let filenameColour: string;
+      switch (colour) {
+        case 'Lime':   filenameColour = 'Lime'; break;
+        case 'Navy':   filenameColour = 'Navy'; break;
+        case 'Orange': filenameColour = 'Orange'; break;
+        case 'Silver': filenameColour = 'Silver'; break;
+        case 'Yellow': filenameColour = 'Yellow'; break;
+        default:       filenameColour = colour.toLowerCase();
+      }
+      map[colour] = `/assets/CT ${filenameColour}.jpg`;
+    });
+    return map;
+  })() : undefined;
+
+  // Default image for CT products: white if no colour selected
+  const defaultCTImage = product.slug.startsWith('ct-') && colourImages?.['White']
+    ? colourImages['White']
+    : imageUrl;
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -92,15 +117,6 @@ const ProductDetailPage: React.FC<ProductPageProps> = async ({ params }) => {
         </nav>
 
         <div className="grid md:grid-cols-2 gap-12">
-          {/* Product Image */}
-          <div className="bg-white rounded-2xl p-8 shadow-sm border border-gray-100 flex items-center justify-center aspect-square">
-            {imageUrl ? (
-              <img src={imageUrl} alt={product.name} className="w-full h-full object-contain" />
-            ) : (
-              <div className="text-8xl">🔒</div>
-            )}
-          </div>
-
           {/* Product Details */}
           <div>
             <div className="text-sm font-semibold text-brand-600 uppercase tracking-wider mb-2">
@@ -130,11 +146,12 @@ const ProductDetailPage: React.FC<ProductPageProps> = async ({ params }) => {
               name={product.name}
               price={product.price}
               unit={product.unit}
-              imageUrl={imageUrl}
+              imageUrl={defaultCTImage}
               minOrder={product.minOrder}
               colours={spec?.colours || []}
               tiers={quantityTiers[product.slug] || null}
               tierColours={tierColours[product.slug]}
+              colourImages={colourImages}
               weightKg={spec?.weightKg}
               lengthCm={spec?.lengthCm}
               widthCm={spec?.widthCm}
