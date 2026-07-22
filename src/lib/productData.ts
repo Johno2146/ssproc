@@ -325,7 +325,7 @@ export const tierColours: Record<string, Record<string, string[]>> = {
     'Per 80': limitedColours,
     'Per 1000': productSpecs['nylock-seal']?.colours || limitedColours,
   },
-}
+
   'ct-black-100mm': { material: 'PA66 (Nylon 6/6)', pullStrength: 'N/A', dimensions: '100 x 2.5 x 1.1 mm', colours: ['Black'], applications: ['Cable management', 'General purpose'], features: ['UV resistant'], securityLevel: 'Standard', boxSize: '45 x 30 x 30 cm', boxWeight: '7.5 kg/carton', weightKg: 0.01, lengthCm: 10, widthCm: 10, heightCm: 4 },
   'ct-colour-100mm': { material: 'PA66 (Nylon 6/6)', pullStrength: 'N/A', dimensions: '100 x 2.5 x 1.1 mm', colours: ['Black, White, Red, Blue, Green, Yellow, Orange, Purple, Pink, Brown, Navy, Lime, Silver'], applications: ['Cable management', 'General purpose'], features: ['UV resistant'], securityLevel: 'Standard', boxSize: '45 x 30 x 30 cm', boxWeight: '7.5 kg/carton', weightKg: 0.01, lengthCm: 10, widthCm: 10, heightCm: 4 },
   'ct-black-150mm': { material: 'PA66 (Nylon 6/6)', pullStrength: 'N/A', dimensions: '150 x 3.6 x 1.3 mm', colours: ['Black'], applications: ['Cable management', 'General purpose'], features: ['UV resistant'], securityLevel: 'Standard', boxSize: '45 x 30 x 30 cm', boxWeight: '12 kg/carton', weightKg: 0.01, lengthCm: 10, widthCm: 10, heightCm: 4 },
@@ -349,3 +349,4 @@ export const tierColours: Record<string, Record<string, string[]>> = {
   'ct-extra-heavy-duty-black-540mm': { material: 'PA66 (Nylon 6/6)', pullStrength: 'N/A', dimensions: '540 x 13 x 2.3 mm', colours: ['Black'], applications: ['Cable management', 'General purpose'], features: ['UV resistant'], securityLevel: 'High', boxSize: '58 x 30 x 33 cm', boxWeight: '18.5 kg/carton', weightKg: 0.01, lengthCm: 10, widthCm: 10, heightCm: 4 },
   'ct-extra-heavy-duty-colour-540mm': { material: 'PA66 (Nylon 6/6)', pullStrength: 'N/A', dimensions: '540 x 13 x 2.3 mm', colours: ['Black, White, Red, Blue, Green, Yellow, Orange, Purple, Pink, Brown, Navy, Lime, Silver'], applications: ['Cable management', 'General purpose'], features: ['UV resistant'], securityLevel: 'High', boxSize: '58 x 30 x 33 cm', boxWeight: '18.5 kg/carton', weightKg: 0.01, lengthCm: 10, widthCm: 10, heightCm: 4 },
 ;
+}
