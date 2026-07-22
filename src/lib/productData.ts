@@ -349,3 +349,25 @@ export const tierColours: Record<string, Record<string, string[]>> = {
   'ct-extra-heavy-duty-black-540mm': { material: 'PA66 (Nylon 6/6)', pullStrength: 'N/A', dimensions: '540 × 13 × 2.3 mm', colours: ['Black'], applications: ['Cable management', 'General purpose'], features: ['UV resistant'], securityLevel: 'High', boxSize: '58 × 30 × 33 cm', boxWeight: '18.5 kg/carton', weightKg: 0.01, lengthCm: 10, widthCm: 10, heightCm: 4 },
   'ct-extra-heavy-duty-colour-540mm': { material: 'PA66 (Nylon 6/6)', pullStrength: 'N/A', dimensions: '540 × 13 × 2.3 mm', colours: ['Black, White, Red, Blue, Green, Yellow, Orange, Purple, Pink, Brown, Navy, Lime, Silver'], applications: ['Cable management', 'General purpose'], features: ['UV resistant'], securityLevel: 'High', boxSize: '58 × 30 × 33 cm', boxWeight: '18.5 kg/carton', weightKg: 0.01, lengthCm: 10, widthCm: 10, heightCm: 4 },
 };
+// Tier-specific colour restrictions for certain products
+// Per 50 and Per 100: only White, Yellow, Light Blue
+// Per 1000: all colours
+const limitedColours = ['White', 'Yellow', 'Light Blue'];
+
+export const tierColours: Record<string, Record<string, string[]>> = {
+  'suretite-320mm': {
+    'Per 50': limitedColours,
+    'Per 100': limitedColours,
+    'Per 1000': productSpecs['suretite-320mm']?.colours || limitedColours,
+  },
+  'twinlock': {
+    'Per 50': limitedColours,
+    'Per 100': limitedColours,
+    'Per 1000': productSpecs['twinlock']?.colours || limitedColours,
+  },
+  'nylock-seal': {
+    'Per 40': limitedColours,
+    'Per 80': limitedColours,
+    'Per 1000': productSpecs['nylock-seal']?.colours || limitedColours,
+  },
+};
