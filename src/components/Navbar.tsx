@@ -110,11 +110,12 @@ const Navbar: React.FC = () => {
             <Link href="/contact" className="bg-brand-blue text-white px-6 py-2.5 rounded-xl font-bold hover:bg-brand-600 transition-all shadow-md shadow-brand-100">
               Contact Sales
             </Link>
+            {!session && (
               <>
                 <Link href="/auth/login" className="text-gray-600 hover:text-brand-600 font-medium transition-colors">Sign In</Link>
                 <Link href="/auth/register" className="text-gray-600 hover:text-brand-600 font-medium transition-colors">Register</Link>
               </>
-            ) : null}
+            )}
           </div>
 
           <div className="md:hidden flex items-center gap-2">
