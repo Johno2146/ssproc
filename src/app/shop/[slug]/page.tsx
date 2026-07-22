@@ -54,17 +54,17 @@ const productImages: Record<string, string> = {
   'suretite-230mm': '/assets/suretite.jpg',
   'suretite-320mm': '/assets/suretite.jpg',
   
-  'ct-100mm': '/assets/CT white.jpg',
-  'ct-150mm': '/assets/CT white.jpg',
-  'ct-200mm': '/assets/CT white.jpg',
-  'ct-slim-200mm': '/assets/CT white.jpg',
-  'ct-heavy-duty-200mm': '/assets/CT white.jpg',
-  'ct-300mm': '/assets/CT white.jpg',
-  'ct-heavy-duty-300mm': '/assets/CT white.jpg',
-  'ct-400mm': '/assets/CT white.jpg',
-  'ct-heavy-duty-400mm': '/assets/CT white.jpg',
-  'ct-heavy-duty-500mm': '/assets/CT white.jpg',
-  'ct-extra-heavy-duty-540mm': '/assets/CT white.jpg',
+  'ct-100mm': '/assets/CT black.jpg',
+  'ct-150mm': '/assets/CT black.jpg',
+  'ct-200mm': '/assets/CT black.jpg',
+  'ct-slim-200mm': '/assets/CT black.jpg',
+  'ct-heavy-duty-200mm': '/assets/CT black.jpg',
+  'ct-300mm': '/assets/CT black.jpg',
+  'ct-heavy-duty-300mm': '/assets/CT black.jpg',
+  'ct-400mm': '/assets/CT black.jpg',
+  'ct-heavy-duty-400mm': '/assets/CT black.jpg',
+  'ct-heavy-duty-500mm': '/assets/CT black.jpg',
+  'ct-extra-heavy-duty-540mm': '/assets/CT black.jpg',
 };
 
 interface ProductPageProps {
