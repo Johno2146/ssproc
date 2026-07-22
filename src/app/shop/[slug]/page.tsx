@@ -41,7 +41,7 @@ async function getProduct(slug: string) {
 
 const productImages: Record<string, string> = {
   'bolt-seal': '/assets/bolt-seal.jpg',
-  'cable-lock-500mm': '/assets/cable-lock.jpg',
+  'cable-seal-500mm': '/assets/cable-lock.jpg',
   'abs-cable-lock': '/assets/abs-cable-seal.jpg',
   'cable-seal-300mm': '/assets/cable-lock.jpg',
   'cable-seal-500mm': '/assets/cable-lock.jpg',
