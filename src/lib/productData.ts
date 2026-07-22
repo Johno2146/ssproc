@@ -135,7 +135,18 @@ export const productSpecs: Record<string, ProductSpec> = {
     widthCm: 2.5,
     heightCm: 1.5,
   },
-  'nylock-seal': {
+  'ct-100mm': { 'Black': ['Black'], 'Colour': ['Black', 'White', 'Red', 'Blue', 'Green', 'Yellow', 'Orange', 'Purple', 'Pink', 'Brown', 'Navy', 'Lime', 'Silver'] },
+  'ct-150mm': { 'Black': ['Black'], 'Colour': ['Black', 'White', 'Red', 'Blue', 'Green', 'Yellow', 'Orange', 'Purple', 'Pink', 'Brown', 'Navy', 'Lime', 'Silver'] },
+  'ct-200mm': { 'Black': ['Black'], 'Colour': ['Black', 'White', 'Red', 'Blue', 'Green', 'Yellow', 'Orange', 'Purple', 'Pink', 'Brown', 'Navy', 'Lime', 'Silver'] },
+  'ct-slim-200mm': { 'Black': ['Black'], 'Colour': ['Black', 'White', 'Red', 'Blue', 'Green', 'Yellow', 'Orange', 'Purple', 'Pink', 'Brown', 'Navy', 'Lime', 'Silver'] },
+  'ct-heavy-duty-200mm': { 'Black': ['Black'], 'Colour': ['Black', 'White', 'Red', 'Blue', 'Green', 'Yellow', 'Orange', 'Purple', 'Pink', 'Brown', 'Navy', 'Lime', 'Silver'] },
+  'ct-300mm': { 'Black': ['Black'], 'Colour': ['Black', 'White', 'Red', 'Blue', 'Green', 'Yellow', 'Orange', 'Purple', 'Pink', 'Brown', 'Navy', 'Lime', 'Silver'] },
+  'ct-heavy-duty-300mm': { 'Black': ['Black'], 'Colour': ['Black', 'White', 'Red', 'Blue', 'Green', 'Yellow', 'Orange', 'Purple', 'Pink', 'Brown', 'Navy', 'Lime', 'Silver'] },
+  'ct-400mm': { 'Black': ['Black'], 'Colour': ['Black', 'White', 'Red', 'Blue', 'Green', 'Yellow', 'Orange', 'Purple', 'Pink', 'Brown', 'Navy', 'Lime', 'Silver'] },
+  'ct-heavy-duty-400mm': { 'Black': ['Black'], 'Colour': ['Black', 'White', 'Red', 'Blue', 'Green', 'Yellow', 'Orange', 'Purple', 'Pink', 'Brown', 'Navy', 'Lime', 'Silver'] },
+  'ct-heavy-duty-500mm': { 'Black': ['Black'], 'Colour': ['Black', 'White', 'Red', 'Blue', 'Green', 'Yellow', 'Orange', 'Purple', 'Pink', 'Brown', 'Navy', 'Lime', 'Silver'] },
+  'ct-extra-heavy-duty-540mm': { 'Black': ['Black'], 'Colour': ['Black', 'White', 'Red', 'Blue', 'Green', 'Yellow', 'Orange', 'Purple', 'Pink', 'Brown', 'Navy', 'Lime', 'Silver'] },
+    'nylock-seal': {
     material: 'Nylon 6',
     pullStrength: '15 kg',
     dimensions: 'Flag: 24mm x 55mm, Tail Diameter: 3mm, Total Length: 310mm',
@@ -257,7 +268,52 @@ export const quantityTiers: Record<string, QuantityTier[]> = {
     { label: 'Per 100', unit: '100 pack', price: 90.00, shipping: { weightKg: 0.500, lengthCm: 43, widthCm: 25, heightCm: 8 } },
     { label: 'Per 1000', unit: '1000 pack', price: 870.00, shipping: { weightKg: 5.0, lengthCm: 50, widthCm: 41, heightCm: 31 } },
   ],
-  'suretite-230mm': [
+
+  'ct-100mm': [
+    { label: 'Black', unit: '100 pack', price: 29.00 },
+    { label: 'Colour', unit: '100 pack', price: 32.00 },
+  ],
+  'ct-150mm': [
+    { label: 'Black', unit: '100 pack', price: 39.00 },
+    { label: 'Colour', unit: '100 pack', price: 42.00 },
+  ],
+  'ct-200mm': [
+    { label: 'Black', unit: '100 pack', price: 49.00 },
+    { label: 'Colour', unit: '100 pack', price: 52.00 },
+  ],
+  'ct-slim-200mm': [
+    { label: 'Black', unit: '100 pack', price: 39.00 },
+    { label: 'Colour', unit: '100 pack', price: 42.00 },
+  ],
+  'ct-heavy-duty-200mm': [
+    { label: 'Black', unit: '100 pack', price: 69.00 },
+    { label: 'Colour', unit: '100 pack', price: 75.00 },
+  ],
+  'ct-300mm': [
+    { label: 'Black', unit: '100 pack', price: 59.00 },
+    { label: 'Colour', unit: '100 pack', price: 62.00 },
+  ],
+  'ct-heavy-duty-300mm': [
+    { label: 'Black', unit: '100 pack', price: 89.00 },
+    { label: 'Colour', unit: '100 pack', price: 95.00 },
+  ],
+  'ct-400mm': [
+    { label: 'Black', unit: '100 pack', price: 69.00 },
+    { label: 'Colour', unit: '100 pack', price: 72.00 },
+  ],
+  'ct-heavy-duty-400mm': [
+    { label: 'Black', unit: '100 pack', price: 99.00 },
+    { label: 'Colour', unit: '100 pack', price: 105.00 },
+  ],
+  'ct-heavy-duty-500mm': [
+    { label: 'Black', unit: '100 pack', price: 119.00 },
+    { label: 'Colour', unit: '100 pack', price: 125.00 },
+  ],
+  'ct-extra-heavy-duty-540mm': [
+    { label: 'Black', unit: '50 pack', price: 149.00 },
+    { label: 'Colour', unit: '50 pack', price: 159.00 },
+  ],
+    'suretite-230mm': [
     { label: 'Per 1000', unit: '1000 pack', price: 810.00, shipping: { weightKg: 4.5, lengthCm: 50, widthCm: 31, heightCm: 31 } },
   ],
   'twinlock': [
@@ -331,7 +387,18 @@ export const tierColours: Record<string, Record<string, string[]>> = {
     'Per 100': limitedColours,
     'Per 1000': productSpecs['twinlock']?.colours || limitedColours,
   },
-  'nylock-seal': {
+  'ct-100mm': { 'Black': ['Black'], 'Colour': ['Black', 'White', 'Red', 'Blue', 'Green', 'Yellow', 'Orange', 'Purple', 'Pink', 'Brown', 'Navy', 'Lime', 'Silver'] },
+  'ct-150mm': { 'Black': ['Black'], 'Colour': ['Black', 'White', 'Red', 'Blue', 'Green', 'Yellow', 'Orange', 'Purple', 'Pink', 'Brown', 'Navy', 'Lime', 'Silver'] },
+  'ct-200mm': { 'Black': ['Black'], 'Colour': ['Black', 'White', 'Red', 'Blue', 'Green', 'Yellow', 'Orange', 'Purple', 'Pink', 'Brown', 'Navy', 'Lime', 'Silver'] },
+  'ct-slim-200mm': { 'Black': ['Black'], 'Colour': ['Black', 'White', 'Red', 'Blue', 'Green', 'Yellow', 'Orange', 'Purple', 'Pink', 'Brown', 'Navy', 'Lime', 'Silver'] },
+  'ct-heavy-duty-200mm': { 'Black': ['Black'], 'Colour': ['Black', 'White', 'Red', 'Blue', 'Green', 'Yellow', 'Orange', 'Purple', 'Pink', 'Brown', 'Navy', 'Lime', 'Silver'] },
+  'ct-300mm': { 'Black': ['Black'], 'Colour': ['Black', 'White', 'Red', 'Blue', 'Green', 'Yellow', 'Orange', 'Purple', 'Pink', 'Brown', 'Navy', 'Lime', 'Silver'] },
+  'ct-heavy-duty-300mm': { 'Black': ['Black'], 'Colour': ['Black', 'White', 'Red', 'Blue', 'Green', 'Yellow', 'Orange', 'Purple', 'Pink', 'Brown', 'Navy', 'Lime', 'Silver'] },
+  'ct-400mm': { 'Black': ['Black'], 'Colour': ['Black', 'White', 'Red', 'Blue', 'Green', 'Yellow', 'Orange', 'Purple', 'Pink', 'Brown', 'Navy', 'Lime', 'Silver'] },
+  'ct-heavy-duty-400mm': { 'Black': ['Black'], 'Colour': ['Black', 'White', 'Red', 'Blue', 'Green', 'Yellow', 'Orange', 'Purple', 'Pink', 'Brown', 'Navy', 'Lime', 'Silver'] },
+  'ct-heavy-duty-500mm': { 'Black': ['Black'], 'Colour': ['Black', 'White', 'Red', 'Blue', 'Green', 'Yellow', 'Orange', 'Purple', 'Pink', 'Brown', 'Navy', 'Lime', 'Silver'] },
+  'ct-extra-heavy-duty-540mm': { 'Black': ['Black'], 'Colour': ['Black', 'White', 'Red', 'Blue', 'Green', 'Yellow', 'Orange', 'Purple', 'Pink', 'Brown', 'Navy', 'Lime', 'Silver'] },
+    'nylock-seal': {
     'Per 40': limitedColours,
     'Per 80': limitedColours,
     'Per 1000': productSpecs['nylock-seal']?.colours || limitedColours,
