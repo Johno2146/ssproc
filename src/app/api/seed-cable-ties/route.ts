@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+iimport { NextResponse } from "next/server";
 import { createClient } from "@libsql/client";
 
 const PRODUCTS = [
@@ -25,7 +25,7 @@ const PRODUCTS = [
   ["CT Extra Heavy Duty Black 540mm","ct-extra-heavy-duty-black-540mm","CT Extra Heavy Duty Black 540mm - PA66 (Nylon 6/6), 540 x 13 x 2.3 mm, Black","Plastic Cable Ties",149.0,"Pack of 50",50],
   ["CT Extra Heavy Duty Colour 540mm","ct-extra-heavy-duty-colour-540mm","CT Extra Heavy Duty Colour 540mm - PA66 (Nylon 6/6), 540 x 13 x 2.3 mm, Black, White, Red, Blue, Green, Yellow, Orange, Purple, Pink, Brown, Navy, Lime, Silver","Plastic Cable Ties",159.0,"Pack of 50",50]
 ];
-mport { NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { createClient } from "@libsql/client";
 
 const PRODUCTS = [
