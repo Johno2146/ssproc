@@ -106,15 +106,15 @@ const Navbar: React.FC = () => {
                   Logout
                 </button>
               </>
-            ) : (
-              <>
-                <Link href="/auth/login" className="text-gray-600 hover:text-brand-600 font-medium transition-colors">Sign In</Link>
-                <Link href="/auth/register" className="text-gray-600 hover:text-brand-600 font-medium transition-colors">Register</Link>
-              </>
             )}
             <Link href="/contact" className="bg-brand-blue text-white px-6 py-2.5 rounded-xl font-bold hover:bg-brand-600 transition-all shadow-md shadow-brand-100">
               Contact Sales
             </Link>
+              <>
+                <Link href="/auth/login" className="text-gray-600 hover:text-brand-600 font-medium transition-colors">Sign In</Link>
+                <Link href="/auth/register" className="text-gray-600 hover:text-brand-600 font-medium transition-colors">Register</Link>
+              </>
+            ) : null}
           </div>
 
           <div className="md:hidden flex items-center gap-2">
@@ -166,11 +166,13 @@ const Navbar: React.FC = () => {
             </>
           ) : (
             <>
-              <Link href="/auth/login" onClick={() => setIsOpen(false)} className="block px-4 py-2 text-gray-600 font-medium hover:bg-gray-50 rounded-lg">Sign In</Link>
-              <Link href="/auth/register" onClick={() => setIsOpen(false)} className="block px-4 py-2 text-gray-600 font-medium hover:bg-gray-50 rounded-lg">Register</Link>
             </>
           )}
           <Link href="/contact" onClick={() => setIsOpen(false)} className="block px-4 py-2 bg-brand-blue text-white font-bold rounded-lg text-center">Contact Sales</Link>
+            <>
+              <Link href="/auth/login" onClick={() => setIsOpen(false)} className="block px-4 py-2 text-gray-600 font-medium hover:bg-gray-50 rounded-lg">Sign In</Link>
+              <Link href="/auth/register" onClick={() => setIsOpen(false)} className="block px-4 py-2 text-gray-600 font-medium hover:bg-gray-50 rounded-lg">Register</Link>
+            ) : null}
         </div>
       )}
     </nav>
@@ -178,3 +180,4 @@ const Navbar: React.FC = () => {
 };
 
 export default Navbar;
+
