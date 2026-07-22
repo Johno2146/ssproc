@@ -167,13 +167,11 @@ const Navbar: React.FC = () => {
             </>
           ) : (
             <>
+              <Link href="/auth/login" onClick={() => setIsOpen(false)} className="block px-4 py-2 text-gray-600 font-medium hover:bg-gray-50 rounded-lg">Sign In</Link>
+              <Link href="/auth/register" onClick={() => setIsOpen(false)} className="block px-4 py-2 text-gray-600 font-medium hover:bg-gray-50 rounded-lg">Register</Link>
             </>
           )}
           <Link href="/contact" onClick={() => setIsOpen(false)} className="block px-4 py-2 bg-brand-blue text-white font-bold rounded-lg text-center">Contact Sales</Link>
-            <>
-              <Link href="/auth/login" onClick={() => setIsOpen(false)} className="block px-4 py-2 text-gray-600 font-medium hover:bg-gray-50 rounded-lg">Sign In</Link>
-              <Link href="/auth/register" onClick={() => setIsOpen(false)} className="block px-4 py-2 text-gray-600 font-medium hover:bg-gray-50 rounded-lg">Register</Link>
-            ) : null}
         </div>
       )}
     </nav>
