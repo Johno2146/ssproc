@@ -19,7 +19,7 @@ interface Product {
 
 const productImages: Record<string, string> = {
   'bolt-seal': '/assets/bolt-seal.jpg',
-  'cable-lock-500mm': '/assets/cable-lock.jpg',
+  'cable-seal-500mm': '/assets/cable-lock.jpg',
   'abs-cable-lock': '/assets/abs-cable-seal.jpg',
   'cable-seal-300mm': '/assets/cable-lock.jpg',
   'cable-seal-500mm': '/assets/cable-lock.jpg',
@@ -59,7 +59,7 @@ const productImages: Record<string, string> = {
 const categories: Record<string, { label: string; slugs: string[] }> = {
   'all': { label: 'All Products', slugs: [] },
   'plastic': { label: 'Plastic Seals', slugs: ['suretite-230mm', 'suretite-320mm', 'suretite-barcoded', 'twinlock', 'twinlock-barcoded', 'padlock-seal', 'nylock-seal'] },
-  'barrier': { label: 'Barrier Seals', slugs: ['bolt-seal', 'cable-lock-500mm', 'abs-cable-lock', 'cable-seal-300mm', 'cable-seal-500mm'] },
+  'barrier': { label: 'Barrier Seals', slugs: ['bolt-seal', 'cable-seal-500mm', 'abs-cable-lock', 'cable-seal-300mm', 'cable-seal-500mm'] },
   'plastic-cable-ties': { label: 'Plastic Cable Ties', slugs: ['ct-black-100mm','ct-colour-100mm','ct-black-150mm','ct-colour-150mm','ct-black-200mm','ct-colour-200mm','ct-black-slim-200mm','ct-colour-slim-200mm','ct-heavy-duty-black-200mm','ct-heavy-duty-colour-200mm','ct-black-300mm','ct-colour-300mm','ct-heavy-duty-black-300mm','ct-heavy-duty-colour-300mm','ct-black-400mm','ct-colour-400mm','ct-heavy-duty-black-400mm','ct-heavy-duty-colour-400mm','ct-heavy-duty-black-500mm','ct-heavy-duty-colour-500mm','ct-extra-heavy-duty-black-540mm','ct-extra-heavy-duty-colour-540mm'] },
   'steel-cable-ties': { label: 'Stainless Steel Cable Ties', slugs: [] },
   'specialized': { label: 'Specialized Seals', slugs: ['suregas-seal'] },
