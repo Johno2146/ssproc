@@ -38,7 +38,7 @@ export async function GET() {
       { name: "SS Cable Tie 7.9×750mm", slug: "ss-7-9-750mm", category: "Stainless Steel Cable Ties", price: 796.13, unit: "Pack of 100", minOrder: 1, stock: 500, imageUrl: "/assets/SS Cable tie.jpg", description: "Stainless Steel 304 cable tie, 7.9 × 750 mm. Corrosion resistant, high tensile. Pack of 100." },
       { name: "SS Cable Tie 7.9×800mm", slug: "ss-7-9-800mm", category: "Stainless Steel Cable Ties", price: 833.94, unit: "Pack of 100", minOrder: 1, stock: 500, imageUrl: "/assets/SS Cable tie.jpg", description: "Stainless Steel 304 cable tie, 7.9 × 800 mm. Corrosion resistant, high tensile. Pack of 100." },
       // Installation Tool
-      { name: "SS Cable Tie Installation Tool", slug: "ss-installation-tool", category: "Installation Tools", price: 1980.34, unit: "Each", minOrder: 1, stock: 50, imageUrl: "/assets/CT Installation tool.jpg", description: "Professional installation tool for stainless steel cable ties. Ergonomic design, durable construction." },
+      { name: "SS Cable Tie Installation Tool", slug: "ss-installation-tool", category: "Stainless Steel Cable Ties", price: 1980.34, unit: "Pack of 1", minOrder: 1, stock: 50, imageUrl: "/assets/CT Installation tool.jpg", description: "Professional installation tool for stainless steel cable ties. Ergonomic design, durable construction." },
     ];
 
     let created = 0;
