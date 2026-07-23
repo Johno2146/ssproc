@@ -184,7 +184,21 @@ const ProductDetailPage: React.FC<ProductPageProps> = async ({ params }) => {
               heightCm={spec?.heightCm}
             />
 
-            {/* Specifications */}
+            {/* Laser Printing CTA */}
+      <div className="bg-gradient-to-r from-brand-950 to-brand-900 rounded-2xl p-6 mt-8 text-white">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div>
+            <h3 className="text-lg font-bold">Custom Laser Printing Available</h3>
+            <p className="text-brand-200 text-sm mt-1">Need your logo, barcode, or serial numbers printed on this product? Contact our sales team for a quote.</p>
+          </div>
+          <a href="/contact" className="inline-flex items-center gap-2 bg-white text-brand-950 font-semibold px-5 py-3 rounded-xl hover:bg-brand-100 transition-colors whitespace-nowrap">
+            Contact Sales
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
+          </a>
+        </div>
+      </div>
+
+      {/* Specifications */}
             {spec && (
               <div className="mt-10 bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
                 <h2 className="text-xl font-bold text-brand-950 mb-4">Product Specifications</h2>
