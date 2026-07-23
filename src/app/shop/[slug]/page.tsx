@@ -181,6 +181,12 @@ const ProductDetailPage: React.FC<ProductPageProps> = async ({ params }) => {
                       <dd className="font-medium text-brand-950 text-right">{spec.dimensions}</dd>
                     </div>
                   )}
+                  {spec.weightKg != null && spec.lengthCm != null && spec.widthCm != null && spec.heightCm != null && (
+                    <div className="flex justify-between py-2 border-b border-gray-100">
+                      <dt className="text-gray-500">Package Dimensions</dt>
+                      <dd className="font-medium text-brand-950">{spec.weightKg} kg | {spec.lengthCm} × {spec.widthCm} × {spec.heightCm} cm</dd>
+                    </div>
+                  )}
                   {spec.securityLevel && (
                     <div className="flex justify-between py-2 border-b border-gray-100">
                       <dt className="text-gray-500">Security Level</dt>
