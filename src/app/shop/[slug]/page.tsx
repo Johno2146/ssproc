@@ -101,7 +101,7 @@ const ProductDetailPage: React.FC<ProductPageProps> = async ({ params }) => {
 
   // Default image for CT products: black if no colour selected
   const defaultCTImage = product.slug.startsWith('ct-') && colourImages?.['Black']
-    ? colourImages['White']
+    ? colourImages['Black']
     : imageUrl;
 
   return (
