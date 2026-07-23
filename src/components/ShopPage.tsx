@@ -67,7 +67,7 @@ const productImages: Record<string, string> = {
   'ss-7-9-700mm': '/assets/SS Cable tie.jpg',
   'ss-7-9-750mm': '/assets/SS Cable tie.jpg',
   'ss-7-9-800mm': '/assets/SS Cable tie.jpg',
-  'ss-installation-tool': '/assets/CT Installation tool.jpg',
+  'ss-installation-tool': '/assets/CT Installation tool.png',
 };
 
 // Category definitions: slug -> product slugs
