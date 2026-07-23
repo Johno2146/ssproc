@@ -54,17 +54,43 @@ const productImages: Record<string, string> = {
   'suretite-230mm': '/assets/suretite.jpg',
   'suretite-320mm': '/assets/suretite.jpg',
   
-  'ct-100mm': '/assets/CT black.jpg',
-  'ct-150mm': '/assets/CT black.jpg',
-  'ct-200mm': '/assets/CT black.jpg',
-  'ct-slim-200mm': '/assets/CT black.jpg',
-  'ct-heavy-duty-200mm': '/assets/CT black.jpg',
-  'ct-300mm': '/assets/CT black.jpg',
-  'ct-heavy-duty-300mm': '/assets/CT black.jpg',
-  'ct-400mm': '/assets/CT black.jpg',
-  'ct-heavy-duty-400mm': '/assets/CT black.jpg',
-  'ct-heavy-duty-500mm': '/assets/CT black.jpg',
-  'ct-extra-heavy-duty-540mm': '/assets/CT black.jpg',
+  'ct-100mm': '/assets/CT white.jpg',
+  'ct-150mm': '/assets/CT white.jpg',
+  'ct-200mm': '/assets/CT white.jpg',
+  'ct-slim-200mm': '/assets/CT white.jpg',
+  'ct-heavy-duty-200mm': '/assets/CT white.jpg',
+  'ct-300mm': '/assets/CT white.jpg',
+  'ct-heavy-duty-300mm': '/assets/CT white.jpg',
+  'ct-400mm': '/assets/CT white.jpg',
+  'ct-heavy-duty-400mm': '/assets/CT white.jpg',
+  'ct-heavy-duty-500mm': '/assets/CT white.jpg',
+  'ct-extra-heavy-duty-540mm': '/assets/CT white.jpg',
+
+  // Stainless Steel Cable Ties
+  'ss-4-6-150mm': '/assets/SS Cable tie.jpg',
+  'ss-4-6-200mm': '/assets/SS Cable tie.jpg',
+  'ss-4-6-250mm': '/assets/SS Cable tie.jpg',
+  'ss-4-6-300mm': '/assets/SS Cable tie.jpg',
+  'ss-4-6-350mm': '/assets/SS Cable tie.jpg',
+  'ss-4-6-400mm': '/assets/SS Cable tie.jpg',
+  'ss-4-6-450mm': '/assets/SS Cable tie.jpg',
+  'ss-4-6-500mm': '/assets/SS Cable tie.jpg',
+  'ss-4-6-550mm': '/assets/SS Cable tie.jpg',
+  'ss-4-6-600mm': '/assets/SS Cable tie.jpg',
+  'ss-7-9-200mm': '/assets/SS Cable tie.jpg',
+  'ss-7-9-250mm': '/assets/SS Cable tie.jpg',
+  'ss-7-9-300mm': '/assets/SS Cable tie.jpg',
+  'ss-7-9-350mm': '/assets/SS Cable tie.jpg',
+  'ss-7-9-400mm': '/assets/SS Cable tie.jpg',
+  'ss-7-9-450mm': '/assets/SS Cable tie.jpg',
+  'ss-7-9-500mm': '/assets/SS Cable tie.jpg',
+  'ss-7-9-550mm': '/assets/SS Cable tie.jpg',
+  'ss-7-9-600mm': '/assets/SS Cable tie.jpg',
+  'ss-7-9-650mm': '/assets/SS Cable tie.jpg',
+  'ss-7-9-700mm': '/assets/SS Cable tie.jpg',
+  'ss-7-9-750mm': '/assets/SS Cable tie.jpg',
+  'ss-7-9-800mm': '/assets/SS Cable tie.jpg',
+  'ss-installation-tool': '/assets/CT Installation tool.jpg',
 };
 
 interface ProductPageProps {
@@ -99,9 +125,9 @@ const ProductDetailPage: React.FC<ProductPageProps> = async ({ params }) => {
     return map;
   })() : undefined;
 
-  // Default image for CT products: black if no colour selected
-  const defaultCTImage = product.slug.startsWith('ct-') && colourImages?.['Black']
-    ? colourImages['Black']
+  // Default image for CT products: white if no colour selected
+  const defaultCTImage = product.slug.startsWith('ct-') && colourImages?.['White']
+    ? colourImages['White']
     : imageUrl;
 
   return (
@@ -171,7 +197,7 @@ const ProductDetailPage: React.FC<ProductPageProps> = async ({ params }) => {
                   )}
                   {spec.pullStrength && (
                     <div className="flex justify-between py-2 border-b border-gray-100">
-                      <dt className="text-gray-500">Tensile Strength (Max load weight)</dt>
+                      <dt className="text-gray-500">Pull Strength</dt>
                       <dd className="font-medium text-brand-950">{spec.pullStrength}</dd>
                     </div>
                   )}
@@ -179,12 +205,6 @@ const ProductDetailPage: React.FC<ProductPageProps> = async ({ params }) => {
                     <div className="flex justify-between py-2 border-b border-gray-100">
                       <dt className="text-gray-500">Dimensions</dt>
                       <dd className="font-medium text-brand-950 text-right">{spec.dimensions}</dd>
-                    </div>
-                  )}
-                  {spec.weightKg != null && spec.lengthCm != null && spec.widthCm != null && spec.heightCm != null && (
-                    <div className="flex justify-between py-2 border-b border-gray-100">
-                      <dt className="text-gray-500">Package Dimensions</dt>
-                      <dd className="font-medium text-brand-950">{spec.weightKg} kg | {spec.lengthCm} × {spec.widthCm} × {spec.heightCm} cm</dd>
                     </div>
                   )}
                   {spec.securityLevel && (
@@ -199,8 +219,18 @@ const ProductDetailPage: React.FC<ProductPageProps> = async ({ params }) => {
                       </dd>
                     </div>
                   )}
-
-
+                  {spec.boxSize && (
+                    <div className="flex justify-between py-2 border-b border-gray-100">
+                      <dt className="text-gray-500">Box Size</dt>
+                      <dd className="font-medium text-brand-950">{spec.boxSize}</dd>
+                    </div>
+                  )}
+                  {spec.boxWeight && (
+                    <div className="flex justify-between py-2 border-b border-gray-100">
+                      <dt className="text-gray-500">Box Weight</dt>
+                      <dd className="font-medium text-brand-950">{spec.boxWeight}</dd>
+                    </div>
+                  )}
                 </dl>
 
                 {spec.applications && spec.applications.length > 0 && (
