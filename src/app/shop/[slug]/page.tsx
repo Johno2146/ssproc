@@ -171,7 +171,7 @@ const ProductDetailPage: React.FC<ProductPageProps> = async ({ params }) => {
                   )}
                   {spec.pullStrength && (
                     <div className="flex justify-between py-2 border-b border-gray-100">
-                      <dt className="text-gray-500">Pull Strength</dt>
+                      <dt className="text-gray-500">Tensile Strength (Max load weight)</dt>
                       <dd className="font-medium text-brand-950">{spec.pullStrength}</dd>
                     </div>
                   )}
@@ -193,18 +193,8 @@ const ProductDetailPage: React.FC<ProductPageProps> = async ({ params }) => {
                       </dd>
                     </div>
                   )}
-                  {spec.boxSize && (
-                    <div className="flex justify-between py-2 border-b border-gray-100">
-                      <dt className="text-gray-500">Box Size</dt>
-                      <dd className="font-medium text-brand-950">{spec.boxSize}</dd>
-                    </div>
-                  )}
-                  {spec.boxWeight && (
-                    <div className="flex justify-between py-2 border-b border-gray-100">
-                      <dt className="text-gray-500">Box Weight</dt>
-                      <dd className="font-medium text-brand-950">{spec.boxWeight}</dd>
-                    </div>
-                  )}
+
+
                 </dl>
 
                 {spec.applications && spec.applications.length > 0 && (
