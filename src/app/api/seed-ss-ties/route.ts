@@ -1,8 +1,16 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { createClient } from "@libsql/client";
 
-export async function POST() {
+const turso = createClient({
+  url: process.env.TURSO_DATABASE_URL || "",
+  authToken: process.env.TURSO_AUTH_TOKEN || "",
+});
+
+export async function GET() {
   try {
+    // Delete existing SS products
+    await turso.execute({ sql: "DELETE FROM Product WHERE category IN ('Stainless Steel Cable Ties', 'Installation Tools')" });
+    
     const products = [
       // 4.6mm series - Pack of 100
       { name: "SS Cable Tie 4.6×150mm", slug: "ss-4-6-150mm", category: "Stainless Steel Cable Ties", price: 218.14, unit: "Pack of 100", minOrder: 1, stock: 500, imageUrl: "/assets/SS Cable tie.jpg", description: "Stainless Steel 304 cable tie, 4.6 × 150 mm. Corrosion resistant, high tensile. Pack of 100." },
