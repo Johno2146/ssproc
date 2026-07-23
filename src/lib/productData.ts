@@ -270,50 +270,51 @@ export const quantityTiers: Record<string, QuantityTier[]> = {
   ],
 
   'ct-100mm': [
-    { label: 'Black', unit: '100 pack', price: 29.00 },
-    { label: 'Colour', unit: '100 pack', price: 32.00 },
+    { label: 'Black', unit: '100 pack', price: 12.87 },
+    { label: 'Colour', unit: '100 pack', price: 12.93 },
   ],
   'ct-150mm': [
-    { label: 'Black', unit: '100 pack', price: 39.00 },
-    { label: 'Colour', unit: '100 pack', price: 42.00 },
-  ],
-  'ct-200mm': [
-    { label: 'Black', unit: '100 pack', price: 49.00 },
-    { label: 'Colour', unit: '100 pack', price: 52.00 },
+    { label: 'Black', unit: '100 pack', price: 25.73 },
+    { label: 'Colour', unit: '100 pack', price: 35.86 },
   ],
   'ct-slim-200mm': [
-    { label: 'Black', unit: '100 pack', price: 39.00 },
-    { label: 'Colour', unit: '100 pack', price: 42.00 },
+    { label: 'Black', unit: '100 pack', price: 37.45 },
+    { label: 'Colour', unit: '100 pack', price: 51.52 },
+  ],
+  'ct-200mm': [
+    { label: 'Black', unit: '100 pack', price: 42.11 },
+    { label: 'Colour', unit: '100 pack', price: 58.49 },
   ],
   'ct-heavy-duty-200mm': [
-    { label: 'Black', unit: '100 pack', price: 69.00 },
-    { label: 'Colour', unit: '100 pack', price: 75.00 },
+    { label: 'Black', unit: '100 pack', price: 109.98 },
+    { label: 'Colour', unit: '100 pack', price: 149.58 },
   ],
   'ct-300mm': [
-    { label: 'Black', unit: '100 pack', price: 59.00 },
-    { label: 'Colour', unit: '100 pack', price: 62.00 },
+    { label: 'Black', unit: '100 pack', price: 70.18 },
+    { label: 'Colour', unit: '100 pack', price: 95.91 },
   ],
   'ct-heavy-duty-300mm': [
-    { label: 'Black', unit: '100 pack', price: 89.00 },
-    { label: 'Colour', unit: '100 pack', price: 95.00 },
+    { label: 'Black', unit: '100 pack', price: 126.33 },
+    { label: 'Colour', unit: '100 pack', price: 173.12 },
   ],
   'ct-400mm': [
-    { label: 'Black', unit: '100 pack', price: 69.00 },
-    { label: 'Colour', unit: '100 pack', price: 72.00 },
+    { label: 'Black', unit: '100 pack', price: 84.22 },
+    { label: 'Colour', unit: '100 pack', price: 114.63 },
   ],
   'ct-heavy-duty-400mm': [
-    { label: 'Black', unit: '100 pack', price: 99.00 },
-    { label: 'Colour', unit: '100 pack', price: 105.00 },
+    { label: 'Black', unit: '100 pack', price: 161.42 },
+    { label: 'Colour', unit: '100 pack', price: 183.89 },
   ],
   'ct-heavy-duty-500mm': [
-    { label: 'Black', unit: '100 pack', price: 119.00 },
-    { label: 'Colour', unit: '100 pack', price: 125.00 },
+    { label: 'Black', unit: '100 pack', price: 222.44 },
+    { label: 'Colour', unit: '100 pack', price: 306.46 },
   ],
   'ct-extra-heavy-duty-540mm': [
-    { label: 'Black', unit: '50 pack', price: 149.00 },
-    { label: 'Colour', unit: '50 pack', price: 159.00 },
+    { label: 'Black', unit: '50 pack', price: 231.60 },
+    { label: 'Colour', unit: '50 pack', price: 318.16 },
   ],
-    'suretite-230mm': [
+
+  'suretite-230mm': [
     { label: 'Per 1000', unit: '1000 pack', price: 810.00, shipping: { weightKg: 4.5, lengthCm: 50, widthCm: 31, heightCm: 31 } },
   ],
   'twinlock': [
