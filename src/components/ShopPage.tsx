@@ -75,7 +75,7 @@ const categories: Record<string, { label: string; slugs: string[] }> = {
   'all': { label: 'All Products', slugs: [] },
   'plastic': { label: 'Plastic Seals', slugs: ['suretite-230mm', 'suretite-320mm', 'suretite-barcoded', 'twinlock', 'twinlock-barcoded', 'padlock-seal', 'nylock-seal'] },
   'barrier': { label: 'Barrier Seals', slugs: ['bolt-seal', 'cable-seal-500mm', 'abs-cable-lock', 'cable-seal-300mm', 'cable-seal-500mm'] },
-  'plastic-cable-ties': { label: 'Plastic Cable Ties', slugs: ['ct-100mm','ct-150mm','ct-200mm','ct-slim-200mm','ct-heavy-duty-200mm','ct-300mm','ct-heavy-duty-300mm','ct-400mm','ct-heavy-duty-400mm','ct-heavy-duty-500mm','ct-extra-heavy-duty-540mm'] },
+  'plastic-cable-ties': { label: 'Plastic Cable Ties', slugs: ['heavy-duty-double-zip-tie-handcuff','ct-100mm','ct-150mm','ct-200mm','ct-slim-200mm','ct-heavy-duty-200mm','ct-300mm','ct-heavy-duty-300mm','ct-400mm','ct-heavy-duty-400mm','ct-heavy-duty-500mm','ct-extra-heavy-duty-540mm'] },
   'steel-cable-ties': { label: 'Stainless Steel Cable Ties', slugs: ['ss-4-6-150mm','ss-4-6-200mm','ss-4-6-250mm','ss-4-6-300mm','ss-4-6-350mm','ss-4-6-400mm','ss-4-6-450mm','ss-4-6-500mm','ss-4-6-550mm','ss-4-6-600mm','ss-7-9-200mm','ss-7-9-250mm','ss-7-9-300mm','ss-7-9-350mm','ss-7-9-400mm','ss-7-9-450mm','ss-7-9-500mm','ss-7-9-550mm','ss-7-9-600mm','ss-7-9-650mm','ss-7-9-700mm','ss-7-9-750mm','ss-7-9-800mm', 'ss-installation-tool'] },
 };
 
