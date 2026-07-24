@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@libsql/client";
 
 const PRODUCTS = [
+  ["Heavy Duty Double Zip Tie Handcuff","heavy-duty-double-zip-tie-handcuff","Heavy Duty Double Zip Tie Handcuff - PA66 (Nylon 6/6). Pack of 20.","Plastic Cable Ties",280.39,"Pack of 20",20],
   ["Cable Tie 100mm","ct-100mm","Cable Tie 100mm - PA66 (Nylon 6/6), 100 x 2.5 x 1.1 mm","Plastic Cable Ties",12.87,"Pack of 100",100],
   ["Cable Tie 150mm","ct-150mm","Cable Tie 150mm - PA66 (Nylon 6/6), 150 x 3.6 x 1.3 mm","Plastic Cable Ties",25.73,"Pack of 100",100],
   ["Cable Tie 200mm","ct-200mm","Cable Tie 200mm - PA66 (Nylon 6/6), 200 x 4.8 x 1.3 mm","Plastic Cable Ties",42.11,"Pack of 100",100],
