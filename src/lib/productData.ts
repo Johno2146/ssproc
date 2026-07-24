@@ -249,6 +249,7 @@ export const productSpecs: Record<string, ProductSpec> = {
     widthCm: 1.5,
     heightCm: 1.5,
   },
+  'heavy-duty-double-zip-tie-handcuff': { material: 'PA66 (Nylon 6/6)', pullStrength: 'N/A', dimensions: 'Heavy Duty Double Zip Tie Handcuff', colours: ['Black'], applications: ['Security', 'Law enforcement'], features: ['UV resistant', 'Heavy duty'], weightKg: 0.5, lengthCm: 30, widthCm: 15, heightCm: 5 },
   'ct-100mm': { material: 'PA66 (Nylon 6/6)', pullStrength: 'N/A', dimensions: '100 × 2.5 × 1.1 mm', colours: ['Black', 'White', 'Red', 'Blue', 'Green', 'Yellow', 'Orange', 'Purple', 'Pink', 'Brown', 'Navy', 'Lime', 'Silver'], applications: ['Cable management', 'General purpose'], features: ['UV resistant'], securityLevel: 'Standard', boxSize: '45 × 30 × 30 cm', boxWeight: '7.5 kg/carton', weightKg: 0.01, lengthCm: 10, widthCm: 10, heightCm: 4 },
   'ct-150mm': { material: 'PA66 (Nylon 6/6)', pullStrength: 'N/A', dimensions: '150 × 3.6 × 1.3 mm', colours: ['Black', 'White', 'Red', 'Blue', 'Green', 'Yellow', 'Orange', 'Purple', 'Pink', 'Brown', 'Navy', 'Lime', 'Silver'], applications: ['Cable management', 'General purpose'], features: ['UV resistant'], securityLevel: 'Standard', boxSize: '45 × 30 × 30 cm', boxWeight: '8.5 kg/carton', weightKg: 0.01, lengthCm: 10, widthCm: 10, heightCm: 4 },
   'ct-200mm': { material: 'PA66 (Nylon 6/6)', pullStrength: 'N/A', dimensions: '200 × 4.8 × 1.3 mm', colours: ['Black', 'White', 'Red', 'Blue', 'Green', 'Yellow', 'Orange', 'Purple', 'Pink', 'Brown', 'Navy', 'Lime', 'Silver'], applications: ['Cable management', 'General purpose'], features: ['UV resistant'], securityLevel: 'Standard', boxSize: '45 × 30 × 30 cm', boxWeight: '10 kg/carton', weightKg: 0.01, lengthCm: 10, widthCm: 10, heightCm: 4 },
@@ -299,6 +300,9 @@ export const quantityTiers: Record<string, QuantityTier[]> = {
     { label: 'Per 1000', unit: '1000 pack', price: 870.00, shipping: { weightKg: 5.0, lengthCm: 50, widthCm: 41, heightCm: 31 } },
   ],
 
+  'heavy-duty-double-zip-tie-handcuff': [
+    { label: 'Pack of 20', unit: '20 pack', price: 280.39 },
+  ],
   'ct-100mm': [
     { label: 'Black', unit: '100 pack', price: 29.00 },
     { label: 'Colour', unit: '100 pack', price: 32.00 },
