@@ -68,7 +68,7 @@ export async function POST(req: Request) {
     const notes = notesParts.join(' | ') || null;
     
     await turso.execute({
-      sql: "INSERT INTO "Order" (id, orderNumber, userId, status, total, shippingName, shippingPhone, shippingEmail, notes, createdAt, updatedAt) VALUES (?, ?, ?, 'pending', ?, ?, ?, ?, ?, datetime('now'), datetime('now'))",
+      sql: `INSERT INTO "Order" (id, orderNumber, userId, status, total, shippingName, shippingPhone, shippingEmail, notes, createdAt, updatedAt) VALUES (?, ?, ?, 'pending', ?, ?, ?, ?, ?, datetime('now'), datetime('now'))`,
       args: [orderId, orderNumber, (session.user as any).id, grandTotal, shippingDetails.name, shippingDetails.phone, shippingDetails.email, notes],
     });
     // Create order items
