@@ -1,6 +1,11 @@
 import { NextResponse } from "next/server";
+import { createClient } from "@libsql/client";
 import { auth } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
+
+const turso = createClient({
+  url: process.env.TURSO_DATABASE_URL || "",
+  authToken: process.env.TURSO_AUTH_TOKEN || "",
+});
 
 export async function GET() {
   try {
@@ -12,35 +17,35 @@ export async function GET() {
     const userRole = (session.user as any).role;
     const userId = (session.user as any).id;
 
-    let orders;
+    let result;
     if (userRole === "admin") {
-      orders = await prisma.order.findMany({
-        include: {
-          items: {
-            include: {
-              product: true,
-            },
-          },
-          user: {
-            select: {
-              name: true,
-              email: true,
-            },
-          },
-        },
-        orderBy: { createdAt: "desc" },
+      result = await turso.execute({
+        sql: `SELECT * FROM "Order" ORDER BY createdAt DESC`,
+        args: [],
       });
     } else {
-      orders = await prisma.order.findMany({
-        where: { userId },
-        include: {
-          items: {
-            include: {
-              product: true,
-            },
-          },
-        },
-        orderBy: { createdAt: "desc" },
+      result = await turso.execute({
+        sql: `SELECT * FROM "Order" WHERE userId = ? ORDER BY createdAt DESC`,
+        args: [userId],
+      });
+    }
+
+    // Fetch items for each order
+    const orders = [];
+    for (const order of result.rows) {
+      const itemsResult = await turso.execute({
+        sql: `SELECT * FROM OrderItem WHERE orderId = ?`,
+        args: [order.id],
+      });
+      const items = itemsResult.rows.map(item => ({
+        ...item,
+        price: Number(item.price),
+        quantity: Number(item.quantity),
+      }));
+      orders.push({
+        ...order,
+        total: Number(order.total),
+        items,
       });
     }
 

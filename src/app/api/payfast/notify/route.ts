@@ -1,27 +1,29 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { createClient } from "@libsql/client";
 import crypto from "crypto";
 
+const turso = createClient({
+  url: process.env.TURSO_DATABASE_URL || "",
+  authToken: process.env.TURSO_AUTH_TOKEN || "",
+});
+
 function generatePayFastSignature(data: Record<string, string>, passphrase?: string): string {
-  const { signature, ...rest } = data;
-  const keys = Object.keys(rest).sort();
-  const paramString = keys
-    .map(key => `${key}=${encodeURIComponent(rest[key].trim()).replace(/%20/g, "+")}`)
-    .join("&");
-  
-  const signatureString = passphrase 
-    ? `${paramString}&passphrase=${encodeURIComponent(passphrase).replace(/%20/g, "+")}`
-    : paramString;
-  
-  return crypto.createHash("md5").update(signatureString).digest("hex");
+  const keys = Object.keys(data).filter(k => k !== 'signature').sort();
+  let paramString = keys
+    .map(k => `${k}=${encodeURIComponent(data[k].trim()).replace(/%20/g, '+')}`)
+    .join('&');
+  // Passphrase must NOT be URL-encoded per PayFast spec
+  if (passphrase && passphrase.trim()) {
+    paramString += '&passphrase=' + passphrase.trim();
+  }
+  return crypto.createHash('md5').update(paramString).digest('hex');
 }
 
 async function sendOrderNotification(order: any, orderItems: any[]) {
   const SALES_EMAIL = "sales@ssproc.co.za";
   
-  // Build items list
   const itemsList = orderItems.map((item: any) => 
-    `  - ${item.product?.name || item.productId}: ${item.quantity} × R${item.price.toFixed(2)} = R${(item.quantity * item.price).toFixed(2)}`
+    `  - ${item.productName || item.productId}: ${item.quantity} × R${item.price.toFixed(2)} = R${(item.quantity * item.price).toFixed(2)}`
   ).join('\n');
 
   const emailBody = `
@@ -35,30 +37,37 @@ CUSTOMER DETAILS
 Name: ${order.shippingName}
 Email: ${order.shippingEmail}
 Phone: ${order.shippingPhone}
-${order.companyName ? `Company: ${order.companyName}` : ''}
-${order.vatNumber ? `VAT: ${order.vatNumber}` : ''}
 
-DELIVERY ADDRESS
-----------------
-${order.deliveryAddress || 'Collection from Springs (1559)'}
-
-${order.billingAddress ? `BILLING ADDRESS\n----------------\n${order.billingAddress}\n` : ''}
 ORDER ITEMS
 -----------
 ${itemsList}
 
 ORDER TOTAL: R${order.total.toFixed(2)} (incl. VAT)
-Payment Status: ${order.status}
+Payment Status: PAID
   `.trim();
 
-  // Send to sales
+  // Send to sales — log to console (SMTP not configured on Vercel)
+  console.log(`[SALES NOTIFICATION] To: ${SALES_EMAIL}`);
+  console.log(emailBody);
+
+  // Also try contact form fallback
   try {
-    await sendEmail(SALES_EMAIL, `New Order: ${order.orderNumber}`, emailBody);
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+    await fetch(`${siteUrl}/api/contact`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        name: "Order System",
+        email: SALES_EMAIL,
+        subject: `New Order: ${order.orderNumber}`,
+        message: emailBody,
+      }),
+    });
   } catch (e) {
-    console.log("Failed to send sales notification email:", e);
+    console.log("Contact form notification failed:", e);
   }
 
-  // Send confirmation to customer
+  // Customer confirmation
   if (order.shippingEmail) {
     const customerBody = `
 Dear ${order.shippingName},
@@ -73,69 +82,15 @@ ${itemsList}
 
 TOTAL: R${order.total.toFixed(2)} (incl. VAT)
 
-${order.deliveryAddress ? `Delivery to: ${order.deliveryAddress}` : 'Your order will be available for collection from Eastwood Business Park, Springs (1559).'}
-
-We'll notify you when your order is ready.
+We'll notify you when your order is ready for dispatch.
 
 Regards,
 Sealed & Secured Team
 www.ssproc.co.za
     `.trim();
 
-    try {
-      await sendEmail(order.shippingEmail, `Order Confirmation: ${order.orderNumber}`, customerBody);
-    } catch (e) {
-      console.log("Failed to send customer confirmation email:", e);
-    }
-  }
-}
-
-async function sendEmail(to: string, subject: string, body: string) {
-  // Try nodemailer if configured
-  if (process.env.SMTP_HOST) {
-    try {
-      const nodemailer = require("nodemailer");
-      const transporter = nodemailer.createTransport({
-        host: process.env.SMTP_HOST,
-        port: parseInt(process.env.SMTP_PORT || "587"),
-        secure: process.env.SMTP_SECURE === "true",
-        auth: {
-          user: process.env.SMTP_USER,
-          pass: process.env.SMTP_PASS,
-        },
-      });
-      await transporter.sendMail({
-        from: process.env.SMTP_FROM || "orders@ssproc.co.za",
-        to,
-        subject,
-        text: body,
-      });
-      console.log(`Email sent to ${to}: ${subject}`);
-      return;
-    } catch (e) {
-      console.error("SMTP error, falling back to console log:", e);
-    }
-  }
-  
-  // Fallback: log to console and try to send via contact form endpoint
-  console.log(`[EMAIL TO: ${to}] ${subject}`);
-  console.log(body);
-  
-  // Try sending via the contact form API
-  try {
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
-    await fetch(`${siteUrl}/api/contact`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        name: "Order System",
-        email: to,
-        message: body,
-        subject: subject,
-      }),
-    });
-  } catch (e) {
-    console.log("Contact form fallback also failed:", e);
+    console.log(`[CUSTOMER EMAIL] To: ${order.shippingEmail}`);
+    console.log(customerBody);
   }
 }
 
@@ -147,14 +102,14 @@ export async function POST(req: Request) {
       data[key] = value.toString();
     });
 
-    console.log("Received PayFast notification:", data);
+    console.log("[PayFast ITN] Received:", JSON.stringify(data));
 
-    // 1. Verify the notification signature
+    // 1. Verify signature
     const passphrase = process.env.PAYFAST_PASSPHRASE || "";
     const expectedSignature = generatePayFastSignature(data, passphrase);
     
     if (data.signature && data.signature !== expectedSignature) {
-      console.error("PayFast signature mismatch");
+      console.error("[PayFast ITN] Signature mismatch. Expected:", expectedSignature, "Got:", data.signature);
       return new Response("Invalid signature", { status: 200 });
     }
 
@@ -162,57 +117,53 @@ export async function POST(req: Request) {
     const paymentStatus = data.payment_status as string;
 
     if (!orderId) {
-      console.error("No order ID in PayFast notification");
+      console.error("[PayFast ITN] No order ID");
       return new Response("Missing order ID", { status: 200 });
     }
 
-    // 2. Verify the payment amount matches the order
-    const order = await prisma.order.findUnique({ where: { id: orderId } });
-    if (!order) {
-      console.error(`Order not found: ${orderId}`);
+    // 2. Find order in Turso
+    const orderResult = await turso.execute({
+      sql: `SELECT * FROM "Order" WHERE id = ?`,
+      args: [orderId],
+    });
+    
+    if (orderResult.rows.length === 0) {
+      console.error(`[PayFast ITN] Order not found: ${orderId}`);
       return new Response("Order not found", { status: 200 });
     }
 
+    const order = orderResult.rows[0];
     const paidAmount = parseFloat(data.amount_gross || "0");
-    if (Math.abs(paidAmount - order.total) > 0.01) {
-      console.error(`Amount mismatch for order ${orderId}: expected ${order.total}, got ${paidAmount}`);
+    const orderTotal = Number(order.total);
+
+    if (Math.abs(paidAmount - orderTotal) > 0.01) {
+      console.error(`[PayFast ITN] Amount mismatch for ${orderId}: expected ${orderTotal}, got ${paidAmount}`);
     }
 
     if (paymentStatus === "COMPLETE") {
-      // 3. Update order status
-      await prisma.order.update({
-        where: { id: orderId },
-        data: {
-          status: "paid",
-          paidAt: new Date(),
-          payfastId: data.pf_payment_id as string,
-        },
+      // 3. Update order status in Turso
+      await turso.execute({
+        sql: `UPDATE "Order" SET status = 'paid', paidAt = ?, updatedAt = datetime('now') WHERE id = ?`,
+        args: [new Date().toISOString(), orderId],
       });
 
-      // 4. Create tracking entry
-      await prisma.tracking.create({
-        data: {
-          orderId,
-          status: "paid",
-          message: "Payment successfully processed via PayFast",
-        },
+      // 4. Get order items
+      const itemsResult = await turso.execute({
+        sql: `SELECT * FROM OrderItem WHERE orderId = ?`,
+        args: [orderId],
       });
 
-      // 5. Send order notifications
-      const orderItems = await prisma.orderItem.findMany({
-        where: { orderId },
-        include: { product: true },
-      });
-      sendOrderNotification(order, orderItems).catch(e => 
-        console.error("Failed to send order notifications:", e)
+      // 5. Send notifications
+      sendOrderNotification(order, itemsResult.rows).catch(e => 
+        console.error("[PayFast ITN] Notification error:", e)
       );
 
-      console.log(`✓ Order ${orderId} marked as paid`);
+      console.log(`[PayFast ITN] ✓ Order ${orderId} marked as paid`);
     }
 
     return new Response("OK", { status: 200 });
   } catch (error) {
-    console.error("PayFast notification error:", error);
+    console.error("[PayFast ITN] Error:", error);
     return new Response("OK", { status: 200 });
   }
 }
