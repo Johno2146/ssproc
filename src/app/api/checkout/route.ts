@@ -14,10 +14,16 @@ const PAYFAST_URL = process.env.PAYFAST_SANDBOX === "true"
   : "https://www.payfast.co.za/eng/process";
 
 function generatePayFastSignature(data: Record<string, string>, passphrase?: string): string {
-  const keys = Object.keys(data).filter(k => k !== 'signature').sort();
-  let paramString = keys.map(k => `${k}=${encodeURIComponent(data[k].trim()).replace(/%20/g, '+')}`).join('&');
+  const qs = require('querystring');
+  const pfData: Record<string, string> = {};
+  for (const [k, v] of Object.entries(data)) {
+    if (k !== 'signature') pfData[k] = v.trim();
+  }
+  const sorted: Record<string, string> = {};
+  Object.keys(pfData).sort().forEach(k => { sorted[k] = pfData[k]; });
+  let paramString = qs.stringify(sorted);
   if (passphrase && passphrase.trim()) {
-    paramString += '&passphrase=' + encodeURIComponent(passphrase.trim()).replace(/%20/g, '+');
+    paramString += '&passphrase=' + encodeURIComponent(passphrase.trim());
   }
   return crypto.createHash('md5').update(paramString).digest('hex');
 }
