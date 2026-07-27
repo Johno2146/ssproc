@@ -2,17 +2,12 @@ import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import crypto from "crypto";
 
-let turso: any = null;
-function turso {
-  if (!turso) {
-    const { createClient } = require("@libsql/client");
-    turso = createClient({
-      url: process.env.TURSO_DATABASE_URL || "",
-      authToken: process.env.TURSO_AUTH_TOKEN || "",
-    });
-  }
-  return turso;
-}
+import { createClient } from "@libsql/client";
+
+const turso = createClient({
+  url: process.env.TURSO_DATABASE_URL || "",
+  authToken: process.env.TURSO_AUTH_TOKEN || "",
+});
 
 const PAYFAST_URL = process.env.PAYFAST_SANDBOX === "true"
   ? "https://sandbox.payfast.co.za/eng/process"
