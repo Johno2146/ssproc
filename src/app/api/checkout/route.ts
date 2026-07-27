@@ -103,6 +103,10 @@ export async function POST(req: Request) {
     const signature = generatePayFastSignature(payfastData, passphrase);
     payfastData.signature = signature;
     
+    // Build debug string showing exact param string used for signature
+    const debugKeys = Object.keys(payfastData).filter(k => k !== 'signature').sort();
+    const debugParamString = debugKeys.map(k => `${k}=${encodeURIComponent(payfastData[k].trim()).replace(/%20/g, '+')}`).join('&');
+    
     // Debug: log signature for troubleshooting
     console.log('[PAYFAST DEBUG] Signature:', signature);
     console.log('[PAYFAST DEBUG] Param string:', Object.keys(payfastData).filter(k => k !== 'signature').sort().map(k => `${k}=${payfastData[k]}`).join('&'));
@@ -112,6 +116,11 @@ export async function POST(req: Request) {
       orderNumber,
       payfastUrl: PAYFAST_URL,
       payfastData,
+      debug: {
+        paramString: debugParamString,
+        signature,
+        siteUrl,
+      },
     });
   } catch (error) {
     console.error("Checkout error:", error);
