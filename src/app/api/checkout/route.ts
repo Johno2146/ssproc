@@ -1,7 +1,12 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
-import { prisma } from "@/lib/prisma";
+import { createClient } from "@libsql/client";
 import crypto from "crypto";
+
+const turso = createClient({
+  url: process.env.TURSO_DATABASE_URL || "",
+  authToken: process.env.TURSO_AUTH_TOKEN || "",
+});
 
 const PAYFAST_URL = process.env.PAYFAST_SANDBOX === "true"
   ? "https://sandbox.payfast.co.za/eng/process"
@@ -43,23 +48,19 @@ export async function POST(req: Request) {
     const vat = total * VAT_RATE;
     const grandTotal = total + vat;
 
-    const order = await prisma.order.create({
-      data: {
-        orderNumber,
-        userId: (session.user as any).id,
-        total: grandTotal,
-        shippingName: shippingDetails.name,
-        shippingPhone: shippingDetails.phone,
-        shippingEmail: shippingDetails.email,
-        items: {
-          create: items.map((item: any) => ({
-            productId: item.productId,
-            quantity: item.quantity,
-            price: item.price,
-          })),
-        },
-      },
+    // Create order in Turso
+    const orderId = crypto.randomUUID();
+    await turso.execute({
+      sql: "INSERT INTO "Order" (id, orderNumber, userId, status, total, shippingName, shippingPhone, shippingEmail, createdAt, updatedAt) VALUES (?, ?, ?, 'pending', ?, ?, ?, ?, datetime('now'), datetime('now'))",
+      args: [orderId, orderNumber, (session.user as any).id, grandTotal, shippingDetails.name, shippingDetails.phone, shippingDetails.email],
     });
+    // Create order items
+    for (const item of items) {
+      await turso.execute({
+        sql: "INSERT INTO OrderItem (id, orderId, productId, quantity, price) VALUES (?, ?, ?, ?, ?)",
+        args: [crypto.randomUUID(), orderId, item.productId, item.quantity, item.price],
+      });
+    }
 
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
     
@@ -67,13 +68,13 @@ export async function POST(req: Request) {
     const payfastData: Record<string, string> = {
       merchant_id: process.env.PAYFAST_MERCHANT_ID || "10000100",
       merchant_key: process.env.PAYFAST_MERCHANT_KEY || "46f0cd694581a",
-      return_url: `${siteUrl}/checkout/success?orderId=${order.id}`,
-      cancel_url: `${siteUrl}/checkout/cancel?orderId=${order.id}`,
+      return_url: `${siteUrl}/checkout/success?orderId=${orderId}`,
+      cancel_url: `${siteUrl}/checkout/cancel?orderId=${orderId}`,
       notify_url: `${siteUrl}/api/payfast/notify`,
       name_first: session.user.name?.split(" ")[0] || "Customer",
       name_last: session.user.name?.split(" ")[1] || "",
       email_address: session.user.email || "",
-      m_payment_id: order.id,
+      m_payment_id: orderId,
       amount: grandTotal.toFixed(2),
       item_name: `Order ${orderNumber}`,
     };
@@ -84,7 +85,7 @@ export async function POST(req: Request) {
     payfastData.signature = signature;
 
     return NextResponse.json({
-      orderId: order.id,
+      orderId: orderId,
       orderNumber,
       payfastUrl: PAYFAST_URL,
       payfastData,
