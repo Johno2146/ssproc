@@ -106,6 +106,10 @@ export async function POST(req: Request) {
     const passphrase = process.env.PAYFAST_PASSPHRASE || ""
     const signature = generatePayFastSignature(payfastData, passphrase);
     payfastData.signature = signature;
+    
+    // Debug: log signature for troubleshooting
+    console.log('[PAYFAST DEBUG] Signature:', signature);
+    console.log('[PAYFAST DEBUG] Param string:', Object.keys(payfastData).filter(k => k !== 'signature').sort().map(k => `${k}=${payfastData[k]}`).join('&'));
 
     return NextResponse.json({
       orderId: orderId,
