@@ -59,9 +59,16 @@ export async function POST(req: Request) {
 
     // Create order in Turso
     const orderId = crypto.randomUUID();
+    // Build notes with company/vat if provided
+    const notesParts = [];
+    if (companyDetails?.companyName) notesParts.push('Company: ' + companyDetails.companyName);
+    if (companyDetails?.vatNumber) notesParts.push('VAT: ' + companyDetails.vatNumber);
+    if (billingAddrStr) notesParts.push('Billing: ' + billingAddrStr);
+    const notes = notesParts.join(' | ') || null;
+    
     await turso.execute({
-      sql: `INSERT INTO "Order" (id, orderNumber, userId, status, total, shippingName, shippingPhone, shippingEmail, companyName, vatNumber, deliveryAddress, billingAddress, createdAt, updatedAt) VALUES (?, ?, ?, 'pending', ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))`,
-      args: [orderId, orderNumber, (session.user as any).id, grandTotal, shippingDetails.name, shippingDetails.phone, shippingDetails.email, companyDetails?.companyName || '', companyDetails?.vatNumber || '', deliveryAddrStr, billingAddrStr],
+      sql: "INSERT INTO "Order" (id, orderNumber, userId, status, total, shippingName, shippingPhone, shippingEmail, notes, deliveryAddress, billingAddress, createdAt, updatedAt) VALUES (?, ?, ?, 'pending', ?, ?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))",
+      args: [orderId, orderNumber, (session.user as any).id, grandTotal, shippingDetails.name, shippingDetails.phone, shippingDetails.email, notes, deliveryAddrStr, billingAddrStr],
     });
     // Create order items
     for (const item of items) {
