@@ -103,7 +103,7 @@ export async function POST(req: Request) {
         { status: 500 }
       );
     }
-    const passphrase = process.env.PAYFAST_PASSPHRASE || ;
+    const passphrase = process.env.PAYFAST_PASSPHRASE || ""
     const signature = generatePayFastSignature(payfastData, passphrase);
     payfastData.signature = signature;
 
