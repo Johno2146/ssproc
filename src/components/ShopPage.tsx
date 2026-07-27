@@ -18,6 +18,7 @@ interface Product {
 }
 
 const productImages: Record<string, string> = {
+  'heavy-duty-double-zip-tie-handcuff': '/assets/CT handcuffs .jpg.jpeg',
   'bolt-seal': '/assets/bolt-seal.jpg',
   'cable-seal-500mm': '/assets/cable-lock.jpg',
   'abs-cable-lock': '/assets/abs-cable-seal.jpg',
