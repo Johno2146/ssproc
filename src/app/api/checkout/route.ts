@@ -3,7 +3,7 @@ import { auth } from "@/lib/auth";
 import crypto from "crypto";
 
 let turso: any = null;
-function getTurso() {
+function turso {
   if (!turso) {
     const { createClient } = require("@libsql/client");
     turso = createClient({
@@ -64,13 +64,13 @@ export async function POST(req: Request) {
 
     // Create order in Turso
     const orderId = crypto.randomUUID();
-    await getTurso().execute({
+    await turso.execute({
       sql: `INSERT INTO "Order" (id, orderNumber, userId, status, total, shippingName, shippingPhone, shippingEmail, companyName, vatNumber, deliveryAddress, billingAddress, createdAt, updatedAt) VALUES (?, ?, ?, 'pending', ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))`,
       args: [orderId, orderNumber, (session.user as any).id, grandTotal, shippingDetails.name, shippingDetails.phone, shippingDetails.email, companyDetails?.companyName || '', companyDetails?.vatNumber || '', deliveryAddrStr, billingAddrStr],
     });
     // Create order items
     for (const item of items) {
-      await getTurso().execute({
+      await turso.execute({
         sql: "INSERT INTO OrderItem (id, orderId, productId, quantity, price) VALUES (?, ?, ?, ?, ?)",
         args: [crypto.randomUUID(), orderId, item.productId, item.quantity, item.price],
       });
