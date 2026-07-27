@@ -63,17 +63,61 @@ const CheckoutPage: React.FC = () => {
   const [shippingQuotes, setShippingQuotes] = useState<ShippingOption[]>([]);
   const [selectedShipping, setSelectedShipping] = useState<string>('collection');
   const [fetchingQuotes, setFetchingQuotes] = useState(false);
+  const [rememberDetails, setRememberDetails] = useState(false);
 
+  // Restore form state from sessionStorage (sign-in redirect) or localStorage (remembered details)
   useEffect(() => {
+    // 1. Restore cart from localStorage
     const savedCart = localStorage.getItem('sealed_cart');
     if (savedCart) {
       try {
         setCartItems(JSON.parse(savedCart));
-      } catch {
-        setCartItems([]);
+      } catch { setCartItems([]); }
+    }
+
+    // 2. Restore checkout form state from sessionStorage (persisted through sign-in)
+    const savedCheckout = sessionStorage.getItem('checkout_form_state');
+    if (savedCheckout) {
+      try {
+        const state = JSON.parse(savedCheckout);
+        if (state.shippingDetails) setShippingDetails(state.shippingDetails);
+        if (state.companyDetails) setCompanyDetails(state.companyDetails);
+        if (state.billingAddress) setBillingAddress(state.billingAddress);
+        if (state.deliveryMethod) setDeliveryMethod(state.deliveryMethod);
+        if (state.deliveryAddress) setDeliveryAddress(state.deliveryAddress);
+        if (state.deliveryPostalCode) setDeliveryPostalCode(state.deliveryPostalCode);
+        if (state.rememberDetails) setRememberDetails(state.rememberDetails);
+        // Clear after restore
+        sessionStorage.removeItem('checkout_form_state');
+      } catch {}
+    }
+
+    // 3. Auto-fill from remembered details (for signed-in users)
+    if (session?.user?.email) {
+      const remembered = localStorage.getItem(`checkout_remembered_${session.user.email}`);
+      if (remembered) {
+        try {
+          const data = JSON.parse(remembered);
+          // Only fill empty fields
+          setShippingDetails(prev => ({
+            name: prev.name || data.shippingDetails?.name || '',
+            phone: prev.phone || data.shippingDetails?.phone || '',
+            email: prev.email || data.shippingDetails?.email || session?.user?.email || '',
+          }));
+          setCompanyDetails(prev => ({
+            companyName: prev.companyName || data.companyDetails?.companyName || '',
+            vatNumber: prev.vatNumber || data.companyDetails?.vatNumber || '',
+          }));
+          setBillingAddress(prev => ({
+            address: prev.address || data.billingAddress?.address || '',
+            city: prev.city || data.billingAddress?.city || '',
+            postalCode: prev.postalCode || data.billingAddress?.postalCode || '',
+          }));
+          setRememberDetails(true);
+        } catch {}
       }
     }
-  }, []);
+  }, [session]);
 
   const total = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const VAT_RATE = 0.15;
@@ -168,6 +212,16 @@ const CheckoutPage: React.FC = () => {
 
   const handleCheckout = async () => {
     if (!session?.user) {
+      // Save form state before redirecting to sign-in
+      sessionStorage.setItem('checkout_form_state', JSON.stringify({
+        shippingDetails,
+        companyDetails,
+        billingAddress,
+        deliveryMethod,
+        deliveryAddress,
+        deliveryPostalCode,
+        rememberDetails,
+      }));
       router.push('/auth/login?callbackUrl=/checkout');
       return;
     }
@@ -239,6 +293,15 @@ const CheckoutPage: React.FC = () => {
       // Clear cart
       localStorage.removeItem('sealed_cart');
       window.dispatchEvent(new Event('cartUpdated'));
+
+      // Remember user details if checked
+      if (rememberDetails && session?.user?.email) {
+        localStorage.setItem(`checkout_remembered_${session.user.email}`, JSON.stringify({
+          shippingDetails,
+          companyDetails,
+          billingAddress,
+        }));
+      }
 
       // Create a form and submit to PayFast
       const form = document.createElement('form');
@@ -624,6 +687,17 @@ const CheckoutPage: React.FC = () => {
                       placeholder={session?.user?.email || 'your@email.com'}
                     />
                   </div>
+                  {session?.user && (
+                    <label className="flex items-center gap-3 cursor-pointer pt-1">
+                      <input
+                        type="checkbox"
+                        checked={rememberDetails}
+                        onChange={(e) => setRememberDetails(e.target.checked)}
+                        className="w-4 h-4 rounded border-gray-300 text-brand-600 focus:ring-brand-500"
+                      />
+                      <span className="text-sm text-gray-600">Remember my details for next time</span>
+                    </label>
+                  )}
                 </div>
               </div>
 
