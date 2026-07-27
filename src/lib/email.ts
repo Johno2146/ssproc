@@ -6,24 +6,51 @@ function getTransporter() {
   if (transporter) return transporter;
 
   const apiKey = process.env.SENDGRID_API_KEY;
-  const fromEmail = process.env.EMAIL_FROM || 'noreply@ssproc.co.za';
-  const fromName = process.env.EMAIL_FROM_NAME || 'Sealed & Secured';
+  const smtpHost = process.env.EMAIL_HOST;
+  const smtpUser = process.env.EMAIL_USER;
+  const smtpPass = process.env.EMAIL_PASS;
 
-  if (!apiKey || apiKey === 'your-sendgrid-api-key-here') {
-    return null;
+  // Prefer SMTP if configured
+  if (smtpHost && smtpUser && smtpPass) {
+    transporter = nodemailer.createTransport({
+      host: smtpHost,
+      port: parseInt(process.env.EMAIL_PORT || "587"),
+      secure: process.env.EMAIL_SECURE === "true",
+      auth: {
+        user: smtpUser,
+        pass: smtpPass,
+      },
+    });
+    console.log("[EMAIL] Using SMTP transport");
+    return transporter;
   }
 
-  transporter = nodemailer.createTransport({
-    host: 'smtp.sendgrid.net',
-    port: 587,
-    secure: false,
-    auth: {
-      user: 'apikey',
-      pass: apiKey,
-    },
-  });
+  // Fall back to SendGrid if API key available
+  if (apiKey && apiKey !== 'your-sendgrid-api-key-here') {
+    transporter = nodemailer.createTransport({
+      host: 'smtp.sendgrid.net',
+      port: 587,
+      secure: false,
+      auth: {
+        user: 'apikey',
+        pass: apiKey,
+      },
+    });
+    console.log("[EMAIL] Using SendGrid transport");
+    return transporter;
+  }
 
-  return transporter;
+  // No email transport configured - log what's missing
+  const missing = [];
+  if (!smtpHost) missing.push('EMAIL_HOST');
+  if (!smtpUser) missing.push('EMAIL_USER');
+  if (!smtpPass) missing.push('EMAIL_PASS');
+  if (!apiKey || apiKey === 'your-sendgrid-api-key-here') missing.push('SENDGRID_API_KEY');
+  
+  console.log(`[EMAIL STUB] No email transport configured. Missing env vars: ${missing.join(', ')}. Add these to Vercel to enable email sending.`);
+  console.log(`[EMAIL STUB] For SMTP: EMAIL_HOST, EMAIL_PORT (optional, default 587), EMAIL_USER, EMAIL_PASS, EMAIL_SECURE (optional), EMAIL_FROM (optional), EMAIL_FROM_NAME (optional)`);
+  
+  return null;
 }
 
 export interface EmailOptions {

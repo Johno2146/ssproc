@@ -2,12 +2,17 @@ import { NextResponse } from "next/server";
 import { createClient } from "@libsql/client";
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
+import { sendOtpEmail } from "@/lib/email";
 
 function getClient() {
   return createClient({
     url: process.env.DATABASE_URL || "",
     authToken: process.env.TURSO_AUTH_TOKEN,
   });
+}
+
+function generateOtp(): string {
+  return Math.floor(100000 + Math.random() * 900000).toString();
 }
 
 export async function POST(req: Request) {
@@ -34,17 +39,43 @@ export async function POST(req: Request) {
 
     const passwordHash = await bcrypt.hash(password, 12);
     const id = crypto.randomUUID();
-    const now = new Date().toISOString();
     const displayName = name || email.split("@")[0];
 
+    // Create user WITHOUT emailVerified (pending verification)
     await client.execute({
-      sql: `INSERT INTO User (id, name, email, "emailVerified", image, passwordHash, phone, company, role) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      args: [id, displayName, email, now, null, passwordHash, phone || "", company || "", "customer"],
+      sql: `INSERT INTO User (id, name, email, emailVerified, image, passwordHash, phone, company, role) VALUES (?, ?, ?, NULL, ?, ?, ?, ?, ?)`,
+      args: [id, displayName, email, null, passwordHash, phone || "", company || "", "customer"],
     });
+
+    // Generate OTP and expiry (15 minutes)
+    const otp = generateOtp();
+    const otpId = crypto.randomUUID();
+    const expiresAt = new Date(Date.now() + 15 * 60 * 1000).toISOString();
+
+    // Store OTP in VerificationToken table
+    await client.execute({
+      sql: `INSERT INTO VerificationToken (id, identifier, token, expires, createdAt) VALUES (?, ?, ?, ?, ?)`,
+      args: [otpId, email, otp, expiresAt, new Date().toISOString()],
+    });
+
+    // Try sending OTP email, fall back to console log
+    let emailSent = false;
+    try {
+      emailSent = await sendOtpEmail(email, displayName, otp);
+    } catch (e) {
+      console.error("Failed to send OTP email:", e);
+    }
+
+    // Always log the OTP so it works even without SMTP
+    console.log(`[OTP] Verification code for ${email}: ${otp}`);
 
     return NextResponse.json({
       id, name: displayName, email,
-      message: "Account created successfully. You can now sign in.",
+      message: emailSent 
+        ? "Account created. Check your email for the verification code."
+        : "Account created. Check the server logs for your verification code (email not configured).",
+      requiresVerification: true,
+      redirectTo: `/auth/verify?email=${encodeURIComponent(email)}`,
     }, { status: 201 });
   } catch (error: any) {
     console.error("Registration error:", error);
