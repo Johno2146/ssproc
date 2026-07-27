@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@libsql/client";
 import crypto from "crypto";
+import { sendEmail } from "@/lib/email";
 
 const turso = createClient({
   url: process.env.TURSO_DATABASE_URL || "",
@@ -23,11 +24,13 @@ async function sendOrderNotification(order: any, orderItems: any[]) {
   const SALES_EMAIL = "sales@ssproc.co.za";
   
   const itemsList = orderItems.map((item: any) => 
-    `  - ${item.productName || item.productId}: ${item.quantity} × R${item.price.toFixed(2)} = R${(item.quantity * item.price).toFixed(2)}`
+    `  - ${item.productName || item.productId}: ${item.quantity} × R${Number(item.price).toFixed(2)} = R${(item.quantity * Number(item.price)).toFixed(2)}`
   ).join('\n');
 
-  const emailBody = `
-NEW ORDER RECEIVED
+  const orderTotal = Number(order.total).toFixed(2);
+
+  // 1. Notify sales team
+  const salesBody = `NEW ORDER RECEIVED
 ==================
 Order Number: ${order.orderNumber}
 Date: ${new Date().toLocaleString('en-ZA')}
@@ -42,35 +45,14 @@ ORDER ITEMS
 -----------
 ${itemsList}
 
-ORDER TOTAL: R${order.total.toFixed(2)} (incl. VAT)
-Payment Status: PAID
-  `.trim();
+ORDER TOTAL: R${orderTotal} (incl. VAT)
+Payment Status: PAID`;
 
-  // Send to sales — log to console (SMTP not configured on Vercel)
-  console.log(`[SALES NOTIFICATION] To: ${SALES_EMAIL}`);
-  console.log(emailBody);
+  sendEmail(SALES_EMAIL, `New Order: ${order.orderNumber}`, salesBody);
 
-  // Also try contact form fallback
-  try {
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
-    await fetch(`${siteUrl}/api/contact`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        name: "Order System",
-        email: SALES_EMAIL,
-        subject: `New Order: ${order.orderNumber}`,
-        message: emailBody,
-      }),
-    });
-  } catch (e) {
-    console.log("Contact form notification failed:", e);
-  }
-
-  // Customer confirmation
+  // 2. Customer confirmation
   if (order.shippingEmail) {
-    const customerBody = `
-Dear ${order.shippingName},
+    const customerBody = `Dear ${order.shippingName},
 
 Thank you for your order with Sealed & Secured!
 
@@ -80,17 +62,15 @@ Order Number: ${order.orderNumber}
 
 ${itemsList}
 
-TOTAL: R${order.total.toFixed(2)} (incl. VAT)
+TOTAL: R${orderTotal} (incl. VAT)
 
 We'll notify you when your order is ready for dispatch.
 
 Regards,
 Sealed & Secured Team
-www.ssproc.co.za
-    `.trim();
+www.ssproc.co.za`;
 
-    console.log(`[CUSTOMER EMAIL] To: ${order.shippingEmail}`);
-    console.log(customerBody);
+    sendEmail(order.shippingEmail, `Order Confirmation: ${order.orderNumber}`, customerBody);
   }
 }
 
