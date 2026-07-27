@@ -74,7 +74,7 @@ export async function POST(req: Request) {
     // Create order items
     for (const item of items) {
       await turso.execute({
-        sql: "INSERT INTO OrderItem (id, orderId, productId, quantity, price) VALUES (?, ?, ?, ?, ?)",
+        sql: `INSERT INTO OrderItem (id, orderId, productId, quantity, price) VALUES (?, ?, ?, ?, ?)`,
         args: [crypto.randomUUID(), orderId, item.productId, item.quantity, item.price],
       });
     }
