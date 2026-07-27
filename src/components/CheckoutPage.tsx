@@ -39,6 +39,15 @@ const CheckoutPage: React.FC = () => {
     phone: '',
     email: '',
   });
+  const [companyDetails, setCompanyDetails] = useState({
+    companyName: '',
+    vatNumber: '',
+  });
+  const [billingAddress, setBillingAddress] = useState({
+    address: '',
+    city: '',
+    postalCode: '',
+  });
   const [deliveryMethod, setDeliveryMethod] = useState<'collection' | 'delivery'>('collection');
   const [deliveryPostalCode, setDeliveryPostalCode] = useState('');
   const [deliveryAddress, setDeliveryAddress] = useState({
@@ -195,6 +204,15 @@ const CheckoutPage: React.FC = () => {
             ...shippingDetails,
             email: shippingDetails.email || session.user.email,
           },
+          companyDetails: {
+            companyName: companyDetails.companyName || undefined,
+            vatNumber: companyDetails.vatNumber || undefined,
+          },
+          billingAddress: billingAddress.address ? {
+            address: billingAddress.address,
+            city: billingAddress.city,
+            postalCode: billingAddress.postalCode,
+          } : undefined,
           shipping: {
             method: deliveryMethod,
             cost: shippingCost,
@@ -605,6 +623,87 @@ const CheckoutPage: React.FC = () => {
                       className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:border-brand-600 focus:ring-2 focus:ring-brand-100 outline-none"
                       placeholder={session?.user?.email || 'your@email.com'}
                     />
+                  </div>
+                </div>
+              </div>
+
+              {/* Company Details (optional) */}
+              <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+                <h2 className="text-xl font-bold text-brand-950 mb-4">Company Details <span className="text-xs font-normal text-gray-400">(optional)</span></h2>
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Company Name</label>
+                    <input
+                      type="text"
+                      value={companyDetails.companyName}
+                      onChange={(e) => setCompanyDetails({ ...companyDetails, companyName: e.target.value })}
+                      className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:border-brand-600 focus:ring-2 focus:ring-brand-100 outline-none"
+                      placeholder="Your company name"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">VAT Number</label>
+                    <input
+                      type="text"
+                      value={companyDetails.vatNumber}
+                      onChange={(e) => setCompanyDetails({ ...companyDetails, vatNumber: e.target.value })}
+                      className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:border-brand-600 focus:ring-2 focus:ring-brand-100 outline-none"
+                      placeholder="e.g. 4123456789"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Billing Address (optional) */}
+              <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-xl font-bold text-brand-950">Billing Address <span className="text-xs font-normal text-gray-400">(optional)</span></h2>
+                  {deliveryMethod === 'delivery' && (
+                    <button
+                      type="button"
+                      onClick={() => setBillingAddress({
+                        address: deliveryAddress.street || '',
+                        city: deliveryAddress.city || '',
+                        postalCode: deliveryAddress.postalCode || deliveryPostalCode || '',
+                      })}
+                      className="text-xs font-medium text-brand-600 hover:text-brand-700 bg-brand-50 hover:bg-brand-100 px-3 py-1.5 rounded-lg transition-all"
+                    >
+                      Same as Delivery
+                    </button>
+                  )}
+                </div>
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Address</label>
+                    <input
+                      type="text"
+                      value={billingAddress.address}
+                      onChange={(e) => setBillingAddress({ ...billingAddress, address: e.target.value })}
+                      className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:border-brand-600 focus:ring-2 focus:ring-brand-100 outline-none"
+                      placeholder="Billing street address"
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">City</label>
+                      <input
+                        type="text"
+                        value={billingAddress.city}
+                        onChange={(e) => setBillingAddress({ ...billingAddress, city: e.target.value })}
+                        className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:border-brand-600 focus:ring-2 focus:ring-brand-100 outline-none"
+                        placeholder="City"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Postal Code</label>
+                      <input
+                        type="text"
+                        value={billingAddress.postalCode}
+                        onChange={(e) => setBillingAddress({ ...billingAddress, postalCode: e.target.value })}
+                        className="w-full px-4 py-2.5 rounded-xl border border-gray-200 focus:border-brand-600 focus:ring-2 focus:ring-brand-100 outline-none"
+                        placeholder="Postal code"
+                      />
+                    </div>
                   </div>
                 </div>
               </div>

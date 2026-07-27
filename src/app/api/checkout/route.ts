@@ -1,19 +1,24 @@
 import { NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
-import { createClient } from "@libsql/client";
 import crypto from "crypto";
 
-const turso = createClient({
-  url: process.env.TURSO_DATABASE_URL || "",
-  authToken: process.env.TURSO_AUTH_TOKEN || "",
-});
+let turso: any = null;
+function getTurso() {
+  if (!turso) {
+    const { createClient } = require("@libsql/client");
+    turso = createClient({
+      url: process.env.TURSO_DATABASE_URL || "",
+      authToken: process.env.TURSO_AUTH_TOKEN || "",
+    });
+  }
+  return turso;
+}
 
 const PAYFAST_URL = process.env.PAYFAST_SANDBOX === "true"
   ? "https://sandbox.payfast.co.za/eng/process"
   : "https://www.payfast.co.za/eng/process";
 
 function generatePayFastSignature(data: Record<string, string>, passphrase?: string): string {
-  // Sort by key, create param string
   const keys = Object.keys(data).sort();
   const paramString = keys
     .map(key => `${key}=${encodeURIComponent(data[key].trim()).replace(/%20/g, "+")}`)
@@ -34,7 +39,7 @@ export async function POST(req: Request) {
     }
 
     const body = await req.json();
-    const { items, shippingDetails } = body;
+    const { items, shippingDetails, companyDetails, billingAddress, shipping } = body;
 
     // Validate items
     if (!items || items.length === 0) {
@@ -48,15 +53,24 @@ export async function POST(req: Request) {
     const vat = total * VAT_RATE;
     const grandTotal = total + vat;
 
+    // Build delivery address string
+    const deliveryAddrStr = [shipping?.street, shipping?.suburb, shipping?.city, shipping?.province, shipping?.postalCode]
+      .filter(Boolean).join(', ');
+
+    // Build billing address string
+    const billingAddrStr = billingAddress 
+      ? [billingAddress.address, billingAddress.city, billingAddress.postalCode].filter(Boolean).join(', ')
+      : '';
+
     // Create order in Turso
     const orderId = crypto.randomUUID();
-    await turso.execute({
-      sql: "INSERT INTO "Order" (id, orderNumber, userId, status, total, shippingName, shippingPhone, shippingEmail, createdAt, updatedAt) VALUES (?, ?, ?, 'pending', ?, ?, ?, ?, datetime('now'), datetime('now'))",
-      args: [orderId, orderNumber, (session.user as any).id, grandTotal, shippingDetails.name, shippingDetails.phone, shippingDetails.email],
+    await getTurso().execute({
+      sql: `INSERT INTO "Order" (id, orderNumber, userId, status, total, shippingName, shippingPhone, shippingEmail, companyName, vatNumber, deliveryAddress, billingAddress, createdAt, updatedAt) VALUES (?, ?, ?, 'pending', ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))`,
+      args: [orderId, orderNumber, (session.user as any).id, grandTotal, shippingDetails.name, shippingDetails.phone, shippingDetails.email, companyDetails?.companyName || '', companyDetails?.vatNumber || '', deliveryAddrStr, billingAddrStr],
     });
     // Create order items
     for (const item of items) {
-      await turso.execute({
+      await getTurso().execute({
         sql: "INSERT INTO OrderItem (id, orderId, productId, quantity, price) VALUES (?, ?, ?, ?, ?)",
         args: [crypto.randomUUID(), orderId, item.productId, item.quantity, item.price],
       });
