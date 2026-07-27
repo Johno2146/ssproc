@@ -83,8 +83,8 @@ export async function POST(req: Request) {
     
     // 2. Prepare PayFast payment data
     const payfastData: Record<string, string> = {
-      merchant_id: process.env.PAYFAST_MERCHANT_ID || "10000100",
-      merchant_key: process.env.PAYFAST_MERCHANT_KEY || "46f0cd694581a",
+      merchant_id: process.env.PAYFAST_MERCHANT_ID || "",
+      merchant_key: process.env.PAYFAST_MERCHANT_KEY || "",
       return_url: `${siteUrl}/checkout/success?orderId=${orderId}`,
       cancel_url: `${siteUrl}/checkout/cancel?orderId=${orderId}`,
       notify_url: `${siteUrl}/api/payfast/notify`,
@@ -97,7 +97,13 @@ export async function POST(req: Request) {
     };
 
     // 3. Generate signature
-    const passphrase = process.env.PAYFAST_PASSPHRASE || "";
+    if (!process.env.PAYFAST_MERCHANT_ID || !process.env.PAYFAST_MERCHANT_KEY) {
+      return NextResponse.json(
+        { error: "Payment gateway not configured. Please set PAYFAST_MERCHANT_ID and PAYFAST_MERCHANT_KEY." },
+        { status: 500 }
+      );
+    }
+    const passphrase = process.env.PAYFAST_PASSPHRASE || ;
     const signature = generatePayFastSignature(payfastData, passphrase);
     payfastData.signature = signature;
 
