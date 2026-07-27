@@ -111,16 +111,18 @@ export async function POST(req: Request) {
     console.log('[PAYFAST DEBUG] Signature:', signature);
     console.log('[PAYFAST DEBUG] Param string:', Object.keys(payfastData).filter(k => k !== 'signature').sort().map(k => `${k}=${payfastData[k]}`).join('&'));
 
-    return NextResponse.json({
-      orderId: orderId,
-      orderNumber,
-      payfastUrl: PAYFAST_URL,
-      payfastData,
-      debug: {
-        paramString: debugParamString,
-        signature,
-        siteUrl,
-      },
+    // Generate HTML form and return it directly (auto-submit)
+    // This ensures the form values and signature use identical encoding
+    let html = '<!DOCTYPE html><html><head><title>Redirecting to PayFast...</title></head><body>';
+    html += '<form id="pf" action="' + PAYFAST_URL + '" method="POST">';
+    for (const [k, v] of Object.entries(payfastData)) {
+      html += '<input type="hidden" name="' + k + '" value="' + v.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;') + '" />';
+    }
+    html += '</form><script>document.getElementById("pf").submit();</script>';
+    html += '</body></html>';
+    
+    return new NextResponse(html, {
+      headers: { 'Content-Type': 'text/html; charset=utf-8' },
     });
   } catch (error) {
     console.error("Checkout error:", error);
