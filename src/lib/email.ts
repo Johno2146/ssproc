@@ -33,3 +33,18 @@ export async function sendEmail(to: string, subject: string, body: string): Prom
     return false;
   }
 }
+
+export async function sendOtpEmail(email: string, name: string, otp: string): Promise<boolean> {
+  const body = `Hi ${name},
+
+Your verification code for Sealed & Secured is: ${otp}
+
+This code expires in 15 minutes.
+
+If you didn't create an account, please ignore this email.
+
+Regards,
+Sealed & Secured Team`;
+
+  return sendEmail(email, `Your verification code: ${otp}`, body);
+}
