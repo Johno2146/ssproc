@@ -8,12 +8,10 @@ const turso = createClient({
   authToken: process.env.TURSO_AUTH_TOKEN || "",
 });
 
-function generatePayFastSignature(data: Record<string, string>, passphrase?: string): string {
-  const keys = Object.keys(data).filter(k => k !== 'signature').sort();
-  let paramString = keys
-    .map(k => `${k}=${encodeURIComponent(data[k].trim()).replace(/%20/g, '+')}`)
-    .join('&');
-  // Passphrase must NOT be URL-encoded per PayFast spec
+function generatePayFastSignature(rawPairs: Record<string, string>, passphrase?: string): string {
+  // rawPairs values are already URL-encoded exactly as PayFast sent them
+  const keys = Object.keys(rawPairs).sort();
+  let paramString = keys.map(k => `${k}=${rawPairs[k]}`).join('&');
   if (passphrase && passphrase.trim()) {
     paramString += '&passphrase=' + passphrase.trim();
   }
@@ -76,32 +74,48 @@ www.ssproc.co.za`;
 
 export async function POST(req: Request) {
   try {
-    const formData = await req.formData();
+    const rawBody = await req.text();
+    console.log("[PayFast ITN] Raw body:", rawBody);
+
+    // Parse raw key=value pairs, keeping values URL-encoded for signature
+    const rawPairs: Record<string, string> = {};
     const data: Record<string, string> = {};
-    formData.forEach((value, key) => {
-      data[key] = value.toString();
+    let rawSignature = '';
+    rawBody.split('&').forEach(pair => {
+      const eq = pair.indexOf('=');
+      if (eq === -1) return;
+      const rawKey = pair.substring(0, eq);
+      const rawVal = pair.substring(eq + 1);
+      const key = decodeURIComponent(rawKey);
+      if (key === 'signature') {
+        rawSignature = rawVal;
+        data[key] = decodeURIComponent(rawVal);
+      } else if (key) {
+        rawPairs[key] = rawVal; // Keep URL-encoded for signature
+        data[key] = decodeURIComponent(rawVal).replace(/\+/g, ' ');
+      }
     });
 
     console.log("[PayFast ITN] Received:", JSON.stringify(data));
 
     // 1. Verify signature
     const passphrase = process.env.PAYFAST_PASSPHRASE || "";
-    const expectedSignature = generatePayFastSignature(data, passphrase);
-    const sigOk = !data.signature || data.signature === expectedSignature;
+    const expectedSignature = generatePayFastSignature(rawPairs, passphrase);
+    const sigOk = !rawSignature || rawSignature === expectedSignature;
     
     // Log signature comparison for debugging
     try {
       await turso.execute({ sql: `CREATE TABLE IF NOT EXISTS ItnLog (id INTEGER PRIMARY KEY AUTOINCREMENT, orderId TEXT, paymentStatus TEXT, sigOk INTEGER, expectedSig TEXT, receivedSig TEXT, rawData TEXT, createdAt TEXT)` });
       await turso.execute({
         sql: `INSERT INTO ItnLog (orderId, paymentStatus, sigOk, expectedSig, receivedSig, rawData, createdAt) VALUES (?, ?, ?, ?, ?, ?, datetime('now'))`,
-        args: [data.m_payment_id || "unknown", data.payment_status || "unknown", sigOk ? 1 : 0, expectedSignature, data.signature || "", JSON.stringify(data)],
+        args: [data.m_payment_id || "unknown", data.payment_status || "unknown", sigOk ? 1 : 0, expectedSignature, rawSignature, JSON.stringify(data)],
       });
     } catch (e) {
       console.error("[PayFast ITN] Failed to log to DB:", e);
     }
     
-    if (data.signature && !sigOk) {
-      console.error("[PayFast ITN] Signature mismatch. Expected:", expectedSignature, "Got:", data.signature);
+    if (rawSignature && !sigOk) {
+      console.error("[PayFast ITN] Signature mismatch. Expected:", expectedSignature, "Got:", rawSignature);
       return new Response("Invalid signature", { status: 200 });
     }
 
