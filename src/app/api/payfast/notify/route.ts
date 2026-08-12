@@ -84,23 +84,23 @@ export async function POST(req: Request) {
 
     console.log("[PayFast ITN] Received:", JSON.stringify(data));
 
-    // Log EVERY ITN call to database for debugging
+    // 1. Verify signature
+    const passphrase = process.env.PAYFAST_PASSPHRASE || "";
+    const expectedSignature = generatePayFastSignature(data, passphrase);
+    const sigOk = !data.signature || data.signature === expectedSignature;
+    
+    // Log signature comparison for debugging
     try {
-      // Ensure table exists
-      await turso.execute({ sql: `CREATE TABLE IF NOT EXISTS ItnLog (id INTEGER PRIMARY KEY AUTOINCREMENT, orderId TEXT, paymentStatus TEXT, rawData TEXT, createdAt TEXT)` });
+      await turso.execute({ sql: `CREATE TABLE IF NOT EXISTS ItnLog (id INTEGER PRIMARY KEY AUTOINCREMENT, orderId TEXT, paymentStatus TEXT, sigOk INTEGER, expectedSig TEXT, receivedSig TEXT, rawData TEXT, createdAt TEXT)` });
       await turso.execute({
-        sql: `INSERT INTO ItnLog (orderId, paymentStatus, rawData, createdAt) VALUES (?, ?, ?, datetime('now'))`,
-        args: [data.m_payment_id || "unknown", data.payment_status || "unknown", JSON.stringify(data)],
+        sql: `INSERT INTO ItnLog (orderId, paymentStatus, sigOk, expectedSig, receivedSig, rawData, createdAt) VALUES (?, ?, ?, ?, ?, ?, datetime('now'))`,
+        args: [data.m_payment_id || "unknown", data.payment_status || "unknown", sigOk ? 1 : 0, expectedSignature, data.signature || "", JSON.stringify(data)],
       });
     } catch (e) {
       console.error("[PayFast ITN] Failed to log to DB:", e);
     }
-
-    // 1. Verify signature
-    const passphrase = process.env.PAYFAST_PASSPHRASE || "";
-    const expectedSignature = generatePayFastSignature(data, passphrase);
     
-    if (data.signature && data.signature !== expectedSignature) {
+    if (data.signature && !sigOk) {
       console.error("[PayFast ITN] Signature mismatch. Expected:", expectedSignature, "Got:", data.signature);
       return new Response("Invalid signature", { status: 200 });
     }
