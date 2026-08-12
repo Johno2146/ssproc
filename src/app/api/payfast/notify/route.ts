@@ -84,6 +84,18 @@ export async function POST(req: Request) {
 
     console.log("[PayFast ITN] Received:", JSON.stringify(data));
 
+    // Log EVERY ITN call to database for debugging
+    try {
+      // Ensure table exists
+      await turso.execute({ sql: `CREATE TABLE IF NOT EXISTS ItnLog (id INTEGER PRIMARY KEY AUTOINCREMENT, orderId TEXT, paymentStatus TEXT, rawData TEXT, createdAt TEXT)` });
+      await turso.execute({
+        sql: `INSERT INTO ItnLog (orderId, paymentStatus, rawData, createdAt) VALUES (?, ?, ?, datetime('now'))`,
+        args: [data.m_payment_id || "unknown", data.payment_status || "unknown", JSON.stringify(data)],
+      });
+    } catch (e) {
+      console.error("[PayFast ITN] Failed to log to DB:", e);
+    }
+
     // 1. Verify signature
     const passphrase = process.env.PAYFAST_PASSPHRASE || "";
     const expectedSignature = generatePayFastSignature(data, passphrase);
