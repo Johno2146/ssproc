@@ -41,8 +41,26 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "No items in order" }, { status: 400 });
     }
 
-    // 1. Create order in database
-    const orderNumber = `SS-${Date.now()}`;
+    // 1. Create order in database — generate sequential order number
+    let orderNumber = `SS-${Date.now()}`; // fallback
+    try {
+      // Ensure counter table exists
+      await turso.execute({ sql: `CREATE TABLE IF NOT EXISTS Counter (name TEXT PRIMARY KEY, value INTEGER NOT NULL)` });
+      // Atomic increment and read the next sequence (starts at 1000 to look established)
+      const counterResult = await turso.execute({
+        sql: `INSERT INTO Counter (name, value) VALUES ('orderNumber', 1000)
+              ON CONFLICT(name) DO UPDATE SET value = value + 1
+              RETURNING value`,
+        args: [],
+      });
+      const seq = Number(counterResult.rows[0]?.value || 0);
+      if (seq > 0) {
+        orderNumber = `SS-${seq}`;
+      }
+    } catch (e) {
+      console.error("Failed to generate sequential order number, falling back to timestamp:", e);
+    }
+
     const total = items.reduce((acc: number, item: any) => acc + item.price * item.quantity, 0);
     const VAT_RATE = 0.15;
     const vat = total * VAT_RATE;
