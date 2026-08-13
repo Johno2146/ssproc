@@ -119,8 +119,29 @@ export async function POST(req: Request) {
         args: [orderId],
       });
 
+      // 4b. Attach product names to items
+      const items = [];
+      for (const item of itemsResult.rows) {
+        let productName = item.productId;
+        try {
+          const prodResult = await turso.execute({
+            sql: `SELECT name FROM Product WHERE id = ?`,
+            args: [item.productId],
+          });
+          if (prodResult.rows.length > 0) {
+            productName = prodResult.rows[0].name;
+          }
+        } catch {}
+        items.push({
+          ...item,
+          productName,
+          price: Number(item.price),
+          quantity: Number(item.quantity),
+        });
+      }
+
       // 5. Send notifications
-      sendOrderNotification(order, itemsResult.rows).catch(e => 
+      sendOrderNotification(order, items).catch(e => 
         console.error("[PayFast ITN] Notification error:", e)
       );
 
