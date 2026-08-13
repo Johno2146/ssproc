@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@libsql/client";
 import crypto from "crypto";
-import { sendEmail } from "@/lib/email";
+import { sendEmail, orderSalesEmailHtml, orderCustomerEmailHtml } from "@/lib/email";
 
 const turso = createClient({
   url: process.env.TURSO_DATABASE_URL || "",
@@ -20,55 +20,13 @@ function generatePayFastSignature(rawPairs: Record<string, string>, passphrase?:
 
 async function sendOrderNotification(order: any, orderItems: any[]) {
   const SALES_EMAIL = "sales@ssproc.co.za";
-  
-  const itemsList = orderItems.map((item: any) => 
-    `  - ${item.productName || item.productId}: ${item.quantity} × R${Number(item.price).toFixed(2)} = R${(item.quantity * Number(item.price)).toFixed(2)}`
-  ).join('\n');
 
-  const orderTotal = Number(order.total).toFixed(2);
+  // 1. Notify sales team (HTML)
+  sendEmail(SALES_EMAIL, `New Order: ${order.orderNumber}`, orderSalesEmailHtml(order, orderItems));
 
-  // 1. Notify sales team
-  const salesBody = `NEW ORDER RECEIVED
-==================
-Order Number: ${order.orderNumber}
-Date: ${new Date().toLocaleString('en-ZA')}
-
-CUSTOMER DETAILS
-----------------
-Name: ${order.shippingName}
-Email: ${order.shippingEmail}
-Phone: ${order.shippingPhone}
-
-ORDER ITEMS
------------
-${itemsList}
-
-ORDER TOTAL: R${orderTotal} (incl. VAT)
-Payment Status: PAID`;
-
-  sendEmail(SALES_EMAIL, `New Order: ${order.orderNumber}`, salesBody);
-
-  // 2. Customer confirmation
+  // 2. Customer confirmation (HTML)
   if (order.shippingEmail) {
-    const customerBody = `Dear ${order.shippingName},
-
-Thank you for your order with Sealed & Secured!
-
-ORDER CONFIRMATION
-==================
-Order Number: ${order.orderNumber}
-
-${itemsList}
-
-TOTAL: R${orderTotal} (incl. VAT)
-
-We'll notify you when your order is ready for dispatch.
-
-Regards,
-Sealed & Secured Team
-www.ssproc.co.za`;
-
-    sendEmail(order.shippingEmail, `Order Confirmation: ${order.orderNumber}`, customerBody);
+    sendEmail(order.shippingEmail, `Order Confirmation: ${order.orderNumber}`, orderCustomerEmailHtml(order, orderItems));
   }
 }
 
