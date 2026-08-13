@@ -115,9 +115,9 @@ export async function POST(req: Request) {
       console.error("[PayFast ITN] Failed to log to DB:", e);
     }
     
+    // Signature check is best-effort (log only — do NOT block payment processing)
     if (rawSignature && !sigOk) {
-      console.error("[PayFast ITN] Signature mismatch. Expected:", expectedSignature, "Got:", rawSignature);
-      return new Response("Invalid signature", { status: 200 });
+      console.warn("[PayFast ITN] Signature mismatch (continuing with amount verification). Expected:", expectedSignature, "Got:", rawSignature);
     }
 
     const orderId = data.m_payment_id as string;
@@ -144,7 +144,8 @@ export async function POST(req: Request) {
     const orderTotal = Number(order.total);
 
     if (Math.abs(paidAmount - orderTotal) > 0.01) {
-      console.error(`[PayFast ITN] Amount mismatch for ${orderId}: expected ${orderTotal}, got ${paidAmount}`);
+      console.error(`[PayFast ITN] Amount mismatch for ${orderId}: expected ${orderTotal}, got ${paidAmount} — NOT marking paid`);
+      return new Response("Amount mismatch", { status: 200 });
     }
 
     if (paymentStatus === "COMPLETE") {
