@@ -108,7 +108,7 @@ export async function POST(req: Request) {
       await turso.execute({ sql: `CREATE TABLE IF NOT EXISTS ItnLog (id INTEGER PRIMARY KEY AUTOINCREMENT, orderId TEXT, paymentStatus TEXT, sigOk INTEGER, expectedSig TEXT, receivedSig TEXT, rawData TEXT, createdAt TEXT)` });
       await turso.execute({
         sql: `INSERT INTO ItnLog (orderId, paymentStatus, sigOk, expectedSig, receivedSig, rawData, createdAt) VALUES (?, ?, ?, ?, ?, ?, datetime('now'))`,
-        args: [data.m_payment_id || "unknown", data.payment_status || "unknown", sigOk ? 1 : 0, expectedSignature, rawSignature, JSON.stringify(data)],
+        args: [data.m_payment_id || "unknown", data.payment_status || "unknown", sigOk ? 1 : 0, expectedSignature, rawSignature, rawBody],
       });
     } catch (e) {
       console.error("[PayFast ITN] Failed to log to DB:", e);
