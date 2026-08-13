@@ -105,6 +105,7 @@ export async function POST(req: Request) {
     
     // Log signature comparison for debugging
     try {
+      await turso.execute({ sql: `DROP TABLE IF EXISTS ItnLog` });
       await turso.execute({ sql: `CREATE TABLE IF NOT EXISTS ItnLog (id INTEGER PRIMARY KEY AUTOINCREMENT, orderId TEXT, paymentStatus TEXT, sigOk INTEGER, expectedSig TEXT, receivedSig TEXT, rawData TEXT, createdAt TEXT)` });
       await turso.execute({
         sql: `INSERT INTO ItnLog (orderId, paymentStatus, sigOk, expectedSig, receivedSig, rawData, createdAt) VALUES (?, ?, ?, ?, ?, ?, datetime('now'))`,
