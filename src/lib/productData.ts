@@ -300,8 +300,6 @@ export const quantityTiers: Record<string, QuantityTier[]> = {
     { label: 'Per 1000', unit: '1000 pack', price: 870.00, shipping: { weightKg: 5.0, lengthCm: 50, widthCm: 41, heightCm: 31 } },
   ],
   'suretite-barcoded': [
-    { label: 'Per 50', unit: '50 pack', price: 55.00, shipping: { weightKg: 0.300, lengthCm: 45, widthCm: 25, heightCm: 5 } },
-    { label: 'Per 100', unit: '100 pack', price: 90.00, shipping: { weightKg: 0.500, lengthCm: 43, widthCm: 25, heightCm: 8 } },
     { label: 'Per 1000', unit: '1000 pack', price: 870.00, shipping: { weightKg: 5.0, lengthCm: 50, widthCm: 41, heightCm: 31 } },
   ],
 
@@ -361,8 +359,6 @@ export const quantityTiers: Record<string, QuantityTier[]> = {
     { label: 'Per 1000', unit: '1000 pack', price: 870.00, shipping: { weightKg: 5.5, lengthCm: 45, widthCm: 45, heightCm: 34 } },
   ],
   'twinlock-barcoded': [
-    { label: 'Per 50', unit: '50 pack', price: 60.00, shipping: { weightKg: 0.310, lengthCm: 45, widthCm: 23, heightCm: 6 } },
-    { label: 'Per 100', unit: '100 pack', price: 100.00, shipping: { weightKg: 0.509, lengthCm: 45, widthCm: 23, heightCm: 10 } },
     { label: 'Per 1000', unit: '1000 pack', price: 870.00, shipping: { weightKg: 5.5, lengthCm: 45, widthCm: 45, heightCm: 34 } },
   ],
   'nylock-seal': [
@@ -427,8 +423,6 @@ export const tierColours: Record<string, Record<string, string[]>> = {
     'Per 1000': productSpecs['suretite-320mm']?.colours || limitedColours,
   },
   'suretite-barcoded': {
-    'Per 50': limitedColours,
-    'Per 100': limitedColours,
     'Per 1000': productSpecs['suretite-barcoded']?.colours || limitedColours,
   },
   'twinlock': {
@@ -437,8 +431,6 @@ export const tierColours: Record<string, Record<string, string[]>> = {
     'Per 1000': productSpecs['twinlock']?.colours || limitedColours,
   },
   'twinlock-barcoded': {
-    'Per 50': limitedColours,
-    'Per 100': limitedColours,
     'Per 1000': productSpecs['twinlock-barcoded']?.colours || limitedColours,
   },
   'ct-100mm': { 'Black': ['Black'], 'Colour': ['Black', 'White', 'Red', 'Blue', 'Green', 'Yellow', 'Orange', 'Purple', 'Pink', 'Brown', 'Navy', 'Lime', 'Silver'] },
