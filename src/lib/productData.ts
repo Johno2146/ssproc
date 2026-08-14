@@ -291,6 +291,33 @@ export const productSpecs: Record<string, ProductSpec> = {
 
   // Installation Tool
   'ss-installation-tool': { material: 'Steel', dimensions: 'N/A', colours: ['Standard'], applications: ['Cable tie installation'], features: ['Ergonomic design', 'Durable construction'], securityLevel: 'N/A', boxSize: 'N/A', boxWeight: 'Variable', weightKg: 0.5, lengthCm: 25, widthCm: 8, heightCm: 3 },
+
+  // Security Bags
+  'cash-bags': {
+    material: 'Heavy-duty polyethylene',
+    colours: ['Black', 'Blue', 'Red', 'Yellow'],
+    applications: ['Cash deposits', 'Banking', 'Retail', 'Cash-in-transit'],
+    features: ['Tamper-evident', 'Security print available', 'Strong welded seams'],
+    securityLevel: 'High',
+    printing: ['Unique sequential numbers', 'Custom print'],
+  },
+  'till-bag': {
+    material: 'Heavy-duty polyethylene',
+    dimensions: '46 x 36 x 10 cm',
+    colours: ['Black', 'Blue', 'Red', 'Yellow'],
+    applications: ['Cash registers', 'Tills', 'Retail'],
+    features: ['Tamper-evident', 'Security print available', 'Strong welded seams'],
+    securityLevel: 'High',
+    printing: ['Unique sequential numbers', 'Custom print'],
+  },
+  'envopoly': {
+    material: 'Polyethylene',
+    colours: ['White'],
+    applications: ['Cash bags', 'Security bags', 'Tamper evidence'],
+    features: ['One-time use', 'Tamper evident', 'Non-reusable locking mechanism'],
+    securityLevel: 'High',
+    printing: ['Unique sequential numbers'],
+  },
 };
 
 export const quantityTiers: Record<string, QuantityTier[]> = {
@@ -393,6 +420,17 @@ export const quantityTiers: Record<string, QuantityTier[]> = {
     { label: 'Per 250', unit: '250 pack', price: 2250.00, shipping: { weightKg: 3.540, lengthCm: 64, widthCm: 25, heightCm: 12 } },
     { label: 'Per 1000', unit: '1000 pack', price: 8500.00, shipping: { weightKg: 9.2, lengthCm: 30, widthCm: 24, heightCm: 21 } },
   ],
+  'cash-bags': [
+    { label: '26cm x 26cm', unit: 'Each', price: 69.00 },
+    { label: '28 x 35cm', unit: 'Each', price: 80.00 },
+    { label: '38 x 40cm', unit: 'Each', price: 90.00 },
+  ],
+  'till-bag': [
+    { label: '46 x 36 x 10cm', unit: 'Each', price: 195.00 },
+  ],
+  'envopoly': [
+    { label: 'Per 1000', unit: '1000 pack', price: 171.00 },
+  ],
 };
 
 export const colourHexMap: Record<string, string> = {
@@ -448,5 +486,16 @@ export const tierColours: Record<string, Record<string, string[]>> = {
     'Per 40': limitedColours,
     'Per 80': limitedColours,
     'Per 1000': productSpecs['nylock-seal']?.colours || limitedColours,
+  },
+  'cash-bags': {
+    '26cm x 26cm': ['Black', 'Blue', 'Red', 'Yellow'],
+    '28 x 35cm': ['Black', 'Blue', 'Red', 'Yellow'],
+    '38 x 40cm': ['Black', 'Blue', 'Red', 'Yellow'],
+  },
+  'till-bag': {
+    '46 x 36 x 10cm': ['Black', 'Blue', 'Red', 'Yellow'],
+  },
+  'envopoly': {
+    'Per 1000': ['White'],
   },
 };
