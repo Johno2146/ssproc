@@ -37,7 +37,7 @@ function brandedEmail(title: string, content: string): string {
           <!-- Header -->
           <tr>
             <td style="background:${NAVY};padding:24px 32px;text-align:left;">
-              <img src="${LOGO_URL}" alt="Sealed &amp; Secured" style="height:48px;width:auto;display:block;">
+              <img src="${LOGO_URL}" alt="Sealed &amp; Secured" style="height:64px;width:auto;display:block;">
             </td>
           </tr>
           <!-- Body -->
