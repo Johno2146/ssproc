@@ -71,7 +71,7 @@ const Navbar: React.FC = () => {
                   </div>
                 </div>
                 {/* Security Bags */}
-                <Link href="/shop?category=security-bags" className="block px-4 py-2.5 text-gray-600 hover:text-brand-600 hover:bg-gray-50 font-medium">Security Bags</Link>
+                <Link href="/shop?category=security-bags" className="block mx-2 px-4 py-2 text-gray-600 hover:text-brand-600 hover:bg-gray-50 rounded-lg font-medium">Security Bags</Link>
                 {/* Cable Ties — nested sub-menu */}
                 <div className="relative group/sub px-4 py-2 hover:bg-gray-50 rounded-lg mx-2">
                   <Link href="/shop?category=plastic-cable-ties" className="flex items-center justify-between text-gray-600 hover:text-brand-600 font-medium">
