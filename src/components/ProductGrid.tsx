@@ -20,6 +20,14 @@ const categories = [
   },
   {
     id: 3,
+    name: 'Security Bags',
+    href: '/shop?category=security-bags',
+    imageSrc: '/assets/security-bag.jpg',
+    imageAlt: 'Tamper-evident security bags for cash handling.',
+    description: 'Tamper-evident cash and till bags for secure handling.',
+  },
+  {
+    id: 4,
     name: 'Cable Ties',
     href: '/shop',
     imageSrc: '/assets/CT black.jpg',
