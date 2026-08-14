@@ -70,6 +70,8 @@ const Navbar: React.FC = () => {
                     <Link href="/shop?category=barrier" className="block px-4 py-2.5 text-gray-600 hover:text-brand-600 hover:bg-gray-50 font-medium">Barrier Seals</Link>
                   </div>
                 </div>
+                {/* Security Bags */}
+                <Link href="/shop?category=security-bags" className="block px-4 py-2.5 text-gray-600 hover:text-brand-600 hover:bg-gray-50 font-medium">Security Bags</Link>
                 {/* Cable Ties — nested sub-menu */}
                 <div className="relative group/sub px-4 py-2 hover:bg-gray-50 rounded-lg mx-2">
                   <Link href="/shop?category=plastic-cable-ties" className="flex items-center justify-between text-gray-600 hover:text-brand-600 font-medium">
@@ -150,6 +152,7 @@ const Navbar: React.FC = () => {
             <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Shop</p>
             <Link href="/shop?category=plastic" onClick={() => setIsOpen(false)} className="block py-1.5 text-gray-600 font-medium hover:text-brand-600">Plastic Seals</Link>
             <Link href="/shop?category=barrier" onClick={() => setIsOpen(false)} className="block py-1.5 text-gray-600 font-medium hover:text-brand-600">Barrier Seals</Link>
+            <Link href="/shop?category=security-bags" onClick={() => setIsOpen(false)} className="block py-1.5 text-gray-600 font-medium hover:text-brand-600">Security Bags</Link>
             <Link href="/shop?category=plastic-cable-ties" onClick={() => setIsOpen(false)} className="block py-1.5 text-gray-600 font-medium hover:text-brand-600">Plastic Cable Ties</Link>
             <Link href="/shop?category=steel-cable-ties" onClick={() => setIsOpen(false)} className="block py-1.5 text-gray-600 font-medium hover:text-brand-600">Stainless Steel Cable Ties</Link>
           </div>
