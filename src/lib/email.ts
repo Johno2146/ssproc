@@ -6,7 +6,7 @@ const resend = process.env.RESEND_API_KEY
 
 const FROM_EMAIL = process.env.RESEND_EMAIL_FROM || 'orders@ssproc.co.za';
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://ssproc.vercel.app';
-const LOGO_URL = `${SITE_URL}/assets/logo.png`;
+const LOGO_URL = `${SITE_URL}/assets/LOGO%20WHITE%20TRANS.png`;
 
 // Brand palette (matches site: Deep Navy + Primary Blue)
 const NAVY = '#0B1F3A';
