@@ -297,10 +297,10 @@ export const quantityTiers: Record<string, QuantityTier[]> = {
   'suretite-320mm': [
     { label: 'Per 50', unit: '50 pack', price: 55.00, shipping: { weightKg: 0.300, lengthCm: 45, widthCm: 25, heightCm: 5 } },
     { label: 'Per 100', unit: '100 pack', price: 90.00, shipping: { weightKg: 0.500, lengthCm: 43, widthCm: 25, heightCm: 8 } },
-    { label: 'Per 1000', unit: '1000 pack', price: 870.00, shipping: { weightKg: 5.0, lengthCm: 50, widthCm: 41, heightCm: 31 } },
+    { label: 'Per 1000', unit: '1000 pack', price: 850.00, shipping: { weightKg: 5.0, lengthCm: 50, widthCm: 41, heightCm: 31 } },
   ],
   'suretite-barcoded': [
-    { label: 'Per 1000', unit: '1000 pack', price: 870.00, shipping: { weightKg: 5.0, lengthCm: 50, widthCm: 41, heightCm: 31 } },
+    { label: 'Per 1000', unit: '1000 pack', price: 1050.00, shipping: { weightKg: 5.0, lengthCm: 50, widthCm: 41, heightCm: 31 } },
   ],
 
   'heavy-duty-double-zip-tie-handcuff': [
@@ -359,7 +359,7 @@ export const quantityTiers: Record<string, QuantityTier[]> = {
     { label: 'Per 1000', unit: '1000 pack', price: 870.00, shipping: { weightKg: 5.5, lengthCm: 45, widthCm: 45, heightCm: 34 } },
   ],
   'twinlock-barcoded': [
-    { label: 'Per 1000', unit: '1000 pack', price: 870.00, shipping: { weightKg: 5.5, lengthCm: 45, widthCm: 45, heightCm: 34 } },
+    { label: 'Per 1000', unit: '1000 pack', price: 1070.00, shipping: { weightKg: 5.5, lengthCm: 45, widthCm: 45, heightCm: 34 } },
   ],
   'nylock-seal': [
     { label: 'Per 40', unit: '40 pack', price: 49.00, shipping: { weightKg: 0.130, lengthCm: 33.2, widthCm: 22, heightCm: 4 } },
@@ -372,8 +372,8 @@ export const quantityTiers: Record<string, QuantityTier[]> = {
   ],
   'padlock-seal': [
     { label: 'Per 50', unit: '50 pack', price: 89.00, shipping: { weightKg: 0.185, lengthCm: 13, widthCm: 18, heightCm: 4 } },
-    { label: 'Per 100', unit: '100 pack', price: 159.00, shipping: { weightKg: 0.370, lengthCm: 20, widthCm: 18, heightCm: 4 } },
-    { label: 'Per 1000', unit: '1000 pack', price: 1420.00, shipping: { weightKg: 4.5, lengthCm: 39, widthCm: 25, heightCm: 19 } },
+    { label: 'Per 100', unit: '100 pack', price: 169.00, shipping: { weightKg: 0.370, lengthCm: 20, widthCm: 18, heightCm: 4 } },
+    { label: 'Per 1000', unit: '1000 pack', price: 1540.00, shipping: { weightKg: 4.5, lengthCm: 39, widthCm: 25, heightCm: 19 } },
   ],
   'abs-cable-lock': [
     { label: 'Per 20', unit: '20 pack', price: 199.00, shipping: { weightKg: 0.294, lengthCm: 42, widthCm: 15, heightCm: 4.5 } },
