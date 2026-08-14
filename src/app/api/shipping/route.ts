@@ -1,89 +1,161 @@
 import { NextResponse } from "next/server";
 
-/**
- * Shipping quotes endpoint.
- *
- * Primary provider: Winfreight (iconnix cloud platform) — `GetQuote` stored-procedure wrapper.
- * Credentials come from env vars (set on Vercel):
- *   WINFRIGHT_API_URL      e.g. http://cloudplatform.iconnix.co.za/WinfreightAPI/
- *   WINFRIGHT_USERNAME     API user (e.g. SealedSecure)
- *   WINFRIGHT_PASSWORD     API password
- *   WINFRIGHT_GROUPNAME    group (e.g. GearUp)
- *   WINFRIGHT_ACCNUM       customer account number with the courier (required by stp_GetQuote)
- *   WINFRIGHT_SERVICE_CODE optional service code override (default "EC")
- *   WINFRIGHT_ORIGIN / WINFRIGHT_ORIGIN_CODE  optional origin station name/code (default Springs/1559)
- *
- * Fallback: The Courier Guy is only used while Winfreight is not configured or has not yet
- * returned verified quotes — it will be removed once the Winfreight cutover is complete.
- */
+// ---------------------------------------------------------------------------
+// Winfreight (Iconnix) shipping quotes — verified live 2026-08-14
+//
+// Endpoints (HTTPS, HTTP Basic auth as the API user):
+//   GetHubCode  -> list of { HubCode, Suburb, City, Province, PostalCode }
+//   GetServCode -> list of valid service codes
+//   GetQuote_2025 -> quote for ONE service code
+//
+// Quote params:
+//   Accnum (SEA003), GroupName (GearUp), ServC (one service code),
+//   Orig (suburb/city name), Orig_Code (HUB code, e.g. JNB / JNB1 / CPT),
+//   Dest (suburb/city name), Dest_Code (hub code),
+//   d_Wayb_Weight_temp (kg), Items (parcel count),
+//   Length / Width / Height (cm, max across parcels)
+//
+// Response row fields: GrandTotal (incl. VAT), SubTotal, VAT, TotalFreight,
+// TotalFuel, ServiceCode, QuoteNumber, Weight, ChargeableWeight, DestCode ...
+// A row with GrandTotal == 0 means the service has no rate on that route.
+// ---------------------------------------------------------------------------
 
-function pickPrice(row: Record<string, any>): number | null {
-  const candidates = [
-    "Rate", "RATE", "Price", "PRICE", "Total", "TOTAL", "Amount", "AMOUNT",
-    "Cost", "COST", "Charge", "CHARGE", "Value", "VALUE", "TotalExcl", "TotalIncl",
-    "Wayb_Amount", "Wayb_Value", "Freight", "FREIGHT", "SubTotal",
-  ];
-  for (const key of candidates) {
-    const v = row[key];
-    if (v !== undefined && v !== null && v !== "" && !isNaN(Number(v))) return Number(v);
+const WF_SERVICES = [
+  "C/Store", "EBS", "INTER", "LOC", "NDS", "ONR", "ONX", "PP", "RFS", "SAT", "SDX", "SDXD", "Truck",
+];
+
+// Friendly names for the GearUp service codes (from GetServCode).
+const SERVICE_LABELS: Record<string, string> = {
+  "C/Store": "Counter to Counter",
+  EBS: "Economy Box Service",
+  INTER: "International",
+  LOC: "Local",
+  NDS: "Next Day Service",
+  ONR: "Overnight Road",
+  ONX: "Overnight Express",
+  PP: "Pudo Point",
+  RFS: "Road Freight Service",
+  SAT: "Saturday Delivery",
+  SDX: "Same Day Express",
+  SDXD: "Same Day Direct",
+  Truck: "Trucking",
+};
+
+// The Winfreight quote response has no ETA field, so estimates are derived
+// from the service type itself (standard courier definitions).
+const SERVICE_ETA: Record<string, string> = {
+  SDX: "0", SDXD: "0", LOC: "0", NDS: "1", ONR: "1", ONX: "1",
+  EBS: "1-3", RFS: "2-5", SAT: "1", PP: "1-2", "C/Store": "1-3",
+  INTER: "3-10", Truck: "2-7",
+};
+
+let hubCache: { rows: any[]; fetchedAt: number } | null = null;
+const HUB_TTL_MS = 24 * 60 * 60 * 1000;
+
+function normalize(s: string): string {
+  return (s || "").trim().toUpperCase().replace(/[^A-Z0-9]/g, "");
+}
+
+async function getHubRows(base: string, basic: string, params: URLSearchParams): Promise<any[]> {
+  if (hubCache && Date.now() - hubCache.fetchedAt < HUB_TTL_MS) return hubCache.rows;
+  try {
+    const res = await fetch(`${base}/GetHubCode?${params.toString()}`, {
+      headers: { Authorization: `Basic ${basic}` },
+      cache: "no-store",
+    });
+    if (res.ok) {
+      const data = await res.json();
+      const rows = data?.ResultSets?.[0] ?? [];
+      if (Array.isArray(rows) && rows.length > 0) {
+        hubCache = { rows, fetchedAt: Date.now() };
+        return rows;
+      }
+    }
+  } catch (e) {
+    console.error("GetHubCode fetch error:", e);
   }
-  // Fall back: first numeric-looking value in the row that is not a weight/length/count field
-  for (const [k, v] of Object.entries(row)) {
-    if (/weight|mass|length|height|width|qty|items|parcel|code|id|ref|date|result|vol|dim/i.test(k)) continue;
-    if (v !== undefined && v !== null && v !== "" && !isNaN(Number(v))) return Number(v);
+  return hubCache ? hubCache.rows : [];
+}
+
+/**
+ * Resolve a customer's city + postal code to a { Dest, Dest_Code } pair the
+ * quote procedure accepts. Returns null when nothing matches (caller then
+ * falls back to Courier Guy so checkout never breaks).
+ */
+function resolveDestination(
+  hubs: any[],
+  city: string,
+  postal: string
+): { Dest: string; Dest_Code: string } | null {
+  if (!hubs.length) return null;
+  const c = normalize(city);
+  const p = (postal || "").trim();
+  if (!c && !p) return null;
+
+  // 1) Exact suburb OR city match + matching postal code
+  if (c && p) {
+    const hit = hubs.find(
+      (r) => r.PostalCode === p && (normalize(r.Suburb) === c || normalize(r.City) === c)
+    );
+    if (hit) {
+      return {
+        Dest: normalize(hit.Suburb) === c ? hit.Suburb : hit.City,
+        Dest_Code: hit.HubCode,
+      };
+    }
+  }
+  // 2) Suburb or city name match alone
+  if (c) {
+    const hit = hubs.find((r) => normalize(r.Suburb) === c || normalize(r.City) === c);
+    if (hit) {
+      return {
+        Dest: normalize(hit.Suburb) === c ? hit.Suburb : hit.City,
+        Dest_Code: hit.HubCode,
+      };
+    }
+  }
+  // 3) Postal code match alone
+  if (p) {
+    const hit = hubs.find((r) => r.PostalCode === p);
+    if (hit) return { Dest: hit.Suburb, Dest_Code: hit.HubCode };
   }
   return null;
 }
 
-function pickService(row: Record<string, any>): string {
-  const candidates = ["Service", "SERVICE", "ServiceDesc", "ServDesc", "Serv_Desc", "ServiceName",
-    "Description", "DESCRIPTION", "Product", "PRODUCT", "Type", "TYPE", "ServC", "Name", "NAME"];
-  for (const key of candidates) {
-    const v = row[key];
-    if (v !== undefined && v !== null && String(v).trim() !== "") return String(v).trim();
-  }
-  return "Standard";
-}
-
-function pickEta(row: Record<string, any>): string {
-  const dateKeys = ["EtaDate", "ETA", "Eta", "DeliveryDate", "Delivery_Date", "EstDelivery", "TransitDays", "Days"];
-  for (const key of dateKeys) {
-    const v = row[key];
-    if (v === undefined || v === null || v === "") continue;
-    const s = String(v);
-    const d = Date.parse(s);
-    if (!isNaN(d)) {
-      const days = Math.ceil((d - Date.now()) / (1000 * 60 * 60 * 24));
-      return `${Math.max(1, days)}`;
-    }
-    if (/\d/.test(s)) return s.trim();
-  }
-  return "1-3";
-}
-
-/** Extract quote rows from the Winfreight ResultSets envelope. */
-function parseWinfreightRows(data: any): Record<string, any>[] {
-  const sets: any[][] = data?.ResultSets ?? [];
-  const rows: Record<string, any>[] = [];
-  for (const set of sets) {
-    if (!Array.isArray(set)) continue;
-    for (const row of set) {
+/** Run one GetQuote_2025 call for a single service and return the price. */
+async function wfQuote(
+  base: string,
+  basic: string,
+  common: URLSearchParams,
+  service: string
+): Promise<{ price: number; row: any } | null> {
+  const params = new URLSearchParams(common);
+  params.set("ServC", service);
+  try {
+    const res = await fetch(`${base}/GetQuote_2025?${params.toString()}`, {
+      headers: { Authorization: `Basic ${basic}` },
+      cache: "no-store",
+    });
+    if (!res.ok) return null;
+    const data = await res.json().catch(() => null);
+    if (!data) return null;
+    const rows = data.ResultSets?.[0] ?? [];
+    for (const row of rows) {
       if (!row || typeof row !== "object") continue;
-      const res = String(row.RESULT ?? "");
-      if (res.toUpperCase().includes("ERROR")) continue;
-      rows.push(row);
-    }
-  }
-  // Also scan output parameters for a numeric result (some wrappers return totals there)
-  const out = data?.OutputParameters;
-  if (out && typeof out === "object") {
-    for (const [k, v] of Object.entries(out)) {
-      if (v !== null && v !== undefined && v !== "" && !isNaN(Number(v)) && !/weight|length|qty/i.test(k)) {
-        rows.push({ Service: k.replace(/^@/, ""), Total: Number(v) });
+      if (String(row.RESULT ?? "").toUpperCase().includes("ERROR")) continue;
+      let price = Number(row.GrandTotal);
+      if (!isFinite(price) || price <= 0) {
+        const sub = Number(row.SubTotal);
+        const vat = Number(row.VAT);
+        if (isFinite(sub) && sub > 0) price = isFinite(vat) && vat > 0 ? sub + vat : sub;
       }
+      if (isFinite(price) && price > 0) return { price, row };
     }
+    return null;
+  } catch (e) {
+    console.error(`Winfreight quote error (${service}):`, e);
+    return null;
   }
-  return rows;
 }
 
 export async function POST(req: Request) {
@@ -95,32 +167,23 @@ export async function POST(req: Request) {
     if ((!parcels || parcels.length === 0) && !weight) {
       return NextResponse.json({ error: "Parcels data or weight is required" }, { status: 400 });
     }
-
-    // Build the parcels array: use provided parcels, or create a single parcel from weight
     const shippingParcels = (parcels && parcels.length > 0) ? parcels : [
-      {
-        submitted_length_cm: 20,
-        submitted_width_cm: 20,
-        submitted_height_cm: 10,
-        submitted_weight_kg: weight,
-      },
+      { submitted_length_cm: 20, submitted_width_cm: 20, submitted_height_cm: 10, submitted_weight_kg: weight },
     ];
-
     const quotes: { provider: string; service: string; price: number; estimatedDays: string }[] = [];
 
     // ------------------------------------------------------------------
-    // Winfreight (primary)
+    // Winfreight / GearUp (primary, verified live)
     // ------------------------------------------------------------------
-    const wfUrl = process.env.WINFRIGHT_API_URL;
+    const wfUrlRaw = process.env.WINFRIGHT_API_URL;
     const wfUser = process.env.WINFRIGHT_USERNAME;
     const wfPass = process.env.WINFRIGHT_PASSWORD;
     const wfGroup = process.env.WINFRIGHT_GROUPNAME;
     const wfAccnum = process.env.WINFRIGHT_ACCNUM;
-
-    if (wfUrl && wfUser && wfPass && wfGroup) {
+    if (wfUrlRaw && wfUser && wfPass && wfGroup && wfAccnum) {
       try {
+        const wfUrl = wfUrlRaw.replace(/\/?$/, "").replace(/^http:\/\//i, "https://");
         const basic = Buffer.from(`${wfUser}:${wfPass}`).toString("base64");
-
         const totalWeight = shippingParcels.reduce(
           (sum: number, p: any) => sum + (Number(p.submitted_weight_kg) || 0),
           0
@@ -134,42 +197,44 @@ export async function POST(req: Request) {
         const width = Math.max(1, ...dims.map((d: any) => d.w));
         const height = Math.max(1, ...dims.map((d: any) => d.h));
 
-        const params = new URLSearchParams({
-          Accnum: wfAccnum || wfGroup,
-          GroupName: wfGroup,
-          ServC: process.env.WINFRIGHT_SERVICE_CODE || "EC",
-          Orig: process.env.WINFRIGHT_ORIGIN || "Springs",
-          Orig_Code: process.env.WINFRIGHT_ORIGIN_CODE || "1559",
-          Dest: destinationCity || destinationPostalCode,
-          Dest_Code: destinationPostalCode,
-          d_Wayb_Weight_temp: String(Math.max(0.1, totalWeight)),
-          Items: String(shippingParcels.length || 1),
-          Length: String(length),
-          Width: String(width),
-          Height: String(height),
-          ...(parcelValue ? { d_Wayb_Value_temp: String(parcelValue) } : {}),
-        });
+        const authParams = new URLSearchParams({ Accnum: wfAccnum, GroupName: wfGroup });
+        const hubs = await getHubRows(wfUrl, basic, authParams);
+        const dest = resolveDestination(hubs, destinationCity || "", destinationPostalCode);
 
-        const wfRes = await fetch(`${wfUrl.replace(/\/?$/, "/")}GetQuote?${params.toString()}`, {
-          headers: { Authorization: `Basic ${basic}` },
-          cache: "no-store",
-        });
-
-        const wfData = await wfRes.json().catch(() => ({}));
-        const rows = parseWinfreightRows(wfData);
-        if (rows.length > 0) {
-          rows.forEach((row) => {
-            const price = pickPrice(row);
-            if (price === null) return;
-            quotes.push({
-              provider: "Winfreight",
-              service: pickService(row),
-              price,
-              estimatedDays: pickEta(row),
-            });
+        if (dest) {
+          const common = new URLSearchParams({
+            Accnum: wfAccnum,
+            GroupName: wfGroup,
+            Orig: process.env.WINFRIGHT_ORIGIN || "ASTON LAKE",
+            Orig_Code: process.env.WINFRIGHT_ORIGIN_CODE || "JNB",
+            Dest: dest.Dest,
+            Dest_Code: dest.Dest_Code,
+            d_Wayb_Weight_temp: String(Math.max(0.1, totalWeight)),
+            Items: String(shippingParcels.length || 1),
+            Length: String(length),
+            Width: String(width),
+            Height: String(height),
+            ...(parcelValue ? { d_Wayb_Value_temp: String(parcelValue) } : {}),
           });
+
+          const results = await Promise.all(
+            WF_SERVICES.map((svc) => wfQuote(wfUrl, basic, common, svc))
+          );
+          for (const r of results) {
+            if (!r) continue;
+            const code = String(r.row.ServiceCode || "").trim();
+            quotes.push({
+              provider: "GearUp",
+              service: SERVICE_LABELS[code] ? `${SERVICE_LABELS[code]} (${code})` : code || "Standard",
+              price: r.price,
+              estimatedDays: SERVICE_ETA[code] || "1-3",
+            });
+          }
+          if (quotes.length === 0) {
+            console.error("Winfreight: no valid rates for", dest.Dest, destinationPostalCode);
+          }
         } else {
-          console.error("Winfreight quote error:", JSON.stringify(wfData).slice(0, 500));
+          console.error("Winfreight: destination not found in hub list:", destinationCity, destinationPostalCode);
         }
       } catch (e) {
         console.error("Winfreight fetch error:", e);
@@ -177,18 +242,17 @@ export async function POST(req: Request) {
     }
 
     // ------------------------------------------------------------------
-    // The Courier Guy (temporary fallback until Winfreight is verified)
+    // The Courier Guy — safety net ONLY when Winfreight returned nothing
     // ------------------------------------------------------------------
     if (quotes.length === 0) {
-      const cgToken = process.env.COURIER_GUY_BEARER_TOKEN;
-      const cgApiUrl = process.env.COURIER_GUY_API_URL || "https://api.portal.thecourierguy.co.za";
-      if (cgToken) {
+      const cgKey = process.env.COURIER_GUY_API_KEY || process.env.THE_COURIER_GUY_API_KEY;
+      if (cgKey) {
         try {
-          const cgRes = await fetch(`${cgApiUrl}/rates`, {
+          const cgRes = await fetch("https://api.thecourierguy.co.za/api/v1/rates", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
-              "Authorization": `Bearer ${cgToken}`,
+              "Authorization": `Basic ${Buffer.from(cgKey).toString("base64")}`,
             },
             body: JSON.stringify({
               collection_address: {
@@ -238,8 +302,7 @@ export async function POST(req: Request) {
               });
             }
           } else {
-            const errText = await cgRes.text();
-            console.error("Courier Guy error response:", cgRes.status, errText);
+            console.error("Courier Guy error response:", cgRes.status, await cgRes.text());
           }
         } catch (e) {
           console.error("Courier Guy fetch error:", e);
@@ -247,44 +310,8 @@ export async function POST(req: Request) {
       }
     }
 
-    // Pudo (optional, only if a key is configured)
-    const pudoKey = process.env.PUDO_API_KEY;
-    if (pudoKey) {
-      try {
-        const pudoRes = await fetch("https://api.pudo.co.za/v1/rates", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "x-api-key": pudoKey,
-          },
-          body: JSON.stringify({
-            weight_kg: weight,
-            origin_postal_code: process.env.SHIPPING_ORIGIN_POSTAL_CODE || "1559",
-            destination_postal_code: destinationPostalCode,
-            ...(parcelValue ? { parcel_value: parcelValue } : {}),
-          }),
-        });
-        if (pudoRes.ok) {
-          const pudoData = await pudoRes.json();
-          if (pudoData.rates) {
-            pudoData.rates.forEach((rate: any) => {
-              quotes.push({
-                provider: "Pudo",
-                service: rate.service || rate.name || "Pudo Locker",
-                price: rate.price || rate.total || 0,
-                estimatedDays: rate.transit_days || "2-5",
-              });
-            });
-          }
-        }
-      } catch (e) {
-        console.error("Pudo error:", e);
-      }
-    }
-
     // Sort by price ascending
     quotes.sort((a, b) => a.price - b.price);
-
     return NextResponse.json({ quotes });
   } catch (error) {
     console.error("Shipping quote error:", error);
