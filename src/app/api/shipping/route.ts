@@ -1,4 +1,8 @@
 import { NextResponse } from "next/server";
+// Bundled SA suburb -> hub lookup (29,270 rows from GetHubCode). Loaded at
+// module scope so quotes never wait on a 3MB network fetch; refreshed in the
+// background once a day.
+import bundledHubs from "../../../data/hubs.json";
 
 // ---------------------------------------------------------------------------
 // Winfreight (Iconnix) shipping quotes — verified live 2026-08-14
@@ -50,14 +54,17 @@ const SERVICE_ETA: Record<string, string> = {
 };
 
 let hubCache: { rows: any[]; fetchedAt: number } | null = null;
+let hubRefreshInFlight = false;
 const HUB_TTL_MS = 24 * 60 * 60 * 1000;
 
 function normalize(s: string): string {
   return (s || "").trim().toUpperCase().replace(/[^A-Z0-9]/g, "");
 }
 
-async function getHubRows(base: string, basic: string, params: URLSearchParams): Promise<any[]> {
-  if (hubCache && Date.now() - hubCache.fetchedAt < HUB_TTL_MS) return hubCache.rows;
+/** Fire-and-forget refresh of the hub list (never blocks quote requests). */
+async function refreshHubRows(base: string, basic: string, params: URLSearchParams) {
+  if (hubRefreshInFlight) return;
+  hubRefreshInFlight = true;
   try {
     const res = await fetch(`${base}/GetHubCode?${params.toString()}`, {
       headers: { Authorization: `Basic ${basic}` },
@@ -68,13 +75,23 @@ async function getHubRows(base: string, basic: string, params: URLSearchParams):
       const rows = data?.ResultSets?.[0] ?? [];
       if (Array.isArray(rows) && rows.length > 0) {
         hubCache = { rows, fetchedAt: Date.now() };
-        return rows;
       }
     }
   } catch (e) {
-    console.error("GetHubCode fetch error:", e);
+    console.error("GetHubCode refresh error:", e);
+  } finally {
+    hubRefreshInFlight = false;
   }
-  return hubCache ? hubCache.rows : [];
+}
+
+async function getHubRows(base: string, basic: string, params: URLSearchParams): Promise<any[]> {
+  // Serve from the bundled list instantly; only refresh when the cache is stale.
+  if (hubCache && Date.now() - hubCache.fetchedAt < HUB_TTL_MS) return hubCache.rows;
+  const bundled = (bundledHubs as any)?.rows ?? [];
+  if (!hubCache) hubCache = { rows: bundled, fetchedAt: Date.now() - HUB_TTL_MS + 60_000 };
+  // Kick off a background refresh so the list stays current without blocking.
+  refreshHubRows(base, basic, params);
+  return hubCache.rows.length ? hubCache.rows : bundled;
 }
 
 /**
