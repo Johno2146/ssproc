@@ -192,11 +192,18 @@ const CheckoutPage: React.FC = () => {
         setError(data.error);
         setShippingQuotes([]);
       } else if (data.quotes && data.quotes.length > 0) {
-        setShippingQuotes(data.quotes);
+        const newQuotes = data.quotes;
+        setShippingQuotes(newQuotes);
         setError('');
-        // Auto-select the cheapest
-        if (!selectedShipping || selectedShipping === 'collection') {
-          setSelectedShipping(`${data.quotes[0].provider}-${data.quotes[0].service}`);
+        // Auto-select the cheapest when nothing is selected, the user was on
+        // Collection, OR the previously selected service is no longer offered
+        // (e.g. after changing the delivery suburb — otherwise the total
+        // silently drops shipping and no option is checked).
+        const selectedStillOffered = newQuotes.some(
+          (q) => `${q.provider}-${q.service}` === selectedShipping
+        );
+        if (!selectedShipping || selectedShipping === 'collection' || !selectedStillOffered) {
+          setSelectedShipping(`${newQuotes[0].provider}-${newQuotes[0].service}`);
         }
       } else {
         setError('No shipping rates available for this postal code. Try Collection instead.');
