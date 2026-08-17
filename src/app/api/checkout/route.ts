@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth";
 import crypto from "crypto";
 
 import { createClient } from "@libsql/client";
+import { isCollectionEligibleSlug } from "@/lib/collectionPolicy";
 
 const turso = createClient({
   url: process.env.TURSO_DATABASE_URL || "",
@@ -39,6 +40,22 @@ export async function POST(req: Request) {
     // Validate items
     if (!items || items.length === 0) {
       return NextResponse.json({ error: "No items in order" }, { status: 400 });
+    }
+    // Server-side enforcement: Collection is only available for plastic + barrier seals.
+    if (shipping?.method === 'collection') {
+      for (const item of items) {
+        const productRes = await turso.execute({
+          sql: "SELECT slug FROM Product WHERE id = ?",
+          args: [item.productId],
+        });
+        const slug = productRes.rows[0]?.slug as string | undefined;
+        if (!slug || !isCollectionEligibleSlug(slug)) {
+          return NextResponse.json(
+            { error: "Collection is not available for this order. Please select delivery." },
+            { status: 400 }
+          );
+        }
+      }
     }
 
     // 1. Create order in database — generate sequential order number
