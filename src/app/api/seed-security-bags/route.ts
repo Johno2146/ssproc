@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import crypto from "crypto";
 import { createClient } from "@libsql/client";
 
 const PRODUCTS = [
@@ -25,8 +26,8 @@ export async function GET() {
         results.push("Updated: " + slug);
       } else {
         await turso.execute({
-          sql: "INSERT INTO Product (name, slug, description, category, price, unit, minOrder, stock, isActive, imageUrl, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1, '', datetime('now'), datetime('now'))",
-          args: [name, slug, description, category, price, unit, minOrder, stock],
+          sql: "INSERT INTO Product (id, name, slug, description, category, price, unit, minOrder, stock, isActive, imageUrl, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 1, '', datetime('now'), datetime('now'))",
+          args: [crypto.randomUUID(), name, slug, description, category, price, unit, minOrder, stock],
         });
         results.push("Seeded: " + slug);
       }

@@ -1,24 +1,21 @@
-// Shared collection-eligibility policy (client + server safe).
-// "Collection" is only available when the cart contains ONLY products from the
-// Plastic Seals and Barrier Seals categories. Every other product (cable ties,
-// security bags, installation tools, etc.) is delivery-only.
+// Collection policy — OWNER RULE (2026-08-17):
+// Collection is available for EVERYTHING except cable ties. Only products in
+// the "Plastic Cable Ties" and "Stainless Steel Cable Ties" categories are
+// delivery-only. Security bags (cash-bags, till-bag, envopoly) and ALL seals
+// (plastic, bolt, cable) are collection-eligible.
+// Category-based so newly added products are covered automatically.
+// Shared by the client (CheckoutPage) and the server (POST /api/checkout)
+// so the two can't drift.
 
-export const COLLECTABLE_SLUGS: ReadonlySet<string> = new Set([
-  // Plastic Seals
-  'suretite-230mm',
-  'suretite-320mm',
-  'suretite-barcoded',
-  'twinlock',
-  'twinlock-barcoded',
-  'padlock-seal',
-  'nylock-seal',
-  // Barrier Seals
-  'bolt-seal',
-  'cable-seal-500mm',
-  'abs-cable-lock',
-  'cable-seal-300mm',
+export const DELIVERY_ONLY_CATEGORIES: ReadonlySet<string> = new Set([
+  'Plastic Cable Ties',
+  'Stainless Steel Cable Ties',
 ]);
 
-export function isCollectable(slug: string): boolean {
-  return COLLECTABLE_SLUGS.has(slug);
+export function isDeliveryOnlyCategory(category: string): boolean {
+  return DELIVERY_ONLY_CATEGORIES.has(category);
+}
+
+export function isCollectableCategory(category: string): boolean {
+  return !isDeliveryOnlyCategory(category);
 }

@@ -3,7 +3,7 @@ import { auth } from "@/lib/auth";
 import crypto from "crypto";
 
 import { createClient } from "@libsql/client";
-import { isCollectable } from "@/lib/collectionPolicy";
+import { isCollectableCategory } from "@/lib/collectionPolicy";
 
 const turso = createClient({
   url: process.env.TURSO_DATABASE_URL || "",
@@ -41,15 +41,15 @@ export async function POST(req: Request) {
     if (!items || items.length === 0) {
       return NextResponse.json({ error: "No items in order" }, { status: 400 });
     }
-    // Server-side enforcement: Collection is only available for plastic + barrier seals.
+    // Server-side enforcement: Collection is only available for non-cable-tie products.
     if (shipping?.method === 'collection') {
       for (const item of items) {
         const productRes = await turso.execute({
-          sql: "SELECT slug FROM Product WHERE id = ?",
+          sql: "SELECT category FROM Product WHERE id = ?",
           args: [item.productId],
         });
-        const slug = productRes.rows[0]?.slug as string | undefined;
-        if (!slug || !isCollectable(slug)) {
+        const category = productRes.rows[0]?.category as string | undefined;
+        if (!category || !isCollectableCategory(category)) {
           return NextResponse.json(
             { error: "Collection is not available for this order. Please select delivery." },
             { status: 400 }

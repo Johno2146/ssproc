@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import crypto from "crypto";
 import { createClient } from "@libsql/client";
 
 const PRODUCTS = [
@@ -48,15 +49,16 @@ const turso = createClient({
 
 export async function GET() {
   try {
-    // First delete all existing CT products
-    await turso.execute({ sql: "DELETE FROM Product WHERE category = 'Plastic Cable Ties'" });
+    // First delete all existing cable-tie products (both categories, keeps the route idempotent)
+    await turso.execute({ sql: "DELETE FROM Product WHERE category IN ('Plastic Cable Ties', 'Stainless Steel Cable Ties')" });
     
-    // Then insert the new merged products
+    // Then insert the new merged products (with generated UUID ids — the id column
+    // has no SQL-level default, so omitting it previously stored NULL ids)
     const results = [];
     for (const [name, slug, description, category, price, unit, stock] of PRODUCTS) {
       await turso.execute({
-        sql: "INSERT INTO Product (name, slug, description, category, price, unit, minOrder, stock, isActive, imageUrl, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1, '', datetime('now'), datetime('now'))",
-        args: [name, slug, description, category, price, unit, stock, stock],
+        sql: "INSERT INTO Product (id, name, slug, description, category, price, unit, minOrder, stock, isActive, imageUrl, createdAt, updatedAt) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 1, '', datetime('now'), datetime('now'))",
+        args: [crypto.randomUUID(), name, slug, description, category, price, unit, stock, stock],
       });
       results.push("Seeded: " + slug);
     }

@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import LocationAutocomplete from './LocationAutocomplete';
 import { signIn, useSession } from 'next-auth/react';
-import { isCollectable } from '@/lib/collectionPolicy';
+import { isCollectableCategory } from '@/lib/collectionPolicy';
 
 interface CartItem {
   productId: string;
@@ -33,7 +33,7 @@ const CheckoutPage: React.FC = () => {
   const router = useRouter();
   const { data: session, status } = useSession();
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
-  const [productSlugs, setProductSlugs] = useState<Record<string, string>>({});
+  const [productCategories, setProductCategories] = useState<Record<string, string>>({});
   const [productsLoaded, setProductsLoaded] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -68,7 +68,7 @@ const CheckoutPage: React.FC = () => {
   const [fetchingQuotes, setFetchingQuotes] = useState(false);
   const [rememberDetails, setRememberDetails] = useState(false);
 
-  // Load product id → slug mapping to determine collection eligibility
+  // Load product id → category mapping to determine collection eligibility
   useEffect(() => {
     const loadProducts = async () => {
       try {
@@ -76,8 +76,8 @@ const CheckoutPage: React.FC = () => {
         if (res.ok) {
           const products = await res.json();
           const map: Record<string, string> = {};
-          products.forEach((p: any) => { map[String(p.id)] = p.slug; });
-          setProductSlugs(map);
+          products.forEach((p: any) => { map[String(p.id)] = p.category; });
+          setProductCategories(map);
         }
       } catch {}
       setProductsLoaded(true);
@@ -139,10 +139,10 @@ const CheckoutPage: React.FC = () => {
     }
   }, [session]);
 
-  // Collection is only allowed when every cart item maps to a collection-eligible slug.
+  // Collection is allowed unless the cart contains a cable tie (delivery-only category).
   const collectionAllowed = productsLoaded && cartItems.length > 0 && cartItems.every(item => {
-    const slug = productSlugs[String(item.productId)];
-    return slug ? isCollectable(slug) : false;
+    const category = productCategories[String(item.productId)];
+    return category ? isCollectableCategory(category) : false;
   });
 
   useEffect(() => {
