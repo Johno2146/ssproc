@@ -205,7 +205,7 @@ export async function POST(req: Request) {
           const common = new URLSearchParams({
             Accnum: wfAccnum,
             GroupName: wfGroup,
-            Orig: process.env.WINFRIGHT_ORIGIN || "ASTON LAKE",
+            Orig: process.env.WINFRIGHT_ORIGIN || "NUFFIELD",
             Orig_Code: process.env.WINFRIGHT_ORIGIN_CODE || "JNB",
             Dest: dest.Dest,
             Dest_Code: dest.Dest_Code,
