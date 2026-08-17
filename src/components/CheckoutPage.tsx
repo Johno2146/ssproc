@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import LocationAutocomplete from './LocationAutocomplete';
 import { signIn, useSession } from 'next-auth/react';
-import { isCollectionEligibleSlug } from '@/lib/collectionPolicy';
+import { isCollectable } from '@/lib/collectionPolicy';
 
 interface CartItem {
   productId: string;
@@ -142,7 +142,7 @@ const CheckoutPage: React.FC = () => {
   // Collection is only allowed when every cart item maps to a collection-eligible slug.
   const collectionAllowed = productsLoaded && cartItems.length > 0 && cartItems.every(item => {
     const slug = productSlugs[String(item.productId)];
-    return slug ? isCollectionEligibleSlug(slug) : false;
+    return slug ? isCollectable(slug) : false;
   });
 
   useEffect(() => {
