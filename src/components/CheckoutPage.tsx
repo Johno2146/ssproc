@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import LocationAutocomplete from './LocationAutocomplete';
 import { signIn, useSession } from 'next-auth/react';
+import { isCollectionEligibleSlug } from '@/lib/collectionPolicy';
 
 interface CartItem {
   productId: string;
@@ -28,24 +29,12 @@ interface ShippingOption {
   estimatedDays: string;
 }
 
-// Products eligible for Collection (Plastic Seals + Barrier Seals only).
-// Everything else (cable ties, security bags, steel ties, tools) is delivery-only.
-const COLLECTABLE_SLUGS = new Set([
-  // Plastic Seals
-  'suretite-230mm', 'suretite-320mm', 'suretite-barcoded',
-  'twinlock', 'twinlock-barcoded', 'padlock-seal', 'nylock-seal',
-  // Barrier Seals
-  'bolt-seal', 'cable-seal-300mm', 'cable-seal-500mm', 'abs-cable-lock',
-]);
-
-function isCollectable(productId: string): boolean {
-  return COLLECTABLE_SLUGS.has(productId);
-}
-
 const CheckoutPage: React.FC = () => {
   const router = useRouter();
   const { data: session, status } = useSession();
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
+  const [productSlugs, setProductSlugs] = useState<Record<string, string>>({});
+  const [productsLoaded, setProductsLoaded] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [shippingDetails, setShippingDetails] = useState({
@@ -78,6 +67,23 @@ const CheckoutPage: React.FC = () => {
   const [selectedShipping, setSelectedShipping] = useState<string>('collection');
   const [fetchingQuotes, setFetchingQuotes] = useState(false);
   const [rememberDetails, setRememberDetails] = useState(false);
+
+  // Load product id → slug mapping to determine collection eligibility
+  useEffect(() => {
+    const loadProducts = async () => {
+      try {
+        const res = await fetch('/api/products', { cache: 'no-store' });
+        if (res.ok) {
+          const products = await res.json();
+          const map: Record<string, string> = {};
+          products.forEach((p: any) => { map[String(p.id)] = p.slug; });
+          setProductSlugs(map);
+        }
+      } catch {}
+      setProductsLoaded(true);
+    };
+    loadProducts();
+  }, []);
 
   // Restore form state from sessionStorage (sign-in redirect) or localStorage (remembered details)
   useEffect(() => {
@@ -133,15 +139,18 @@ const CheckoutPage: React.FC = () => {
     }
   }, [session]);
 
-  // Delivery-only items (cable ties, security bags, steel ties, tools) cannot be collected.
-  const cartIsCollectable = cartItems.length > 0 && cartItems.every(item => isCollectable(item.productId));
+  // Collection is only allowed when every cart item maps to a collection-eligible slug.
+  const collectionAllowed = productsLoaded && cartItems.length > 0 && cartItems.every(item => {
+    const slug = productSlugs[String(item.productId)];
+    return slug ? isCollectionEligibleSlug(slug) : false;
+  });
 
   useEffect(() => {
-    if (cartItems.length > 0 && !cartIsCollectable && deliveryMethod === 'collection') {
+    if (productsLoaded && cartItems.length > 0 && !collectionAllowed && deliveryMethod === 'collection') {
       setDeliveryMethod('delivery');
       setSelectedShipping('');
     }
-  }, [cartItems, cartIsCollectable, deliveryMethod]);
+  }, [productsLoaded, cartItems, collectionAllowed, deliveryMethod]);
 
   const total = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const VAT_RATE = 0.15;
@@ -459,7 +468,7 @@ const CheckoutPage: React.FC = () => {
                   {/* Collection option */}
                   <label
                     className={`flex items-center p-4 rounded-xl border-2 transition-all ${
-                      !cartIsCollectable
+                      !collectionAllowed
                         ? 'border-gray-200 bg-gray-50 opacity-60 cursor-not-allowed'
                         : deliveryMethod === 'collection'
                         ? 'border-brand-600 bg-brand-50 cursor-pointer'
@@ -471,7 +480,7 @@ const CheckoutPage: React.FC = () => {
                       name="deliveryMethod"
                       value="collection"
                       checked={deliveryMethod === 'collection'}
-                      disabled={!cartIsCollectable}
+                      disabled={!collectionAllowed}
                       onChange={() => {
                         setDeliveryMethod('collection');
                         setSelectedShipping('collection');
@@ -481,9 +490,9 @@ const CheckoutPage: React.FC = () => {
                     <div className="ml-3 flex-1">
                       <span className="font-bold text-brand-950">Collection</span>
                       <p className="text-xs text-gray-500">Collect from Eastwood Business Park, Springs (1559)</p>
-                      {!cartIsCollectable && (
+                      {!collectionAllowed && (
                         <p className="text-xs text-red-600 font-medium mt-1">
-                          Not available for cable ties &amp; security bags — delivery only.
+                          Collection not available for this order — delivery only.
                         </p>
                       )}
                     </div>
