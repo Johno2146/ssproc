@@ -28,6 +28,20 @@ interface ShippingOption {
   estimatedDays: string;
 }
 
+// Products eligible for Collection (Plastic Seals + Barrier Seals only).
+// Everything else (cable ties, security bags, steel ties, tools) is delivery-only.
+const COLLECTABLE_SLUGS = new Set([
+  // Plastic Seals
+  'suretite-230mm', 'suretite-320mm', 'suretite-barcoded',
+  'twinlock', 'twinlock-barcoded', 'padlock-seal', 'nylock-seal',
+  // Barrier Seals
+  'bolt-seal', 'cable-seal-300mm', 'cable-seal-500mm', 'abs-cable-lock',
+]);
+
+function isCollectable(productId: string): boolean {
+  return COLLECTABLE_SLUGS.has(productId);
+}
+
 const CheckoutPage: React.FC = () => {
   const router = useRouter();
   const { data: session, status } = useSession();
@@ -118,6 +132,16 @@ const CheckoutPage: React.FC = () => {
       }
     }
   }, [session]);
+
+  // Delivery-only items (cable ties, security bags, steel ties, tools) cannot be collected.
+  const cartIsCollectable = cartItems.length > 0 && cartItems.every(item => isCollectable(item.productId));
+
+  useEffect(() => {
+    if (cartItems.length > 0 && !cartIsCollectable && deliveryMethod === 'collection') {
+      setDeliveryMethod('delivery');
+      setSelectedShipping('');
+    }
+  }, [cartItems, cartIsCollectable, deliveryMethod]);
 
   const total = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const VAT_RATE = 0.15;
@@ -434,10 +458,12 @@ const CheckoutPage: React.FC = () => {
                 <div className="space-y-3">
                   {/* Collection option */}
                   <label
-                    className={`flex items-center p-4 rounded-xl border-2 cursor-pointer transition-all ${
-                      deliveryMethod === 'collection'
-                        ? 'border-brand-600 bg-brand-50'
-                        : 'border-gray-200 hover:border-gray-300'
+                    className={`flex items-center p-4 rounded-xl border-2 transition-all ${
+                      !cartIsCollectable
+                        ? 'border-gray-200 bg-gray-50 opacity-60 cursor-not-allowed'
+                        : deliveryMethod === 'collection'
+                        ? 'border-brand-600 bg-brand-50 cursor-pointer'
+                        : 'border-gray-200 hover:border-gray-300 cursor-pointer'
                     }`}
                   >
                     <input
@@ -445,6 +471,7 @@ const CheckoutPage: React.FC = () => {
                       name="deliveryMethod"
                       value="collection"
                       checked={deliveryMethod === 'collection'}
+                      disabled={!cartIsCollectable}
                       onChange={() => {
                         setDeliveryMethod('collection');
                         setSelectedShipping('collection');
@@ -454,6 +481,11 @@ const CheckoutPage: React.FC = () => {
                     <div className="ml-3 flex-1">
                       <span className="font-bold text-brand-950">Collection</span>
                       <p className="text-xs text-gray-500">Collect from Eastwood Business Park, Springs (1559)</p>
+                      {!cartIsCollectable && (
+                        <p className="text-xs text-red-600 font-medium mt-1">
+                          Not available for cable ties &amp; security bags — delivery only.
+                        </p>
+                      )}
                     </div>
                     <span className="font-bold text-green-600">Free</span>
                   </label>
