@@ -3,7 +3,7 @@ import { auth } from "@/lib/auth";
 import crypto from "crypto";
 
 import { createClient } from "@libsql/client";
-import { isCollectionEligibleSlug } from "@/lib/collectionPolicy";
+import { isCollectable } from "@/lib/collectionPolicy";
 
 const turso = createClient({
   url: process.env.TURSO_DATABASE_URL || "",
@@ -49,7 +49,7 @@ export async function POST(req: Request) {
           args: [item.productId],
         });
         const slug = productRes.rows[0]?.slug as string | undefined;
-        if (!slug || !isCollectionEligibleSlug(slug)) {
+        if (!slug || !isCollectable(slug)) {
           return NextResponse.json(
             { error: "Collection is not available for this order. Please select delivery." },
             { status: 400 }

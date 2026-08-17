@@ -3,7 +3,7 @@
 // Plastic Seals and Barrier Seals categories. Every other product (cable ties,
 // security bags, installation tools, etc.) is delivery-only.
 
-export const COLLECTION_ELIGIBLE_SLUGS: ReadonlySet<string> = new Set([
+export const COLLECTABLE_SLUGS: ReadonlySet<string> = new Set([
   // Plastic Seals
   'suretite-230mm',
   'suretite-320mm',
@@ -19,6 +19,6 @@ export const COLLECTION_ELIGIBLE_SLUGS: ReadonlySet<string> = new Set([
   'cable-seal-300mm',
 ]);
 
-export function isCollectionEligibleSlug(slug: string): boolean {
-  return COLLECTION_ELIGIBLE_SLUGS.has(slug);
+export function isCollectable(slug: string): boolean {
+  return COLLECTABLE_SLUGS.has(slug);
 }
