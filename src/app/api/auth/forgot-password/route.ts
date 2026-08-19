@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
 import crypto from "crypto";
+import { getClient } from "@/lib/db";
 import { sendOtpEmail } from "@/lib/email";
 
 export async function POST(req: Request) {
@@ -11,20 +11,30 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Email is required" }, { status: 400 });
     }
 
-    const user = await prisma.user.findUnique({ where: { email } });
-    if (!user) {
+    const client = getClient();
+
+    const userRes = await client.execute({
+      sql: "SELECT * FROM User WHERE email = ?",
+      args: [email],
+    });
+    if (userRes.rows.length === 0) {
       return NextResponse.json({ error: "No account found with this email" }, { status: 404 });
     }
+    const user = userRes.rows[0] as any;
 
     // Delete old tokens
-    await prisma.verificationToken.deleteMany({ where: { identifier: email } });
+    await client.execute({
+      sql: "DELETE FROM VerificationToken WHERE identifier = ?",
+      args: [email],
+    });
 
     // Generate new OTP
     const otp = crypto.randomInt(100000, 999999).toString();
-    const expires = new Date(Date.now() + 15 * 60 * 1000);
+    const expires = new Date(Date.now() + 15 * 60 * 1000).toISOString();
 
-    await prisma.verificationToken.create({
-      data: { identifier: email, token: otp, expires },
+    await client.execute({
+      sql: "INSERT INTO VerificationToken (id, identifier, token, expires, createdAt) VALUES (?, ?, ?, ?, ?)",
+      args: [crypto.randomUUID(), email, otp, expires, new Date().toISOString()],
     });
 
     await sendOtpEmail(email, user.name || "Valued Customer", otp);

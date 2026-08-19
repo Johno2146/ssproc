@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { getClient } from "@/lib/db";
 import { auth } from "@/lib/auth";
 
 export async function GET() {
@@ -8,11 +8,11 @@ export async function GET() {
     if ((session?.user as any)?.role !== "admin") {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
-
-    const users = await prisma.user.findMany({
-      orderBy: { createdAt: "desc" },
-    });
-    return NextResponse.json(users);
+    const client = getClient();
+    const res = await client.execute(
+      "SELECT * FROM User ORDER BY createdAt DESC"
+    );
+    return NextResponse.json(res.rows);
   } catch (error) {
     console.error("Error fetching users:", error);
     return NextResponse.json(

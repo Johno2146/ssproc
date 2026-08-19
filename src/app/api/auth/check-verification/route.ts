@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { getClient } from "@/lib/db";
 
 export async function GET(req: Request) {
   try {
@@ -13,18 +13,22 @@ export async function GET(req: Request) {
       );
     }
 
-    const user = await prisma.user.findUnique({
-      where: { email },
-      select: { emailVerified: true },
+    const client = getClient();
+    const userRes = await client.execute({
+      sql: "SELECT emailVerified FROM User WHERE email = ?",
+      args: [email],
     });
 
-    if (!user) {
+    if (userRes.rows.length === 0) {
       return NextResponse.json({ exists: false, verified: false });
     }
 
+    const user = userRes.rows[0] as any;
+    const verified = user.emailVerified !== null && user.emailVerified !== undefined && String(user.emailVerified).length > 0;
+
     return NextResponse.json({
       exists: true,
-      verified: user.emailVerified !== null,
+      verified,
     });
   } catch (error) {
     console.error("Check verification error:", error);
