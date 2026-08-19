@@ -114,7 +114,13 @@ export async function POST(req: Request) {
       });
     }
 
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+    // Build the public site URL for PayFast return/cancel/notify URLs.
+    // Priority: explicit NEXT_PUBLIC_SITE_URL → request-derived (x-forwarded-proto + host,
+    // as set by Vercel) → canonical production URL. NEVER fall back to localhost — PayFast
+    // must always be able to reach the notify endpoint.
+    const forwardedProto = req.headers.get("x-forwarded-proto") || "https";
+    const host = req.headers.get("x-forwarded-host") || req.headers.get("host") || "";
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || (host ? `${forwardedProto}://${host}` : "https://www.ssproc.co.za");
     
     // 2. Prepare PayFast payment data
     const payfastData: Record<string, string> = {

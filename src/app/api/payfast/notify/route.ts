@@ -61,10 +61,12 @@ export async function POST(req: Request) {
     const expectedSignature = generatePayFastSignature(rawPairs, passphrase);
     const sigOk = !rawSignature || rawSignature === expectedSignature;
     
-    // Log signature comparison for debugging
+    // Log signature comparison for debugging.
+    // NOTE: never DROP the ItnLog table (it wipes the audit trail for every stuck order).
+    // Create if missing, then roll off rows older than 14 days once per ITN.
     try {
-      await turso.execute({ sql: `DROP TABLE IF EXISTS ItnLog` });
       await turso.execute({ sql: `CREATE TABLE IF NOT EXISTS ItnLog (id INTEGER PRIMARY KEY AUTOINCREMENT, orderId TEXT, paymentStatus TEXT, sigOk INTEGER, expectedSig TEXT, receivedSig TEXT, rawData TEXT, createdAt TEXT)` });
+      await turso.execute({ sql: `DELETE FROM ItnLog WHERE createdAt < datetime('now','-14 days')` });
       await turso.execute({
         sql: `INSERT INTO ItnLog (orderId, paymentStatus, sigOk, expectedSig, receivedSig, rawData, createdAt) VALUES (?, ?, ?, ?, ?, ?, datetime('now'))`,
         args: [data.m_payment_id || "unknown", data.payment_status || "unknown", sigOk ? 1 : 0, expectedSignature, rawSignature, rawBody],
@@ -146,6 +148,8 @@ export async function POST(req: Request) {
       );
 
       console.log(`[PayFast ITN] ✓ Order ${orderId} marked as paid`);
+    } else {
+      console.warn(`[PayFast ITN] payment_status "${paymentStatus}" for order ${orderId} is NOT COMPLETE — NOT marking order paid (order stays pending). Current status: ${order.status}`);
     }
 
     return new Response("OK", { status: 200 });
