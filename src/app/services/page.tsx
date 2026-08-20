@@ -1,5 +1,13 @@
 import React from 'react';
 import Link from 'next/link';
+import { buildMetadata } from '@/lib/seo';
+
+export const metadata = buildMetadata({
+  title: 'Services — Sealed & Secured',
+  description:
+    'Explore Sealed & Secured services: procurement outsourcing, custom laser printing, bulk supply and supply-chain security solutions for logistics and industrial clients.',
+  path: '/services',
+});
 
 const ServicesPage: React.FC = () => {
   const services = [

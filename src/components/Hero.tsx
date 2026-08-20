@@ -53,7 +53,7 @@ const Hero: React.FC<HeroProps> = ({ onContactClick, onBrowseClick }) => {
         <img
           className="h-56 w-full object-cover sm:h-72 md:h-96 lg:w-full lg:h-full"
           src="/assets/hero-banner.jpg"
-          alt="Security Bolt Seal"
+          alt="Sealed & Secured — premium security seals, tamper-evident solutions and cable ties"
         />
       </div>
     </div>

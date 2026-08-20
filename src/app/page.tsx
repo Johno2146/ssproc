@@ -2,10 +2,50 @@ import Hero from "@/components/Hero";
 import Features from "@/components/Features";
 import ProductGrid from "@/components/ProductGrid";
 import Link from "next/link";
+import JsonLd from "@/components/JsonLd";
+import {
+  CANONICAL_BASE,
+  buildMetadata,
+  CONTACT_PHONE,
+  SITE_NAME,
+  DEFAULT_OG_IMAGE,
+  DEFAULT_DESCRIPTION,
+} from "@/lib/seo";
+
+export const metadata = buildMetadata({
+  title: SITE_NAME + " — Premium Security Seal Solutions",
+  description: DEFAULT_DESCRIPTION,
+  path: "/",
+  image: DEFAULT_OG_IMAGE,
+  keywords: ["security seals", "tamper evident", "cable ties", "logistics", "South Africa"],
+});
 
 export default function HomePage() {
+  const orgJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    name: SITE_NAME,
+    url: CANONICAL_BASE,
+    logo: `${CANONICAL_BASE}/assets/logo.png`,
+    description: DEFAULT_DESCRIPTION,
+    telephone: CONTACT_PHONE,
+    contactPoint: {
+      "@type": "ContactPoint",
+      telephone: CONTACT_PHONE,
+      contactType: "sales",
+      areaServed: "ZA",
+      availableLanguage: "English",
+    },
+  };
+  const webSiteJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: SITE_NAME,
+    url: CANONICAL_BASE,
+  };
   return (
     <div className="flex flex-col">
+      <JsonLd data={[orgJsonLd, webSiteJsonLd]} />
       <Hero />
       <Features />
       <ProductGrid />
