@@ -23,12 +23,23 @@ export const metadata = buildMetadata({
 export default function HomePage() {
   const orgJsonLd = {
     "@context": "https://schema.org",
-    "@type": "Organization",
+    "@type": ["Organization", "Store"],
     name: SITE_NAME,
     url: CANONICAL_BASE,
     logo: `${CANONICAL_BASE}/assets/logo.png`,
     description: DEFAULT_DESCRIPTION,
     telephone: CONTACT_PHONE,
+    address: {
+      "@type": "PostalAddress",
+      streetAddress: "23 Wright Street, Eastwood Business Park",
+      addressLocality: "Nuffield, Springs",
+      addressRegion: "Gauteng",
+      postalCode: "1559",
+      addressCountry: "ZA",
+    },
+    geo: { "@type": "GeoCoordinates", latitude: -26.2507, longitude: 28.4003 },
+    areaServed: ["ZA", "South Africa"],
+    openingHours: "Mo-Fr 08:00-17:00",
     contactPoint: {
       "@type": "ContactPoint",
       telephone: CONTACT_PHONE,
@@ -43,12 +54,41 @@ export default function HomePage() {
     name: SITE_NAME,
     url: CANONICAL_BASE,
   };
+  const faqItems = [
+    { q: "What types of security seals does Sealed & Secured supply?", a: "We supply premium security seals including Suretite plastic seals, Twinlock, Nylock and padlock seals, cable seals, bolt seals, stainless-steel cable ties and tamper-evident security bags for logistics and industrial use." },
+    { q: "What is the difference between tamper-evident and bolt seals?", a: "Tamper-evident seals (such as cable or plastic seals) break visibly when tampered with, deterring interference with bags or light-weight closures. Bolt seals are heavy-duty metal seals used on containers, trailers and high-value cargo where strong, secure locking is required." },
+    { q: "Can you print serial numbers, barcodes or logos on seals?", a: "Yes. We offer custom laser printing of logos, barcodes and serial numbers on qualifying products. Please contact our sales team for a quote." },
+    { q: "Where do you deliver and is collection available?", a: "We deliver across South Africa. Free collection is available from our Springs (Gauteng) location for most products; cable ties are delivery-only." },
+  ];
+  const faqJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: faqItems.map((f) => ({
+      "@type": "Question",
+      name: f.q,
+      acceptedAnswer: { "@type": "Answer", text: f.a },
+    })),
+  };
   return (
     <div className="flex flex-col">
-      <JsonLd data={[orgJsonLd, webSiteJsonLd]} />
+      <JsonLd data={[orgJsonLd, webSiteJsonLd, faqJsonLd]} />
       <Hero />
       <Features />
       <ProductGrid />
+      {/* FAQ — SEO-friendly, factual Q&A */}
+      <section className="py-16 bg-white">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <h2 className="text-3xl font-bold text-brand-950 mb-8 text-center">Frequently Asked Questions</h2>
+          <div className="space-y-4">
+            {faqItems.map((f, i) => (
+              <details key={i} className="bg-gray-50 rounded-xl p-5 border border-gray-100">
+                <summary className="font-semibold text-brand-950 cursor-pointer">{f.q}</summary>
+                <p className="mt-3 text-gray-600">{f.a}</p>
+              </details>
+            ))}
+          </div>
+        </div>
+      </section>
 
       {/* Trust Section */}
       <section className="py-20 bg-brand-navy text-white">
