@@ -121,14 +121,39 @@ export async function POST(req: Request) {
     const forwardedProto = req.headers.get("x-forwarded-proto") || "https";
     const host = req.headers.get("x-forwarded-host") || req.headers.get("host") || "";
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || (host ? `${forwardedProto}://${host}` : "https://www.ssproc.co.za");
-    
+
+    // ===== Bulletproof canonicalization for PayFast URLs =====
+    // The apex https://ssproc.co.za (and *.vercel.app) 308-redirects to
+    // https://www.ssproc.co.za. PayFast's ITN sender does NOT follow redirects,
+    // so a notify_url pointing at a redirecting host silently drops the ITN and
+    // the order stays "pending" forever. To guarantee the notify always lands,
+    // hard-normalize notify_url to the canonical production base (no redirect).
+    // return_url/cancel_url are also normalized so the customer never bounces.
+    const CANONICAL_BASE = "https://www.ssproc.co.za";
+    const normalizeBase = (raw: string): string => {
+      // Strip trailing slash / path, keep only scheme://host
+      let hostOnly = (raw || "")
+        .replace(/^([a-z][a-z0-9+.-]*:\/\/)?/i, "")
+        .split("/")[0]
+        .split("?")[0]
+        .toLowerCase();
+      if (!hostOnly) return CANONICAL_BASE;
+      // Force https, and if this is our own domain (apex or www) or a vercel
+      // preview host, pin the canonical www host so notify never redirects.
+      if (hostOnly === "ssproc.co.za" || hostOnly === "www.ssproc.co.za" || hostOnly.endsWith(".vercel.app")) {
+        return CANONICAL_BASE;
+      }
+      return `https://${hostOnly}`;
+    };
+    const canonicalBase = normalizeBase(siteUrl);
+
     // 2. Prepare PayFast payment data
     const payfastData: Record<string, string> = {
       merchant_id: process.env.PAYFAST_MERCHANT_ID || "",
       merchant_key: process.env.PAYFAST_MERCHANT_KEY || "",
-      return_url: `${siteUrl}/checkout/success?orderId=${orderId}`,
-      cancel_url: `${siteUrl}/checkout/cancel?orderId=${orderId}`,
-      notify_url: `${siteUrl}/api/payfast/notify`,
+      return_url: `${canonicalBase}/checkout/success?orderId=${orderId}`,
+      cancel_url: `${canonicalBase}/checkout/cancel?orderId=${orderId}`,
+      notify_url: `${canonicalBase}/api/payfast/notify`,
       name_first: session.user.name?.split(" ")[0] || "Customer",
       name_last: session.user.name?.split(" ")[1] || "",
       email_address: session.user.email || "",
