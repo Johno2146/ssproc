@@ -3,7 +3,10 @@ import Link from 'next/link';
 import { createClient } from "@libsql/client";
 import { productSpecs, quantityTiers, tierColours } from '@/lib/productData';
 import ProductDetailClient from './ProductDetailClient';
+import JsonLd from "@/components/JsonLd";
 import { notFound } from "next/navigation";
+import { absoluteUrl, CANONICAL_BASE, buildMetadata, SITE_NAME } from '@/lib/seo';
+import type { Metadata } from 'next';
 
 function getClient() {
   return createClient({
@@ -99,6 +102,24 @@ const productImages: Record<string, string> = {
   'ss-installation-tool': '/assets/CT Installation tool.png',
 };
 
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const { slug } = await params;
+  const product = await getProduct(slug);
+  if (!product) return { title: "Product not found" };
+  const spec = productSpecs[product.slug] || null;
+  const image = productImages[product.slug] || product.imageUrl || null;
+  const description =
+    product.description ||
+    `${product.name} — ${product.category} security seal. ${spec?.material ? `Made from ${spec.material}. ` : ''}Buy online from Sealed & Secured with secure payment and fast SA delivery.`;
+  return buildMetadata({
+    title: `${product.name} — ${product.category} | Sealed & Secured`,
+    description,
+    path: `/shop/${product.slug}`,
+    image,
+    keywords: [product.name, product.category, "security seal", "tamper evident", "South Africa"],
+  });
+}
+
 interface ProductPageProps {
   params: Promise<{ slug: string }>;
 }
@@ -138,6 +159,37 @@ const ProductDetailPage: React.FC<ProductPageProps> = async ({ params }) => {
 
   return (
     <div className="min-h-screen bg-gray-50">
+      {/* Product + Breadcrumb structured data */}
+      <JsonLd
+        data={[
+          {
+            "@context": "https://schema.org",
+            "@type": "Product",
+            name: product.name,
+            image: imageUrl ? absoluteUrl(imageUrl) : undefined,
+            description: product.description || `${product.name} security seal`,
+            brand: { "@type": "Brand", name: SITE_NAME },
+            category: product.category,
+            offers: {
+              "@type": "AggregateOffer",
+              priceCurrency: "ZAR",
+              lowPrice: Math.min(...(quantityTiers[product.slug] || [{ price: Number(product.price) }]).map((t) => t.price)),
+              highPrice: Math.max(...(quantityTiers[product.slug] || [{ price: Number(product.price) }]).map((t) => t.price)),
+              availability: product.stock > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+              url: absoluteUrl(`/shop/${product.slug}`),
+            },
+          },
+          {
+            "@context": "https://schema.org",
+            "@type": "BreadcrumbList",
+            itemListElement: [
+              { "@type": "ListItem", position: 1, name: "Home", item: `${CANONICAL_BASE}/` },
+              { "@type": "ListItem", position: 2, name: "Shop", item: `${CANONICAL_BASE}/shop` },
+              { "@type": "ListItem", position: 3, name: product.name, item: absoluteUrl(`/shop/${product.slug}`) },
+            ],
+          },
+        ]}
+      />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Breadcrumb */}
         <nav className="flex mb-8 text-sm text-gray-500">
