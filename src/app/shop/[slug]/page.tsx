@@ -157,10 +157,22 @@ const ProductDetailPage: React.FC<ProductPageProps> = async ({ params }) => {
             <h1 className="text-3xl md:text-4xl font-extrabold text-brand-950 mb-4">{product.name}</h1>
             <p className="text-gray-600 mb-6">{product.description}</p>
 
-            {/* Price */}
+            {/* Price — headline price derived from quantityTiers (min tier) like ShopPage,
+                so it always matches the options tab; the raw DB Product.price is stale for
+                tiered products (e.g. Suretite 320mm shows 85 instead of 55). Multi-tier
+                products use "From R{min}" since the options tab lists all tier prices. */}
             <div className="flex items-baseline gap-3 mb-6">
-              <span className="text-3xl font-bold text-brand-950">R{product.price.toFixed(2)}</span>
-              <span className="text-gray-400">excl. VAT / {product.unit}</span>
+              {quantityTiers[product.slug] ? (
+                <>
+                  <span className="text-3xl font-bold text-brand-950">From R{Math.min(...quantityTiers[product.slug].map(t => t.price)).toFixed(2)}</span>
+                  <span className="text-gray-400">excl. VAT</span>
+                </>
+              ) : (
+                <>
+                  <span className="text-3xl font-bold text-brand-950">R{product.price.toFixed(2)}</span>
+                  <span className="text-gray-400">excl. VAT / {product.unit}</span>
+                </>
+              )}
             </div>
 
             <div className="flex items-center gap-2 mb-6">
