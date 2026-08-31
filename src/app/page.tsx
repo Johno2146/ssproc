@@ -39,7 +39,7 @@ export default function HomePage() {
     },
     geo: { "@type": "GeoCoordinates", latitude: -26.2507, longitude: 28.4003 },
     areaServed: ["ZA", "South Africa"],
-    openingHours: "Mo-Fr 08:00-17:00",
+    openingHours: ["Mo-Th 08:00-16:30", "Fr 08:00-14:30"],
     contactPoint: {
       "@type": "ContactPoint",
       telephone: CONTACT_PHONE,
