@@ -322,12 +322,12 @@ export const productSpecs: Record<string, ProductSpec> = {
 
 export const quantityTiers: Record<string, QuantityTier[]> = {
   'suretite-320mm': [
-    { label: 'Per 50', unit: '50 pack', price: 55.00, shipping: { weightKg: 0.300, lengthCm: 45, widthCm: 25, heightCm: 5 } },
-    { label: 'Per 100', unit: '100 pack', price: 90.00, shipping: { weightKg: 0.500, lengthCm: 43, widthCm: 25, heightCm: 8 } },
-    { label: 'Per 1000', unit: '1000 pack', price: 850.00, shipping: { weightKg: 5.0, lengthCm: 50, widthCm: 41, heightCm: 31 } },
+    { label: 'Per 50', unit: '50 pack', price: 60.00, shipping: { weightKg: 0.300, lengthCm: 45, widthCm: 25, heightCm: 5 } },
+    { label: 'Per 100', unit: '100 pack', price: 105.00, shipping: { weightKg: 0.500, lengthCm: 43, widthCm: 25, heightCm: 8 } },
+    { label: 'Per 1000', unit: '1000 pack', price: 910.00, shipping: { weightKg: 5.0, lengthCm: 50, widthCm: 41, heightCm: 31 } },
   ],
   'suretite-barcoded': [
-    { label: 'Per 1000', unit: '1000 pack', price: 1050.00, shipping: { weightKg: 5.0, lengthCm: 50, widthCm: 41, heightCm: 31 } },
+    { label: 'Per 1000', unit: '1000 pack', price: 1130.00, shipping: { weightKg: 5.0, lengthCm: 50, widthCm: 41, heightCm: 31 } },
   ],
 
   'heavy-duty-double-zip-tie-handcuff': [
@@ -378,58 +378,60 @@ export const quantityTiers: Record<string, QuantityTier[]> = {
     { label: 'Colour', unit: '50 pack', price: 318.16 },
   ],
     'suretite-230mm': [
-    { label: 'Per 1000', unit: '1000 pack', price: 810.00, shipping: { weightKg: 4.5, lengthCm: 50, widthCm: 31, heightCm: 31 } },
+    { label: 'Per 1000', unit: '1000 pack', price: 870.00, shipping: { weightKg: 4.5, lengthCm: 50, widthCm: 31, heightCm: 31 } },
   ],
   'twinlock': [
-    { label: 'Per 50', unit: '50 pack', price: 60.00, shipping: { weightKg: 0.310, lengthCm: 45, widthCm: 23, heightCm: 6 } },
-    { label: 'Per 100', unit: '100 pack', price: 100.00, shipping: { weightKg: 0.509, lengthCm: 45, widthCm: 23, heightCm: 10 } },
-    { label: 'Per 1000', unit: '1000 pack', price: 870.00, shipping: { weightKg: 5.5, lengthCm: 45, widthCm: 45, heightCm: 34 } },
+    { label: 'Per 50', unit: '50 pack', price: 65.00, shipping: { weightKg: 0.310, lengthCm: 45, widthCm: 23, heightCm: 6 } },
+    { label: 'Per 100', unit: '100 pack', price: 110.00, shipping: { weightKg: 0.509, lengthCm: 45, widthCm: 23, heightCm: 10 } },
+    { label: 'Per 1000', unit: '1000 pack', price: 935.00, shipping: { weightKg: 5.5, lengthCm: 45, widthCm: 45, heightCm: 34 } },
   ],
   'twinlock-barcoded': [
-    { label: 'Per 1000', unit: '1000 pack', price: 1070.00, shipping: { weightKg: 5.5, lengthCm: 45, widthCm: 45, heightCm: 34 } },
+    { label: 'Per 1000', unit: '1000 pack', price: 1130.00, shipping: { weightKg: 5.5, lengthCm: 45, widthCm: 45, heightCm: 34 } },
   ],
   'nylock-seal': [
-    { label: 'Per 40', unit: '40 pack', price: 49.00, shipping: { weightKg: 0.130, lengthCm: 33.2, widthCm: 22, heightCm: 4 } },
-    { label: 'Per 80', unit: '80 pack', price: 90.00, shipping: { weightKg: 0.244, lengthCm: 32, widthCm: 22, heightCm: 6 } },
-    { label: 'Per 1000', unit: '1000 pack', price: 705.00, shipping: { weightKg: 2.3, lengthCm: 29, widthCm: 16, heightCm: 32 } },
+    { label: 'Per 40', unit: '40 pack', price: 55.00, shipping: { weightKg: 0.130, lengthCm: 33.2, widthCm: 22, heightCm: 4 } },
+    { label: 'Per 80', unit: '80 pack', price: 95.00, shipping: { weightKg: 0.244, lengthCm: 32, widthCm: 22, heightCm: 6 } },
+    { label: 'Per 1000', unit: '1000 pack', price: 760.00, shipping: { weightKg: 2.3, lengthCm: 29, widthCm: 16, heightCm: 32 } },
   ],
   'bolt-seal': [
-    { label: 'Per 12', unit: '12 pack', price: 105.00, shipping: { weightKg: 0.570, lengthCm: 28, widthCm: 13, heightCm: 4.2 } },
-    { label: 'Per box of 240', unit: '240 pack', price: 1920.00, shipping: { weightKg: 13.8, lengthCm: 22, widthCm: 30, heightCm: 27 } },
+    { label: 'Per 12', unit: '12 pack', price: 120.00, shipping: { weightKg: 0.570, lengthCm: 28, widthCm: 13, heightCm: 4.2 } },
+    { label: 'Per box of 240', unit: '240 pack', price: 2040.00, shipping: { weightKg: 13.8, lengthCm: 22, widthCm: 30, heightCm: 27 } },
   ],
   'padlock-seal': [
-    { label: 'Per 50', unit: '50 pack', price: 89.00, shipping: { weightKg: 0.185, lengthCm: 13, widthCm: 18, heightCm: 4 } },
-    { label: 'Per 100', unit: '100 pack', price: 169.00, shipping: { weightKg: 0.370, lengthCm: 20, widthCm: 18, heightCm: 4 } },
+    { label: 'Per 50', unit: '50 pack', price: 100.00, shipping: { weightKg: 0.185, lengthCm: 13, widthCm: 18, heightCm: 4 } },
+    { label: 'Per 100', unit: '100 pack', price: 189.00, shipping: { weightKg: 0.370, lengthCm: 20, widthCm: 18, heightCm: 4 } },
     { label: 'Per 1000', unit: '1000 pack', price: 1540.00, shipping: { weightKg: 4.5, lengthCm: 39, widthCm: 25, heightCm: 19 } },
   ],
   'abs-cable-lock': [
-    { label: 'Per 20', unit: '20 pack', price: 199.00, shipping: { weightKg: 0.294, lengthCm: 42, widthCm: 15, heightCm: 4.5 } },
-    { label: 'Per 50', unit: '50 pack', price: 450.00, shipping: { weightKg: 0.808, lengthCm: 42, widthCm: 22, heightCm: 5 } },
-    { label: 'Per 250', unit: '250 pack', price: 1625.00, shipping: { weightKg: 4.05, lengthCm: 45, widthCm: 23, heightCm: 10 } },
-    { label: 'Per 1000', unit: '1000 pack', price: 6000.00, shipping: { weightKg: 15.4, lengthCm: 42, widthCm: 29, heightCm: 15 } },
+    { label: 'Per 20', unit: '20 pack', price: 215.00, shipping: { weightKg: 0.294, lengthCm: 42, widthCm: 15, heightCm: 4.5 } },
+    { label: 'Per 50', unit: '50 pack', price: 485.00, shipping: { weightKg: 0.808, lengthCm: 42, widthCm: 22, heightCm: 5 } },
+    { label: 'Per 250', unit: '250 pack', price: 1700.00, shipping: { weightKg: 4.05, lengthCm: 45, widthCm: 23, heightCm: 10 } },
+    { label: 'Per 1000', unit: '1000 pack', price: 6250.00, shipping: { weightKg: 15.4, lengthCm: 42, widthCm: 29, heightCm: 15 } },
   ],
   'cable-seal-300mm': [
-    { label: 'Per 20', unit: '20 pack', price: 225.00, shipping: { weightKg: 0.260, lengthCm: 39, widthCm: 14, heightCm: 4 } },
-    { label: 'Per 50', unit: '50 pack', price: 480.00, shipping: { weightKg: 0.756, lengthCm: 39, widthCm: 17, heightCm: 6 } },
-    { label: 'Per 250', unit: '250 pack', price: 2125.00, shipping: { weightKg: 3.222, lengthCm: 45, widthCm: 20, heightCm: 10 } },
-    { label: 'Per 1000', unit: '1000 pack', price: 8000.00, shipping: { weightKg: 9.2, lengthCm: 30, widthCm: 24, heightCm: 21 } },
-  ],
-  'cable-seal-500mm': [
-    { label: 'Per 20', unit: '20 pack', price: 250.00, shipping: { weightKg: 0.294, lengthCm: 62, widthCm: 19, heightCm: 6 } },
-    { label: 'Per 50', unit: '50 pack', price: 510.00, shipping: { weightKg: 0.778, lengthCm: 62, widthCm: 14, heightCm: 4 } },
-    { label: 'Per 250', unit: '250 pack', price: 2250.00, shipping: { weightKg: 3.540, lengthCm: 64, widthCm: 25, heightCm: 12 } },
+    { label: 'Per 20', unit: '20 pack', price: 240.00, shipping: { weightKg: 0.260, lengthCm: 39, widthCm: 14, heightCm: 4 } },
+    { label: 'Per 50', unit: '50 pack', price: 500.00, shipping: { weightKg: 0.756, lengthCm: 39, widthCm: 17, heightCm: 6 } },
+    { label: 'Per 250', unit: '250 pack', price: 2250.00, shipping: { weightKg: 3.222, lengthCm: 45, widthCm: 20, heightCm: 10 } },
     { label: 'Per 1000', unit: '1000 pack', price: 8500.00, shipping: { weightKg: 9.2, lengthCm: 30, widthCm: 24, heightCm: 21 } },
   ],
+  'cable-seal-500mm': [
+    { label: 'Per 20', unit: '20 pack', price: 270.00, shipping: { weightKg: 0.294, lengthCm: 62, widthCm: 19, heightCm: 6 } },
+    { label: 'Per 50', unit: '50 pack', price: 550.00, shipping: { weightKg: 0.778, lengthCm: 62, widthCm: 14, heightCm: 4 } },
+    { label: 'Per 250', unit: '250 pack', price: 2420.00, shipping: { weightKg: 3.540, lengthCm: 64, widthCm: 25, heightCm: 12 } },
+    { label: 'Per 1000', unit: '1000 pack', price: 8850.00, shipping: { weightKg: 9.2, lengthCm: 30, widthCm: 24, heightCm: 21 } },
+  ],
   'cash-bags': [
-    { label: '26cm x 26cm', unit: 'Each', price: 69.00 },
-    { label: '28 x 35cm', unit: 'Each', price: 80.00 },
-    { label: '38 x 40cm', unit: 'Each', price: 90.00 },
+    { label: '26 x 28cm', unit: 'Each', price: 74.00 },
+    { label: '28 x 35cm', unit: 'Each', price: 86.00 },
+    { label: '38 x 40cm', unit: 'Each', price: 97.00 },
+    { label: '22 x 14cm', unit: 'Each', price: 52.00 },
+    { label: '46 x 36cm', unit: 'Each', price: 117.00 },
   ],
   'till-bag': [
-    { label: '46 x 36 x 10cm', unit: 'Each', price: 195.00 },
+    { label: '46 x 36 x 10cm', unit: 'Each', price: 210.00 },
   ],
   'envopoly': [
-    { label: 'Per 1000', unit: '1000 pack', price: 171.00 },
+    { label: 'Per 1000', unit: '1000 pack', price: 185.00 },
   ],
 };
 
@@ -488,9 +490,11 @@ export const tierColours: Record<string, Record<string, string[]>> = {
     'Per 1000': productSpecs['nylock-seal']?.colours || limitedColours,
   },
   'cash-bags': {
-    '26cm x 26cm': ['Black', 'Blue', 'Red', 'Yellow'],
+    '26 x 28cm': ['Black', 'Blue', 'Red', 'Yellow'],
     '28 x 35cm': ['Black', 'Blue', 'Red', 'Yellow'],
     '38 x 40cm': ['Black', 'Blue', 'Red', 'Yellow'],
+    '22 x 14cm': ['Black', 'Blue', 'Red', 'Yellow'],
+    '46 x 36cm': ['Black', 'Blue', 'Red', 'Yellow'],
   },
   'till-bag': {
     '46 x 36 x 10cm': ['Black', 'Blue', 'Red', 'Yellow'],
