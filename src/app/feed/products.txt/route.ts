@@ -2,6 +2,7 @@ import { getClient } from "@/lib/db";
 import { quantityTiers } from "@/lib/productData";
 import { productImages } from "@/lib/productImages";
 import { CANONICAL_BASE, SITE_NAME } from "@/lib/seo";
+import { withVat } from "@/lib/vat";
 
 // Google Merchant Center TXT (tab-separated) product feed.
 // Stable URL: https://www.ssproc.co.za/feed/products.txt
@@ -82,7 +83,10 @@ export async function GET() {
   }
 
   const lines = rows.map((p) => {
-    const price = feedPrice(p.slug, Number(p.price));
+    // Prices in the feed are VAT-inclusive (15%) — Google/Merchant Center must
+    // show the total the customer actually pays at checkout. Money stays net
+    // server-side (Order.total = Σ(net×qty) + 15% VAT).
+    const price = withVat(feedPrice(p.slug, Number(p.price)));
     const image = productImages[p.slug] || p.imageUrl || "";
     const availability = Number(p.stock) > 0 ? "in stock" : "out of stock";
     return [

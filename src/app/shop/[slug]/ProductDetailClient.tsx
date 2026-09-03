@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { withVat } from '@/lib/vat';
 
 interface QuantityTier {
   label: string;
@@ -193,7 +194,7 @@ const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ productId, na
               >
                 <span className="block">{tier.label}</span>
                 <span className={`block text-xs mt-0.5 ${selectedTierIndex === index ? 'text-white/80' : 'text-brand-600'}`}>
-                  R{tier.price.toFixed(2)}
+                  R{withVat(tier.price).toFixed(2)}
                 </span>
               </button>
             ))}
@@ -253,12 +254,12 @@ const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ productId, na
 
       {/* Price Display */}
       <div className="flex items-baseline gap-3 mb-2">
-        <span className="text-3xl font-bold text-brand-950">R{totalPrice.toFixed(2)}</span>
-        <span className="text-gray-400">excl. VAT</span>
+        <span className="text-3xl font-bold text-brand-950">R{withVat(totalPrice).toFixed(2)}</span>
+        <span className="text-gray-400">incl. VAT</span>
       </div>
       {quantity > 1 && (
         <p className="text-xs text-gray-400 -mt-2">
-          R{displayPrice.toFixed(2)} per {displayUnit}
+          R{withVat(displayPrice).toFixed(2)} per {displayUnit}
         </p>
       )}
 
@@ -277,7 +278,7 @@ const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ productId, na
           ? '✓ Added to Cart'
           : !canAddToCart
             ? 'Select a Colour'
-            : `Add to Cart - R${totalPrice.toFixed(2)}`}
+            : `Add to Cart - R${withVat(totalPrice).toFixed(2)}`}
       </button>
     </div>
   );

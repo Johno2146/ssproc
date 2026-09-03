@@ -1,4 +1,5 @@
 import { Resend } from 'resend';
+import { withVat } from '@/lib/vat';
 
 const resend = process.env.RESEND_API_KEY
   ? new Resend(process.env.RESEND_API_KEY)
@@ -115,7 +116,8 @@ function orderItemsHtml(items: any[]): string {
     const name = item.productName || item.productId || 'Item';
     const qty = Number(item.quantity);
     const price = Number(item.price);
-    const lineTotal = (qty * price).toFixed(2);
+    // Line totals shown VAT-inclusive (15%); order.total is already net+VAT.
+    const lineTotal = withVat(qty * price).toFixed(2);
     return `<tr>
       <td style="padding:10px 12px;border-bottom:1px solid #E5E7EB;">${esc(name)}</td>
       <td style="padding:10px 12px;border-bottom:1px solid #E5E7EB;text-align:center;">${qty}</td>

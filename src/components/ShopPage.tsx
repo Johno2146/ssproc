@@ -2,6 +2,7 @@ import React from 'react';
 import Link from 'next/link';
 import CategoryDropdown from './CategoryDropdown';
 import { quantityTiers } from '@/lib/productData';
+import { withVat } from '@/lib/vat';
 
 interface Product {
   id: string;
@@ -155,13 +156,13 @@ const ShopPage: React.FC<ShopPageProps> = async ({ selectedCategory }) => {
                   <div className="flex items-baseline gap-2 mb-4">
                     {quantityTiers[product.slug] ? (
                       <>
-                        <span className="text-2xl font-bold text-brand-950">From R{Math.min(...quantityTiers[product.slug].map(t => t.price)).toFixed(2)}</span>
-                        <span className="text-sm text-gray-400">excl. VAT</span>
+                        <span className="text-2xl font-bold text-brand-950">From R{withVat(Math.min(...quantityTiers[product.slug].map(t => t.price))).toFixed(2)}</span>
+                        <span className="text-sm text-gray-400">incl. VAT</span>
                       </>
                     ) : (
                       <>
-                        <span className="text-2xl font-bold text-brand-950">R{product.price.toFixed(2)}</span>
-                        <span className="text-sm text-gray-400">excl. VAT / {product.unit}</span>
+                        <span className="text-2xl font-bold text-brand-950">R{withVat(product.price).toFixed(2)}</span>
+                        <span className="text-sm text-gray-400">incl. VAT / {product.unit}</span>
                       </>
                     )}
                   </div>
