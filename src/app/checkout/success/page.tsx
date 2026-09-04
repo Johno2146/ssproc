@@ -43,8 +43,19 @@ function SuccessContent() {
                   <span className="font-medium">R{(item.price * item.quantity).toFixed(2)}</span>
                 </div>
               ))}
+              {order.shippingCost ? (
+                <div className="flex justify-between text-sm py-1 text-gray-600">
+                  <span>Delivery ({order.shippingProvider || 'Courier'}{order.shippingService ? `: ${order.shippingService}` : ''})</span>
+                  <span className="font-medium">R{Number(order.shippingCost).toFixed(2)}</span>
+                </div>
+              ) : (
+                <div className="flex justify-between text-sm py-1 text-green-600">
+                  <span>Collection</span>
+                  <span className="font-medium">Free</span>
+                </div>
+              )}
               <div className="border-t border-gray-200 pt-2 mt-2 flex justify-between font-bold">
-                <span>Total (incl. VAT)</span>
+                <span>Total (incl. VAT &amp; delivery)</span>
                 <span>R{order.total?.toFixed(2)}</span>
               </div>
             </div>
