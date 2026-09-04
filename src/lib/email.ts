@@ -139,6 +139,9 @@ function orderItemsHtml(items: any[]): string {
 
 export function orderSalesEmailHtml(order: any, orderItems: any[]): string {
   const total = Number(order.total).toFixed(2);
+  const shippingLine = order.shippingCost
+    ? `<p style="margin:0 0 4px;font-size:14px;color:#4B5563;">Delivery (${esc(order.shippingProvider || 'Courier')}${order.shippingService ? ': ' + esc(order.shippingService) : ''}): <strong>R${Number(order.shippingCost).toFixed(2)}</strong></p>`
+    : `<p style="margin:0 0 4px;font-size:14px;color:#16A34A;"><strong>Collection</strong> (free)</p>`;
   const content = `
     <p style="margin:0 0 16px;">A new order has been placed and paid.</p>
     <div style="background:${LIGHT_BG};border-radius:8px;padding:16px;margin:0 0 16px;">
@@ -152,13 +155,19 @@ export function orderSalesEmailHtml(order: any, orderItems: any[]): string {
     <p style="margin:0 0 16px;">${esc(order.shippingPhone)}</p>
     <p style="margin:0 0 8px;font-weight:600;">Items</p>
     ${orderItemsHtml(orderItems)}
-    <div style="text-align:right;font-size:16px;font-weight:700;color:${NAVY};">Order Total: R${total} <span style="font-weight:400;color:#6B7280;font-size:12px;">(incl. VAT)</span></div>
+    <div style="text-align:right;margin:0 0 16px;">
+      ${shippingLine}
+      <p style="margin:0;font-size:16px;font-weight:700;color:${NAVY};">Order Total: R${total} <span style="font-weight:400;color:#6B7280;font-size:12px;">(incl. VAT &amp; delivery)</span></p>
+    </div>
   `;
   return brandedEmail('New Order Received', content);
 }
 
 export function orderCustomerEmailHtml(order: any, orderItems: any[]): string {
   const total = Number(order.total).toFixed(2);
+  const shippingLine = order.shippingCost
+    ? `<p style="margin:0 0 4px;font-size:14px;color:#4B5563;">Delivery (${esc(order.shippingProvider || 'Courier')}${order.shippingService ? ': ' + esc(order.shippingService) : ''}): <strong>R${Number(order.shippingCost).toFixed(2)}</strong></p>`
+    : `<p style="margin:0 0 4px;font-size:14px;color:#16A34A;"><strong>Collection</strong> (free)</p>`;
   const content = `
     <p style="margin:0 0 16px;">Hi ${esc(order.shippingName)},</p>
     <p style="margin:0 0 16px;">Thank you for your order with Sealed &amp; Secured. We've received your payment and your order is confirmed.</p>
@@ -167,7 +176,10 @@ export function orderCustomerEmailHtml(order: any, orderItems: any[]): string {
     </div>
     <p style="margin:0 0 8px;font-weight:600;">Your Items</p>
     ${orderItemsHtml(orderItems)}
-    <div style="text-align:right;font-size:16px;font-weight:700;color:${NAVY};margin:0 0 20px;">Total: R${total} <span style="font-weight:400;color:#6B7280;font-size:12px;">(incl. VAT)</span></div>
+    <div style="text-align:right;margin:0 0 16px;">
+      ${shippingLine}
+      <p style="margin:0;font-size:16px;font-weight:700;color:${NAVY};">Total: R${total} <span style="font-weight:400;color:#6B7280;font-size:12px;">(incl. VAT &amp; delivery)</span></p>
+    </div>
     <p style="margin:0 0 8px;color:#4B5563;">We'll notify you as soon as your order is dispatched.</p>
     <p style="margin:0;color:#4B5563;">Thank you for choosing Sealed &amp; Secured.</p>
   `;

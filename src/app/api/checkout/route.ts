@@ -4,6 +4,9 @@ import crypto from "crypto";
 
 import { createClient } from "@libsql/client";
 import { isCollectableCategory } from "@/lib/collectionPolicy";
+import { getShippingQuotes } from "@/lib/shippingQuotes";
+import type { ShippingQuote } from "@/lib/shippingQuotes";
+import { quantityTiers } from "@/lib/productData";
 
 const turso = createClient({
   url: process.env.TURSO_DATABASE_URL || "",
@@ -81,7 +84,78 @@ export async function POST(req: Request) {
     const total = items.reduce((acc: number, item: any) => acc + item.price * item.quantity, 0);
     const VAT_RATE = 0.15;
     const vat = total * VAT_RATE;
-    const grandTotal = total + vat;
+
+    // ------------------------------------------------------------------
+    // Server-side shipping validation — NEVER trust the browser's cost.
+    // Re-quote against the live GearUp/Winfreight API using the cart's own
+    // parcels (dims/weights sourced from the server's Product catalogue via
+    // the tier data), then match the customer-selected provider+service.
+    // ------------------------------------------------------------------
+    const shippingMethod: string = shipping?.method || 'collection';
+    let shippingCost = 0;
+    let shippingProvider: string | null = null;
+    let shippingService: string | null = null;
+
+    if (shippingMethod === 'delivery') {
+      const selectedProvider = shipping?.provider || '';
+      const postalCode = shipping?.postalCode || '';
+      const city = shipping?.city || '';
+      const zone = shipping?.province || '';
+
+      // Build parcels from the selected cart items with their real dims/weight.
+      // Dims come from the server-side Product catalogue (id → slug →
+      // quantityTiers), so the browser cannot understate weight or dimensions
+      // to get a cheaper quote. Falls back to the client-sent dims; either
+      // way the final price is the server's fresh quote, never the browser's.
+      const parcels = [];
+      for (const item of items) {
+        const q = Math.max(1, Math.floor(Number(item.quantity) || 1));
+        let slug = (item as any).slug || '';
+        if (!slug && item.productId) {
+          const prodRes = await turso.execute({
+            sql: "SELECT slug FROM Product WHERE id = ?",
+            args: [item.productId],
+          });
+          slug = (prodRes.rows[0]?.slug as string) || '';
+        }
+        const tierSlug = slug ? (quantityTiers as Record<string, any[]>)[slug] : undefined;
+        const tier = tierSlug && tierSlug.length ? tierSlug[0] : null;
+        parcels.push({
+          submitted_length_cm: Math.ceil(tier?.shipping?.lengthCm || item.lengthCm || 20),
+          submitted_width_cm: Math.ceil(tier?.shipping?.widthCm || item.widthCm || 15),
+          submitted_height_cm: Math.ceil(tier?.shipping?.heightCm || item.heightCm || 10),
+          // Mirror the client's parcel math exactly (round weight to 1dp) so
+          // the validated quote list matches what the customer saw/selected.
+          submitted_weight_kg: Math.round(Number(tier?.shipping?.weightKg || item.weightKg || 0.1) * q * 10) / 10,
+        });
+      }
+
+      const quotes: ShippingQuote[] = await getShippingQuotes({
+        parcels,
+        destinationPostalCode: postalCode,
+        destinationCity: city,
+        destinationZone: zone,
+      });
+
+      // Match the selected quote: provider + service must exist in the fresh
+      // server-side quote list, and the price charged is the server-validated one.
+      const selected = quotes.find(
+        (q) => `${q.provider}-${q.service}` === selectedProvider
+      );
+      if (!selected) {
+        return NextResponse.json(
+          { error: "Shipping selection is no longer valid. Please re-select a shipping method." },
+          { status: 400 }
+        );
+      }
+      shippingCost = selected.price;
+      shippingProvider = selected.provider;
+      shippingService = selected.service;
+    } else if (shippingMethod !== 'collection') {
+      return NextResponse.json({ error: "Invalid shipping method" }, { status: 400 });
+    }
+
+    const grandTotal = Math.round((total + vat + shippingCost) * 100) / 100;
 
     // Build delivery address string
     const deliveryAddrStr = [shipping?.street, shipping?.suburb, shipping?.city, shipping?.province, shipping?.postalCode]
@@ -94,6 +168,16 @@ export async function POST(req: Request) {
 
     // Create order in Turso
     const orderId = crypto.randomUUID();
+    // Ensure shipping-charge columns exist (idempotent for fresh installs)
+    try {
+      await turso.execute({ sql: `ALTER TABLE "Order" ADD COLUMN shippingCost REAL` });
+    } catch (e) { /* column already exists */ }
+    try {
+      await turso.execute({ sql: `ALTER TABLE "Order" ADD COLUMN shippingProvider TEXT` });
+    } catch (e) { /* column already exists */ }
+    try {
+      await turso.execute({ sql: `ALTER TABLE "Order" ADD COLUMN shippingService TEXT` });
+    } catch (e) { /* column already exists */ }
     // Build notes with company/vat/address if provided
     const notesParts = [];
     if (companyDetails?.companyName) notesParts.push('Company: ' + companyDetails.companyName);
@@ -103,8 +187,8 @@ export async function POST(req: Request) {
     const notes = notesParts.join(' | ') || null;
     
     await turso.execute({
-      sql: `INSERT INTO "Order" (id, orderNumber, userId, status, total, shippingName, shippingPhone, shippingEmail, notes, createdAt, updatedAt) VALUES (?, ?, ?, 'pending', ?, ?, ?, ?, ?, datetime('now'), datetime('now'))`,
-      args: [orderId, orderNumber, (session.user as any).id, grandTotal, shippingDetails.name, shippingDetails.phone, shippingDetails.email, notes],
+      sql: `INSERT INTO "Order" (id, orderNumber, userId, status, total, shippingName, shippingPhone, shippingEmail, shippingCost, shippingProvider, shippingService, notes, createdAt, updatedAt) VALUES (?, ?, ?, 'pending', ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))`,
+      args: [orderId, orderNumber, (session.user as any).id, grandTotal, shippingDetails.name, shippingDetails.phone, shippingDetails.email, shippingCost, shippingProvider, shippingService, notes],
     });
     // Create order items
     for (const item of items) {
