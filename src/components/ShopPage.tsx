@@ -112,9 +112,26 @@ const ShopPage: React.FC<ShopPageProps> = async ({ selectedCategory }) => {
 
   // Filter products by category
   const categoryDef = categories[selectedCategory] || categories['all'];
-  const products = categoryDef.slugs.length > 0
+  const baseProducts = categoryDef.slugs.length > 0
     ? allProducts.filter(p => categoryDef.slugs.includes(p.slug))
     : allProducts;
+  // "All Products" ordering: sink cable ties to the bottom so Metal Seals
+  // (and everything else) appear ABOVE all cable ties. Category-filter views
+  // keep their existing order (slugs list) untouched. Stable sort preserves
+  // the API order within each group.
+  let products = baseProducts;
+  if (categoryDef.slugs.length === 0) {
+    const cableTieSlugs = new Set([
+      ...categories['plastic-cable-ties'].slugs,
+      ...categories['steel-cable-ties'].slugs,
+    ]);
+    products = [...baseProducts].sort((a, b) => {
+      const aIsCable = cableTieSlugs.has(a.slug);
+      const bIsCable = cableTieSlugs.has(b.slug);
+      if (aIsCable !== bIsCable) return aIsCable ? 1 : -1;
+      return 0;
+    });
+  }
 
   return (
     <div className="bg-gray-50 min-h-screen">
