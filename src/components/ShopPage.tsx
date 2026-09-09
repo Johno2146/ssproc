@@ -115,22 +115,24 @@ const ShopPage: React.FC<ShopPageProps> = async ({ selectedCategory }) => {
   const baseProducts = categoryDef.slugs.length > 0
     ? allProducts.filter(p => categoryDef.slugs.includes(p.slug))
     : allProducts;
-  // "All Products" ordering: sink cable ties to the bottom so Metal Seals
-  // (and everything else) appear ABOVE all cable ties. Category-filter views
-  // keep their existing order (slugs list) untouched. Stable sort preserves
-  // the API order within each group.
+  // "All Products" ordering: group products in a logical category order with
+  // Metal Seals placed above both cable-tie categories (owner request). Stable
+  // sort: within a category the API/DB order is preserved. Category-filter
+  // views (slugs list) are untouched.
   let products = baseProducts;
   if (categoryDef.slugs.length === 0) {
-    const cableTieSlugs = new Set([
-      ...categories['plastic-cable-ties'].slugs,
-      ...categories['steel-cable-ties'].slugs,
+    const categoryRank = new Map([
+      ['Plastic Seals', 0],
+      ['Bolt Seals', 1],
+      ['Cable Seals', 2],
+      ['Metal Seals', 3],
+      ['Security Bags', 4],
+      ['Plastic Cable Ties', 5],
+      ['Stainless Steel Cable Ties', 6],
     ]);
-    products = [...baseProducts].sort((a, b) => {
-      const aIsCable = cableTieSlugs.has(a.slug);
-      const bIsCable = cableTieSlugs.has(b.slug);
-      if (aIsCable !== bIsCable) return aIsCable ? 1 : -1;
-      return 0;
-    });
+    products = [...baseProducts].sort(
+      (a, b) => (categoryRank.get(a.category) ?? 999) - (categoryRank.get(b.category) ?? 999)
+    );
   }
 
   return (
