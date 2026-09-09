@@ -63,6 +63,9 @@ const productImages: Record<string, string> = {
   'cash-bags': '/assets/security-bag.jpg',
   'till-bag': '/assets/security-bag.jpg',
   'envopoly': '/assets/envopoly.jpg',
+  // Metal Seals
+  'metal-strap-ball': '/assets/Ball.jpg',
+  'metal-strap-flat': '/assets/Flat.jpg',
   
   'ct-100mm': '/assets/CT white.jpg',
   'ct-150mm': '/assets/CT white.jpg',
