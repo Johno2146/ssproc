@@ -22,7 +22,7 @@ const TermsOfService: React.FC = () => {
 
         <div>
           <h2 className="text-xl font-bold text-gray-900 border-b border-gray-100 pb-2">4. Pricing and Payment</h2>
-          <p className="mt-4">Prices for our products are subject to change without notice. All prices displayed include VAT where applicable. Payment is required at the time of purchase through our integrated payment gateway. You are not obligated to pay for unauthorised transactions.</p>
+          <p className="mt-4">Prices for our products are subject to change without notice. All prices displayed are final. Payment is required at the time of purchase through our integrated payment gateway. You are not obligated to pay for unauthorised transactions.</p>
         </div>
 
         <div>

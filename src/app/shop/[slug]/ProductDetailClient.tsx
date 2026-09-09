@@ -255,7 +255,6 @@ const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ productId, na
       {/* Price Display */}
       <div className="flex items-baseline gap-3 mb-2">
         <span className="text-3xl font-bold text-brand-950">R{withVat(totalPrice).toFixed(2)}</span>
-        <span className="text-gray-400">incl. VAT</span>
       </div>
       {quantity > 1 && (
         <p className="text-xs text-gray-400 -mt-2">

@@ -55,7 +55,7 @@ function SuccessContent() {
                 </div>
               )}
               <div className="border-t border-gray-200 pt-2 mt-2 flex justify-between font-bold">
-                <span>Total (incl. VAT &amp; delivery)</span>
+                <span>Total (incl. delivery)</span>
                 <span>R{order.total?.toFixed(2)}</span>
               </div>
             </div>

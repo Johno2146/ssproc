@@ -1,22 +1,18 @@
-// VAT-inclusive pricing helper (South Africa, 15%).
+// Pricing helper — owner's final prices are the ONLY prices, no VAT mark-up.
 //
-// IMPORTANT: this is a DISPLAY-ONLY helper. The source of truth for money is the
-// NET price everywhere:
-//   - quantityTiers / Product.price in the DB are NET (excl. VAT)
-//   - the cart stores NET prices
-//   - /api/checkout computes Order.total = Σ(net×qty) + 15% VAT and that exact
-//     number goes to PayFast and is validated by the ITN (amount_gross ±0.01).
-// Net money collected MUST NOT change — only customer-facing displays and the
-// Google Merchant Center feed wrap net prices with withVat() and label them
-// "incl. VAT".
-export const VAT_RATE = 0.15;
-
-/** Round a net price up to a 2-decimal VAT-inclusive price (banker-friendly round half up). */
+// Owner decision (2026-09-09): the site displays and charges exactly the
+// owner's updated price-list numbers (the NET values in productData.ts / DB).
+// No VAT is added anywhere — displayed price == charged price == feed price.
+// Historical orders are untouched.
+//
+// withVat() and vatOfGross() are kept as identity/zero so every existing call
+// site continues to compile and behave correctly with VAT_RATE = 0.
+export const VAT_RATE = 0;
+/** Returns the price unchanged (no VAT mark-up — identity). */
 export function withVat(net: number): number {
-  return Math.round(net * (1 + VAT_RATE) * 100) / 100;
+  return net;
 }
-
-/** VAT content of a 2-decimal gross price (gross − net equivalent). */
+/** VAT content is always zero (no VAT mark-up). */
 export function vatOfGross(gross: number): number {
-  return Math.round((gross - gross / (1 + VAT_RATE)) * 100) / 100;
+  return 0;
 }

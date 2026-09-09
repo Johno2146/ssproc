@@ -6,7 +6,7 @@ import Link from 'next/link';
 import LocationAutocomplete from './LocationAutocomplete';
 import { signIn, useSession } from 'next-auth/react';
 import { isCollectableCategory } from '@/lib/collectionPolicy';
-import { withVat, VAT_RATE, vatOfGross } from '@/lib/vat';
+import { withVat } from '@/lib/vat';
 
 interface CartItem {
   productId: string;
@@ -153,14 +153,11 @@ const CheckoutPage: React.FC = () => {
     }
   }, [productsLoaded, cartItems, collectionAllowed, deliveryMethod]);
 
-  // Cart prices are NET (excl. VAT). Display everything VAT-inclusive.
+  // Cart prices are the owner's final prices — no VAT mark-up anywhere.
   // NOTE: money math is server-authoritative — /api/checkout computes
-  // Order.total = Σ(net×qty) + 15% VAT and sends exactly that to PayFast.
+  // Order.total = Σ(price×qty) + shipping and sends exactly that to PayFast.
   // These client numbers are for display only and match that same figure.
   const netTotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
-  const vat = netTotal * VAT_RATE;
-  const subtotalInclVat = withVat(netTotal); // VAT-inclusive product total
-  const vatIncludedInSubtotal = vatOfGross(subtotalInclVat);
 
   // Build parcels array - one per unique product with proper dimensions × quantity
   const parcels = cartItems.map(item => ({
@@ -187,9 +184,9 @@ const CheckoutPage: React.FC = () => {
     if (selected) shippingCost = selected.price;
   }
 
-  // Display-only grand total: VAT-inclusive products + shipping.
-  // (Money actually charged to PayFast = server Order.total = net + 15% VAT.)
-  const grandTotal = subtotalInclVat + shippingCost;
+  // Display-only grand total: product prices + shipping.
+  // (Money actually charged to PayFast = server Order.total = Σ(price×qty) + shipping.)
+  const grandTotal = netTotal + shippingCost;
 
   const handleQuantityChange = (productId: string, delta: number) => {
     const updated = cartItems.map(item => {
@@ -412,7 +409,7 @@ const CheckoutPage: React.FC = () => {
                     <h3 className="font-bold text-brand-950">{item.name}</h3>
                     {item.colour && <p className="text-xs text-gray-500 mt-0.5">Colour: {item.colour}</p>}
                     {item.tierLabel && <p className="text-xs text-brand-600 mt-0.5 font-medium">{item.tierLabel}</p>}
-                    <p className="text-brand-600 font-semibold mt-1">R{withVat(item.price).toFixed(2)} incl. VAT / {item.unit}</p>
+                    <p className="text-brand-600 font-semibold mt-1">R{withVat(item.price).toFixed(2)} / {item.unit}</p>
                     <div className="flex items-center gap-3 mt-3">
                       <button
                         onClick={() => handleQuantityChange(item.productId, -1)}
@@ -437,7 +434,6 @@ const CheckoutPage: React.FC = () => {
                   </div>
                   <div className="text-right flex-shrink-0">
                     <p className="font-bold text-brand-950">R{withVat(item.price * item.quantity).toFixed(2)}</p>
-                    <p className="text-xs text-gray-400">incl. VAT</p>
                   </div>
                 </div>
               ))}
@@ -449,12 +445,8 @@ const CheckoutPage: React.FC = () => {
                 <h2 className="text-xl font-bold text-brand-950 mb-4">Order Summary</h2>
                 <div className="space-y-3 text-sm">
                   <div className="flex justify-between">
-                    <span className="text-gray-600">Subtotal (incl. VAT)</span>
-                    <span className="font-semibold">R{subtotalInclVat.toFixed(2)}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">VAT (15%, included)</span>
-                    <span className="font-semibold">R{vatIncludedInSubtotal.toFixed(2)}</span>
+                    <span className="text-gray-600">Subtotal</span>
+                    <span className="font-semibold">R{netTotal.toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-600">Shipping</span>
@@ -463,7 +455,7 @@ const CheckoutPage: React.FC = () => {
                     </span>
                   </div>
                   <div className="border-t pt-3 flex justify-between text-lg">
-                    <span className="font-bold">Total (incl. VAT)</span>
+                    <span className="font-bold">Total</span>
                     <span className="font-bold text-brand-950">R{grandTotal.toFixed(2)}</span>
                   </div>
                 </div>

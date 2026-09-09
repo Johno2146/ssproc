@@ -161,12 +161,11 @@ const ShopPage: React.FC<ShopPageProps> = async ({ selectedCategory }) => {
                     {quantityTiers[product.slug] ? (
                       <>
                         <span className="text-2xl font-bold text-brand-950">From R{withVat(Math.min(...quantityTiers[product.slug].map(t => t.price))).toFixed(2)}</span>
-                        <span className="text-sm text-gray-400">incl. VAT</span>
                       </>
                     ) : (
                       <>
                         <span className="text-2xl font-bold text-brand-950">R{withVat(product.price).toFixed(2)}</span>
-                        <span className="text-sm text-gray-400">incl. VAT / {product.unit}</span>
+                        <span className="text-sm text-gray-400">{product.unit}</span>
                       </>
                     )}
                   </div>

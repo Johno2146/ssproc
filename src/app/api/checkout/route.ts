@@ -82,8 +82,6 @@ export async function POST(req: Request) {
     }
 
     const total = items.reduce((acc: number, item: any) => acc + item.price * item.quantity, 0);
-    const VAT_RATE = 0.15;
-    const vat = total * VAT_RATE;
 
     // ------------------------------------------------------------------
     // Server-side shipping validation — NEVER trust the browser's cost.
@@ -155,7 +153,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Invalid shipping method" }, { status: 400 });
     }
 
-    const grandTotal = Math.round((total + vat + shippingCost) * 100) / 100;
+    const grandTotal = Math.round((total + shippingCost) * 100) / 100;
 
     // Build delivery address string
     const deliveryAddrStr = [shipping?.street, shipping?.suburb, shipping?.city, shipping?.province, shipping?.postalCode]

@@ -177,7 +177,7 @@ const ProductDetailPage: React.FC<ProductPageProps> = async ({ params }) => {
             offers: {
               "@type": "AggregateOffer",
               priceCurrency: "ZAR",
-              // Display prices are VAT-inclusive (15%); money stays net server-side.
+              // Display prices are the owner's final prices (no VAT mark-up).
               lowPrice: withVat(Math.min(...(quantityTiers[product.slug] || [{ price: Number(product.price) }]).map((t) => t.price))),
               highPrice: withVat(Math.max(...(quantityTiers[product.slug] || [{ price: Number(product.price) }]).map((t) => t.price))),
               availability: product.stock > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
@@ -218,17 +218,16 @@ const ProductDetailPage: React.FC<ProductPageProps> = async ({ params }) => {
                 so it always matches the options tab; the raw DB Product.price is stale for
                 tiered products (e.g. Suretite 320mm shows 85 instead of 55). Multi-tier
                 products use "From R{min}" since the options tab lists all tier prices.
-                Displayed prices are VAT-inclusive (15%); money stays net server-side. */}
+                Displayed prices are the owner's final prices (no VAT mark-up). */}
             <div className="flex items-baseline gap-3 mb-6">
               {quantityTiers[product.slug] ? (
                 <>
                   <span className="text-3xl font-bold text-brand-950">From R{withVat(Math.min(...quantityTiers[product.slug].map(t => t.price))).toFixed(2)}</span>
-                  <span className="text-gray-400">incl. VAT</span>
                 </>
               ) : (
                 <>
                   <span className="text-3xl font-bold text-brand-950">R{withVat(product.price).toFixed(2)}</span>
-                  <span className="text-gray-400">incl. VAT / {product.unit}</span>
+                  <span className="text-gray-400">{product.unit}</span>
                 </>
               )}
             </div>

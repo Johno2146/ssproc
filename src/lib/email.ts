@@ -116,7 +116,7 @@ function orderItemsHtml(items: any[]): string {
     const name = item.productName || item.productId || 'Item';
     const qty = Number(item.quantity);
     const price = Number(item.price);
-    // Line totals shown VAT-inclusive (15%); order.total is already net+VAT.
+    // Line totals shown at the owner's final prices (no VAT mark-up).
     const lineTotal = withVat(qty * price).toFixed(2);
     return `<tr>
       <td style="padding:10px 12px;border-bottom:1px solid #E5E7EB;">${esc(name)}</td>
@@ -157,7 +157,7 @@ export function orderSalesEmailHtml(order: any, orderItems: any[]): string {
     ${orderItemsHtml(orderItems)}
     <div style="text-align:right;margin:0 0 16px;">
       ${shippingLine}
-      <p style="margin:0;font-size:16px;font-weight:700;color:${NAVY};">Order Total: R${total} <span style="font-weight:400;color:#6B7280;font-size:12px;">(incl. VAT &amp; delivery)</span></p>
+      <p style="margin:0;font-size:16px;font-weight:700;color:${NAVY};">Order Total: R${total} <span style="font-weight:400;color:#6B7280;font-size:12px;">(incl. delivery)</span></p>
     </div>
   `;
   return brandedEmail('New Order Received', content);
@@ -178,7 +178,7 @@ export function orderCustomerEmailHtml(order: any, orderItems: any[]): string {
     ${orderItemsHtml(orderItems)}
     <div style="text-align:right;margin:0 0 16px;">
       ${shippingLine}
-      <p style="margin:0;font-size:16px;font-weight:700;color:${NAVY};">Total: R${total} <span style="font-weight:400;color:#6B7280;font-size:12px;">(incl. VAT &amp; delivery)</span></p>
+      <p style="margin:0;font-size:16px;font-weight:700;color:${NAVY};">Total: R${total} <span style="font-weight:400;color:#6B7280;font-size:12px;">(incl. delivery)</span></p>
     </div>
     <p style="margin:0 0 8px;color:#4B5563;">We'll notify you as soon as your order is dispatched.</p>
     <p style="margin:0;color:#4B5563;">Thank you for choosing Sealed &amp; Secured.</p>

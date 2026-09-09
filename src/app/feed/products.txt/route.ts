@@ -83,9 +83,8 @@ export async function GET() {
   }
 
   const lines = rows.map((p) => {
-    // Prices in the feed are VAT-inclusive (15%) — Google/Merchant Center must
-    // show the total the customer actually pays at checkout. Money stays net
-    // server-side (Order.total = Σ(net×qty) + 15% VAT).
+    // Feed prices are the owner's final prices (no VAT mark-up) — they match
+    // exactly what the customer sees and pays at checkout.
     const price = withVat(feedPrice(p.slug, Number(p.price)));
     const image = productImages[p.slug] || p.imageUrl || "";
     const availability = Number(p.stock) > 0 ? "in stock" : "out of stock";
