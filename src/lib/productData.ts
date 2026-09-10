@@ -428,10 +428,10 @@ export const quantityTiers: Record<string, QuantityTier[]> = {
     { label: 'Per box of 240', unit: '240 pack', price: 2040.00, shipping: { weightKg: 13.8, lengthCm: 22, widthCm: 30, heightCm: 27 } },
   ],
   'metal-strap-ball': [
-    { label: 'Per 1000', unit: '1000 pack', price: 1988.00, shipping: { weightKg: 12.0, lengthCm: 52, widthCm: 38, heightCm: 32 } },
+    { label: 'Per 1000', unit: '1000 pack', price: 1988.00, shipping: { weightKg: 6.26, lengthCm: 35, widthCm: 35, heightCm: 20 } },
   ],
   'metal-strap-flat': [
-    { label: 'Per 1000', unit: '1000 pack', price: 1988.00, shipping: { weightKg: 12.0, lengthCm: 52, widthCm: 38, heightCm: 32 } },
+    { label: 'Per 1000', unit: '1000 pack', price: 1988.00, shipping: { weightKg: 4.98, lengthCm: 24, widthCm: 23, heightCm: 13 } },
   ],
   'padlock-seal': [
     { label: 'Per 50', unit: '50 pack', price: 100.00, shipping: { weightKg: 0.185, lengthCm: 13, widthCm: 18, heightCm: 4 } },
