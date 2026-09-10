@@ -360,52 +360,132 @@ export const quantityTiers: Record<string, QuantityTier[]> = {
     { label: 'Per 1000', unit: '1000 pack', price: 1130.00, shipping: { weightKg: 5.0, lengthCm: 50, widthCm: 41, heightCm: 31 } },
   ],
 
+  // --- Cable-tie pack shipping (derived 2026-09-10) -------------------------
+  // Plastic ties: pack weight = per-tie volume (band W×H×L from productSpecs)
+  // × PA66 density ~1.14 g/cm³ + ~30% for head/barb, × pack qty, + bag/packaging
+  // (~0.02kg). Dims = flat bundle in polybag (length = tie length + 2-4cm).
+  // SS ties: per-tie volume × SS304 density ~7.9 g/cm³ + ~20% head, × 100 + bag.
+  // Prices are the owner's final NET prices (VAT_RATE=0) — unchanged.
+  // All values are ESTIMATES pending owner-measured numbers.
+  // ---------------------------------------------------------------------------
   'heavy-duty-double-zip-tie-handcuff': [
-    { label: 'Pack of 20', unit: '20 pack', price: 280.39 },
+    { label: 'Pack of 20', unit: '20 pack', price: 280.39, shipping: { weightKg: 0.25, lengthCm: 30, widthCm: 15, heightCm: 6 } },
   ],
   'ct-100mm': [
-    { label: 'Black', unit: '100 pack', price: 12.87 },
-    { label: 'Colour', unit: '100 pack', price: 12.93 },
+    { label: 'Black', unit: '100 pack', price: 12.87, shipping: { weightKg: 0.10, lengthCm: 14, widthCm: 10, heightCm: 4 } },
+    { label: 'Colour', unit: '100 pack', price: 12.93, shipping: { weightKg: 0.10, lengthCm: 14, widthCm: 10, heightCm: 4 } },
   ],
   'ct-150mm': [
-    { label: 'Black', unit: '100 pack', price: 25.73 },
-    { label: 'Colour', unit: '100 pack', price: 35.86 },
+    { label: 'Black', unit: '100 pack', price: 25.73, shipping: { weightKg: 0.12, lengthCm: 18, widthCm: 12, heightCm: 4 } },
+    { label: 'Colour', unit: '100 pack', price: 35.86, shipping: { weightKg: 0.12, lengthCm: 18, widthCm: 12, heightCm: 4 } },
   ],
   'ct-200mm': [
-    { label: 'Black', unit: '100 pack', price: 42.11 },
-    { label: 'Colour', unit: '100 pack', price: 58.49 },
+    { label: 'Black', unit: '100 pack', price: 42.11, shipping: { weightKg: 0.20, lengthCm: 24, widthCm: 12, heightCm: 4 } },
+    { label: 'Colour', unit: '100 pack', price: 58.49, shipping: { weightKg: 0.20, lengthCm: 24, widthCm: 12, heightCm: 4 } },
   ],
   'ct-slim-200mm': [
-    { label: 'Black', unit: '100 pack', price: 37.45 },
-    { label: 'Colour', unit: '100 pack', price: 51.52 },
+    { label: 'Black', unit: '100 pack', price: 37.45, shipping: { weightKg: 0.12, lengthCm: 24, widthCm: 12, heightCm: 4 } },
+    { label: 'Colour', unit: '100 pack', price: 51.52, shipping: { weightKg: 0.12, lengthCm: 24, widthCm: 12, heightCm: 4 } },
   ],
   'ct-heavy-duty-200mm': [
-    { label: 'Black', unit: '100 pack', price: 109.98 },
-    { label: 'Colour', unit: '100 pack', price: 149.58 },
+    { label: 'Black', unit: '100 pack', price: 109.98, shipping: { weightKg: 0.45, lengthCm: 24, widthCm: 14, heightCm: 5 } },
+    { label: 'Colour', unit: '100 pack', price: 149.58, shipping: { weightKg: 0.45, lengthCm: 24, widthCm: 14, heightCm: 5 } },
   ],
   'ct-300mm': [
-    { label: 'Black', unit: '100 pack', price: 70.18 },
-    { label: 'Colour', unit: '100 pack', price: 95.91 },
+    { label: 'Black', unit: '100 pack', price: 70.18, shipping: { weightKg: 0.28, lengthCm: 32, widthCm: 14, heightCm: 5 } },
+    { label: 'Colour', unit: '100 pack', price: 95.91, shipping: { weightKg: 0.28, lengthCm: 32, widthCm: 14, heightCm: 5 } },
   ],
   'ct-heavy-duty-300mm': [
-    { label: 'Black', unit: '100 pack', price: 126.33 },
-    { label: 'Colour', unit: '100 pack', price: 173.12 },
+    { label: 'Black', unit: '100 pack', price: 126.33, shipping: { weightKg: 0.65, lengthCm: 32, widthCm: 16, heightCm: 6 } },
+    { label: 'Colour', unit: '100 pack', price: 173.12, shipping: { weightKg: 0.65, lengthCm: 32, widthCm: 16, heightCm: 6 } },
   ],
   'ct-400mm': [
-    { label: 'Black', unit: '100 pack', price: 84.22 },
-    { label: 'Colour', unit: '100 pack', price: 114.63 },
+    { label: 'Black', unit: '100 pack', price: 84.22, shipping: { weightKg: 0.37, lengthCm: 42, widthCm: 16, heightCm: 6 } },
+    { label: 'Colour', unit: '100 pack', price: 114.63, shipping: { weightKg: 0.37, lengthCm: 42, widthCm: 16, heightCm: 6 } },
   ],
   'ct-heavy-duty-400mm': [
-    { label: 'Black', unit: '100 pack', price: 161.42 },
-    { label: 'Colour', unit: '100 pack', price: 183.89 },
+    { label: 'Black', unit: '100 pack', price: 161.42, shipping: { weightKg: 0.86, lengthCm: 42, widthCm: 18, heightCm: 7 } },
+    { label: 'Colour', unit: '100 pack', price: 183.89, shipping: { weightKg: 0.86, lengthCm: 42, widthCm: 18, heightCm: 7 } },
   ],
   'ct-heavy-duty-500mm': [
-    { label: 'Black', unit: '100 pack', price: 222.44 },
-    { label: 'Colour', unit: '100 pack', price: 306.46 },
+    { label: 'Black', unit: '100 pack', price: 222.44, shipping: { weightKg: 1.07, lengthCm: 52, widthCm: 18, heightCm: 7 } },
+    { label: 'Colour', unit: '100 pack', price: 306.46, shipping: { weightKg: 1.07, lengthCm: 52, widthCm: 18, heightCm: 7 } },
   ],
   'ct-extra-heavy-duty-540mm': [
-    { label: 'Black', unit: '50 pack', price: 231.60 },
-    { label: 'Colour', unit: '50 pack', price: 318.16 },
+    { label: 'Black', unit: '50 pack', price: 231.60, shipping: { weightKg: 1.20, lengthCm: 56, widthCm: 18, heightCm: 8 } },
+    { label: 'Colour', unit: '50 pack', price: 318.16, shipping: { weightKg: 1.20, lengthCm: 56, widthCm: 18, heightCm: 8 } },
+  ],
+  'ss-4-6-150mm': [
+    { label: 'Pack of 100', unit: '100 pack', price: 218.14, shipping: { weightKg: 0.20, lengthCm: 18, widthCm: 10, heightCm: 4 } },
+  ],
+  'ss-4-6-200mm': [
+    { label: 'Pack of 100', unit: '100 pack', price: 249.65, shipping: { weightKg: 0.27, lengthCm: 23, widthCm: 10, heightCm: 4 } },
+  ],
+  'ss-4-6-250mm': [
+    { label: 'Pack of 100', unit: '100 pack', price: 278.74, shipping: { weightKg: 0.33, lengthCm: 28, widthCm: 10, heightCm: 4 } },
+  ],
+  'ss-4-6-300mm': [
+    { label: 'Pack of 100', unit: '100 pack', price: 298.12, shipping: { weightKg: 0.40, lengthCm: 33, widthCm: 10, heightCm: 4 } },
+  ],
+  'ss-4-6-350mm': [
+    { label: 'Pack of 100', unit: '100 pack', price: 344.18, shipping: { weightKg: 0.46, lengthCm: 38, widthCm: 10, heightCm: 4 } },
+  ],
+  'ss-4-6-400mm': [
+    { label: 'Pack of 100', unit: '100 pack', price: 380.54, shipping: { weightKg: 0.53, lengthCm: 43, widthCm: 10, heightCm: 4 } },
+  ],
+  'ss-4-6-450mm': [
+    { label: 'Pack of 100', unit: '100 pack', price: 421.74, shipping: { weightKg: 0.60, lengthCm: 48, widthCm: 10, heightCm: 4 } },
+  ],
+  'ss-4-6-500mm': [
+    { label: 'Pack of 100', unit: '100 pack', price: 458.10, shipping: { weightKg: 0.66, lengthCm: 53, widthCm: 10, heightCm: 4 } },
+  ],
+  'ss-4-6-550mm': [
+    { label: 'Pack of 100', unit: '100 pack', price: 492.03, shipping: { weightKg: 0.72, lengthCm: 58, widthCm: 10, heightCm: 4 } },
+  ],
+  'ss-4-6-600mm': [
+    { label: 'Pack of 100', unit: '100 pack', price: 528.38, shipping: { weightKg: 0.79, lengthCm: 63, widthCm: 10, heightCm: 4 } },
+  ],
+  'ss-7-9-200mm': [
+    { label: 'Pack of 100', unit: '100 pack', price: 325.59, shipping: { weightKg: 0.60, lengthCm: 23, widthCm: 12, heightCm: 5 } },
+  ],
+  'ss-7-9-250mm': [
+    { label: 'Pack of 100', unit: '100 pack', price: 357.10, shipping: { weightKg: 0.75, lengthCm: 28, widthCm: 12, heightCm: 5 } },
+  ],
+  'ss-7-9-300mm': [
+    { label: 'Pack of 100', unit: '100 pack', price: 411.64, shipping: { weightKg: 0.90, lengthCm: 33, widthCm: 12, heightCm: 5 } },
+  ],
+  'ss-7-9-350mm': [
+    { label: 'Pack of 100', unit: '100 pack', price: 441.13, shipping: { weightKg: 1.05, lengthCm: 38, widthCm: 12, heightCm: 5 } },
+  ],
+  'ss-7-9-400mm': [
+    { label: 'Pack of 100', unit: '100 pack', price: 495.74, shipping: { weightKg: 1.20, lengthCm: 43, widthCm: 12, heightCm: 5 } },
+  ],
+  'ss-7-9-450mm': [
+    { label: 'Pack of 100', unit: '100 pack', price: 532.43, shipping: { weightKg: 1.35, lengthCm: 48, widthCm: 12, heightCm: 5 } },
+  ],
+  'ss-7-9-500mm': [
+    { label: 'Pack of 100', unit: '100 pack', price: 532.43, shipping: { weightKg: 1.50, lengthCm: 53, widthCm: 12, heightCm: 5 } },
+  ],
+  'ss-7-9-550mm': [
+    { label: 'Pack of 100', unit: '100 pack', price: 567.16, shipping: { weightKg: 1.65, lengthCm: 58, widthCm: 12, heightCm: 5 } },
+  ],
+  'ss-7-9-600mm': [
+    { label: 'Pack of 100', unit: '100 pack', price: 661.12, shipping: { weightKg: 1.80, lengthCm: 63, widthCm: 12, heightCm: 5 } },
+  ],
+  'ss-7-9-650mm': [
+    { label: 'Pack of 100', unit: '100 pack', price: 707.91, shipping: { weightKg: 1.95, lengthCm: 68, widthCm: 12, heightCm: 5 } },
+  ],
+  'ss-7-9-700mm': [
+    { label: 'Pack of 100', unit: '100 pack', price: 736.74, shipping: { weightKg: 2.10, lengthCm: 73, widthCm: 12, heightCm: 5 } },
+  ],
+  'ss-7-9-750mm': [
+    { label: 'Pack of 100', unit: '100 pack', price: 796.13, shipping: { weightKg: 2.25, lengthCm: 78, widthCm: 12, heightCm: 5 } },
+  ],
+  'ss-7-9-800mm': [
+    { label: 'Pack of 100', unit: '100 pack', price: 833.94, shipping: { weightKg: 2.40, lengthCm: 83, widthCm: 12, heightCm: 5 } },
+  ],
+  'ss-installation-tool': [
+    { label: 'Pack of 1', unit: '1 pack', price: 1980.34, shipping: { weightKg: 0.50, lengthCm: 25, widthCm: 8, heightCm: 3 } },
   ],
     'suretite-230mm': [
     { label: 'Per 1000', unit: '1000 pack', price: 870.00, shipping: { weightKg: 4.5, lengthCm: 50, widthCm: 31, heightCm: 31 } },
