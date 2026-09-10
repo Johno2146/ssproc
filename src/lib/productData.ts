@@ -196,7 +196,7 @@ export const productSpecs: Record<string, ProductSpec> = {
     dimensions: 'Standard bolt seal size',
     colours: ['Standard'],
     applications: ['Shipping Containers', 'Heavy-duty Logistics', 'Transport'],
-    features: ['ISO 17712 compliant', 'High-security bolt seal', 'Custom printing available'],
+    features: ['High-security bolt seal', 'Custom printing available'],
     securityLevel: 'High',
     printing: ['Custom printing available'],
     boxSize: 'Bulk packaging',

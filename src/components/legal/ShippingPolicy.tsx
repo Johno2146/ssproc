@@ -27,7 +27,7 @@ const ShippingPolicy: React.FC = () => {
 
         <div>
           <h2 className="text-xl font-bold text-gray-900 border-b border-gray-100 pb-2">5. Tracking Your Order</h2>
-          <p className="mt-4">Once your order has shipped, you will receive a tracking number via email. If you have opted in, you will also receive real-time updates via WhatsApp.</p>
+          <p className="mt-4">Once your order has shipped, you will receive a tracking number via email so you can follow your parcel's progress.</p>
         </div>
 
         <div>

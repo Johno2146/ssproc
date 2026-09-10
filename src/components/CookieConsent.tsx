@@ -26,7 +26,7 @@ const CookieConsent: React.FC = () => {
         <p className="text-sm text-brand-200 flex-1">
           This website uses cookies for essential functionality (session management) and Google Maps on the checkout page. 
           By continuing to use this site, you consent to our use of cookies.{' '}
-          <Link href="/privacy" className="text-brand-300 underline hover:text-white">
+          <Link href="/cookies" className="text-brand-300 underline hover:text-white">
             Learn more
           </Link>
         </p>

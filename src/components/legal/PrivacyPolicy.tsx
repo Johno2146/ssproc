@@ -51,7 +51,6 @@ const PrivacyPolicy: React.FC = () => {
           <ul className="mt-4 list-disc list-inside space-y-2">
             <li><strong>Payfast</strong> (payment processing).</li>
             <li><strong>The Courier Guy</strong> and other shipping partners (order delivery).</li>
-            <li><strong>WhatsApp</strong> (tracking notifications, if opted in).</li>
             <li><strong>SendGrid</strong> (transactional emails, including OTPs).</li>
           </ul>
           <p className="mt-2">Where we share your data with third parties, we have agreements in place to ensure they process your data in compliance with POPIA. Some of these third parties may be located outside South Africa.</p>
@@ -87,7 +86,7 @@ const PrivacyPolicy: React.FC = () => {
 
         <div>
           <h2 className="text-xl font-bold text-gray-900 border-b border-gray-100 pb-2">10. Cookies</h2>
-          <p className="mt-4">Our website uses essential cookies for session management and authentication. We also use the Google Maps API on our checkout page, which may set cookies. By using our website, you consent to the use of these cookies. You can disable cookies in your browser settings, but this may affect the functionality of our site.</p>
+          <p className="mt-4">Our website uses essential cookies for session management and authentication. We also use the Google Maps API on our checkout page, which may set cookies. By using our website, you consent to the use of these cookies. Please see our <a href="/cookies" className="text-brand-600 underline">Cookie Policy</a> for full details. You can disable cookies in your browser settings, but this may affect the functionality of our site.</p>
         </div>
 
         <div>
@@ -102,13 +101,16 @@ const PrivacyPolicy: React.FC = () => {
         </div>
 
         <div>
-          <h2 className="text-xl font-bold text-gray-900 border-b border-gray-100 pb-2">12. Contact Our Information Officer</h2>
-          <p className="mt-4">If you have any questions, concerns, or requests regarding your personal information, please contact our Information Officer:</p>
-          <p className="mt-2">
+          <h2 className="text-xl font-bold text-gray-900 border-b border-gray-100 pb-2">12. PAIA Manual &amp; Information Officer</h2>
+          <p className="mt-4">In accordance with section 51 of the Promotion of Access to Information Act, 2000 (PAIA) and sections 55 of the Protection of Personal Information Act, 2013 (POPIA), Sealed and Secured (Pty) Ltd has designated an Information Officer who is responsible for overseeing the processing of personal information and for dealing with requests for access to records held by the company.</p>
+          <p className="mt-4"><strong>Information Officer</strong><br />
+            Sealed and Secured (Pty) Ltd<br />
             Email: sales@ssproc.co.za<br />
             Phone: +27 10 555 0114<br />
             Address: Eastwood Business Park, 23 Wright Street, Nuffield, Springs, Gauteng
           </p>
+          <p className="mt-4">A copy of our PAIA manual, which describes the records we hold and the procedure for requesting access, is available on request free of charge. To request the PAIA manual or to exercise any of your rights under PAIA or POPIA, please contact the Information Officer at the details above. We will respond to valid requests within the time periods prescribed by law.</p>
+          <p className="mt-4">If you have any questions, concerns, or requests regarding your personal information, please contact our Information Officer using the details above.</p>
         </div>
       </section>
     </LegalLayout>

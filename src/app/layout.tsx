@@ -14,7 +14,7 @@ export const metadata: Metadata = {
   metadataBase: new URL(CANONICAL_BASE),
   title: "Sealed & Secured — Premium Security Seal Solutions",
   description:
-    "Premium security seal solutions for logistics and industrial sectors. Simplify procurement with integrated PayFast payments and real-time WhatsApp order tracking.",
+    "Premium security seal solutions for logistics and industrial sectors. Simplify procurement with integrated PayFast payments and fast, reliable delivery across South Africa.",
   keywords: [
     "security seals",
     "tamper evident",
