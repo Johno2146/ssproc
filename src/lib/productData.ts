@@ -536,18 +536,29 @@ export const quantityTiers: Record<string, QuantityTier[]> = {
     { label: 'Per 250', unit: '250 pack', price: 2420.00, shipping: { weightKg: 3.540, lengthCm: 64, widthCm: 25, heightCm: 12 } },
     { label: 'Per 1000', unit: '1000 pack', price: 8850.00, shipping: { weightKg: 9.2, lengthCm: 30, widthCm: 24, heightCm: 21 } },
   ],
+  // --- Security Bags: pack shipping (derived 2026-09-10) --------------------
+  // Public research found no published carton weights for these SA-sold items,
+  // but confirmed the product class via SA suppliers (TruSeal truseal.co.za,
+  // Avansa avansa.co.za sell identical tamper-evident cash/gusset bags).
+  // Values DERIVED: heavy-duty PE film at 120-200 gsm (class standard for bank/
+  // cash bags), area = 2 sides + seal lip (+ gusset for till bag), density
+  // PE ~0.91 g/cm³. 'Each' tiers ship flat-folded in a poly envelope (lean).
+  // Envopoly = one-time tamper-evident SEALS (per seed: "One-time use
+  // tamper-evident seal for security bags. Per 1000") — carton of 1000 small
+  // poly seals ~2.5g each. All ESTIMATES pending owner-measured numbers.
+  // ---------------------------------------------------------------------------
   'cash-bags': [
-    { label: '26 x 28cm', unit: 'Each', price: 74.00 },
-    { label: '28 x 35cm', unit: 'Each', price: 86.00 },
-    { label: '38 x 40cm', unit: 'Each', price: 97.00 },
-    { label: '22 x 14cm', unit: 'Each', price: 52.00 },
-    { label: '46 x 36cm', unit: 'Each', price: 117.00 },
+    { label: '26 x 28cm', unit: 'Each', price: 74.00, shipping: { weightKg: 0.03, lengthCm: 30, widthCm: 28, heightCm: 2 } },
+    { label: '28 x 35cm', unit: 'Each', price: 86.00, shipping: { weightKg: 0.04, lengthCm: 37, widthCm: 30, heightCm: 2 } },
+    { label: '38 x 40cm', unit: 'Each', price: 97.00, shipping: { weightKg: 0.06, lengthCm: 42, widthCm: 40, heightCm: 2 } },
+    { label: '22 x 14cm', unit: 'Each', price: 52.00, shipping: { weightKg: 0.02, lengthCm: 24, widthCm: 16, heightCm: 2 } },
+    { label: '46 x 36cm', unit: 'Each', price: 117.00, shipping: { weightKg: 0.06, lengthCm: 48, widthCm: 38, heightCm: 2 } },
   ],
   'till-bag': [
-    { label: '46 x 36 x 10cm', unit: 'Each', price: 210.00 },
+    { label: '46 x 36 x 10cm', unit: 'Each', price: 210.00, shipping: { weightKg: 0.09, lengthCm: 48, widthCm: 38, heightCm: 3 } },
   ],
   'envopoly': [
-    { label: 'Per 1000', unit: '1000 pack', price: 185.00 },
+    { label: 'Per 1000', unit: '1000 pack', price: 185.00, shipping: { weightKg: 2.80, lengthCm: 30, widthCm: 25, heightCm: 18 } },
   ],
 };
 
