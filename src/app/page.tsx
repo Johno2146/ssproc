@@ -58,7 +58,7 @@ export default function HomePage() {
     { q: "What types of security seals does Sealed & Secured supply?", a: "We supply premium security seals including Suretite plastic seals, Twinlock, Nylock and padlock seals, cable seals, bolt seals, stainless-steel cable ties and tamper-evident security bags for logistics and industrial use." },
     { q: "What is the difference between tamper-evident and bolt seals?", a: "Tamper-evident seals (such as cable or plastic seals) break visibly when tampered with, deterring interference with bags or light-weight closures. Bolt seals are heavy-duty metal seals used on containers, trailers and high-value cargo where strong, secure locking is required." },
     { q: "Can you print serial numbers, barcodes or logos on seals?", a: "Yes. We offer custom laser printing of logos, barcodes and serial numbers on qualifying products. Please contact our sales team for a quote." },
-    { q: "Where do you deliver and is collection available?", a: "We deliver across South Africa. Free collection is available from our Springs (Gauteng) location for most products; cable ties are delivery-only." },
+    { q: "Where do you deliver and is collection available?", a: "We deliver across South Africa. Free collection is available from our Springs (Gauteng) location for most products; cable ties and plastic tags are delivery-only." },
   ];
   const faqJsonLd = {
     "@context": "https://schema.org",

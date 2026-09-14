@@ -67,11 +67,12 @@ const Navbar: React.FC = () => {
                   </Link>
                   <div className="absolute left-full top-0 mt-0 w-48 bg-white rounded-xl shadow-lg border border-gray-100 opacity-0 invisible group-hover/sub:opacity-100 group-hover/sub:visible transition-all duration-200 z-50 py-2 ml-1">
                     <Link href="/shop?category=plastic" className="block px-4 py-2.5 text-gray-600 hover:text-brand-600 hover:bg-gray-50 font-medium">Plastic Seals</Link>
-                    <Link href="/shop?category=plastic-tags" className="block px-4 py-2.5 text-gray-600 hover:text-brand-600 hover:bg-gray-50 font-medium">Plastic tags</Link>
                     <Link href="/shop?category=barrier" className="block px-4 py-2.5 text-gray-600 hover:text-brand-600 hover:bg-gray-50 font-medium">Barrier Seals</Link>
                     <Link href="/shop?category=metal" className="block px-4 py-2.5 text-gray-600 hover:text-brand-600 hover:bg-gray-50 font-medium">Metal Seals</Link>
                   </div>
                 </div>
+                {/* Plastic tags — own top-level item (owner 2026-09-14) */}
+                <Link href="/shop?category=plastic-tags" className="block mx-2 px-4 py-2 text-gray-600 hover:text-brand-600 hover:bg-gray-50 rounded-lg font-medium">Plastic tags</Link>
                 {/* Security Bags */}
                 <Link href="/shop?category=security-bags" className="block mx-2 px-4 py-2 text-gray-600 hover:text-brand-600 hover:bg-gray-50 rounded-lg font-medium">Security Bags</Link>
                 {/* Cable Ties — nested sub-menu */}
@@ -153,9 +154,9 @@ const Navbar: React.FC = () => {
           <div className="px-4 py-2">
             <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">Shop</p>
             <Link href="/shop?category=plastic" onClick={() => setIsOpen(false)} className="block py-1.5 text-gray-600 font-medium hover:text-brand-600">Plastic Seals</Link>
-            <Link href="/shop?category=plastic-tags" onClick={() => setIsOpen(false)} className="block py-1.5 text-gray-600 font-medium hover:text-brand-600">Plastic tags</Link>
             <Link href="/shop?category=barrier" onClick={() => setIsOpen(false)} className="block py-1.5 text-gray-600 font-medium hover:text-brand-600">Barrier Seals</Link>
             <Link href="/shop?category=metal" onClick={() => setIsOpen(false)} className="block py-1.5 text-gray-600 font-medium hover:text-brand-600">Metal Seals</Link>
+            <Link href="/shop?category=plastic-tags" onClick={() => setIsOpen(false)} className="block py-1.5 text-gray-600 font-medium hover:text-brand-600">Plastic tags</Link>
             <Link href="/shop?category=security-bags" onClick={() => setIsOpen(false)} className="block py-1.5 text-gray-600 font-medium hover:text-brand-600">Security Bags</Link>
             <Link href="/shop?category=plastic-cable-ties" onClick={() => setIsOpen(false)} className="block py-1.5 text-gray-600 font-medium hover:text-brand-600">Plastic Cable Ties</Link>
             <Link href="/shop?category=steel-cable-ties" onClick={() => setIsOpen(false)} className="block py-1.5 text-gray-600 font-medium hover:text-brand-600">Stainless Steel Cable Ties</Link>

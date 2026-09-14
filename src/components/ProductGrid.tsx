@@ -11,20 +11,20 @@ const categories = [
     description: 'Versatile & Cost-effective indicative solutions.',
   },
   {
-    id: 5,
-    name: 'Plastic tags',
-    href: '/shop?category=plastic-tags',
-    imageSrc: '/assets/Motag printed.jpg',
-    imageAlt: 'Printed and unprinted plastic tags for identification and marking.',
-    description: 'Flat plastic tags for asset marking and identification.',
-  },
-  {
     id: 2,
     name: 'Barrier Seals',
     href: '/shop',
     imageSrc: '/assets/cable-lock.jpg',
     imageAlt: 'High-security barrier seals for containers and doors.',
     description: 'Heavy-duty barrier seals for maximum security.',
+  },
+  {
+    id: 5,
+    name: 'Plastic tags',
+    href: '/shop?category=plastic-tags',
+    imageSrc: '/assets/Motag printed.jpg',
+    imageAlt: 'Printed and unprinted plastic tags for identification and marking.',
+    description: 'Flat plastic tags for asset marking and identification.',
   },
   {
     id: 3,

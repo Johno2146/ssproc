@@ -37,7 +37,7 @@ const ShippingPolicy: React.FC = () => {
 
         <div>
           <h2 className="text-xl font-bold text-gray-900 border-b border-gray-100 pb-2">7. Collection</h2>
-          <p className="mt-4">You may collect your order from our premises at Eastwood Business Park, 23 Wright Street, Nuffield, Springs, Gauteng, at no charge. Please contact us to arrange a collection time.</p>
+          <p className="mt-4">You may collect your order from our premises at Eastwood Business Park, 23 Wright Street, Nuffield, Springs, Gauteng, at no charge. Please contact us to arrange a collection time. Cable ties and plastic tags are delivery-only and cannot be collected.</p>
         </div>
       </section>
     </LegalLayout>

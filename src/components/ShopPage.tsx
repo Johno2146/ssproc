@@ -91,9 +91,9 @@ const productImages: Record<string, string> = {
 const categories: Record<string, { label: string; slugs: string[] }> = {
   'all': { label: 'All Products', slugs: [] },
   'plastic': { label: 'Plastic Seals', slugs: ['suretite-230mm', 'suretite-320mm', 'suretite-barcoded', 'twinlock', 'twinlock-barcoded', 'padlock-seal', 'nylock-seal'] },
-  'plastic-tags': { label: 'Plastic tags', slugs: ['motag-35x75', 'tag-62x100', 'tag-62x125', 'tag-62x150', 'tag-75x150'] },
   'barrier': { label: 'Barrier Seals', slugs: ['bolt-seal', 'cable-seal-500mm', 'abs-cable-lock', 'cable-seal-300mm', 'cable-seal-500mm'] },
   'metal': { label: 'Metal Seals', slugs: ['metal-strap-ball', 'metal-strap-flat'] },
+  'plastic-tags': { label: 'Plastic tags', slugs: ['motag-35x75', 'tag-62x100', 'tag-62x125', 'tag-62x150', 'tag-75x150'] },
   'security-bags': { label: 'Security Bags', slugs: ['cash-bags', 'till-bag', 'envopoly'] },
   'plastic-cable-ties': { label: 'Plastic Cable Ties', slugs: ['heavy-duty-double-zip-tie-handcuff','ct-100mm','ct-150mm','ct-200mm','ct-slim-200mm','ct-heavy-duty-200mm','ct-300mm','ct-heavy-duty-300mm','ct-400mm','ct-heavy-duty-400mm','ct-heavy-duty-500mm','ct-extra-heavy-duty-540mm'] },
   'steel-cable-ties': { label: 'Stainless Steel Cable Ties', slugs: ['ss-4-6-150mm','ss-4-6-200mm','ss-4-6-250mm','ss-4-6-300mm','ss-4-6-350mm','ss-4-6-400mm','ss-4-6-450mm','ss-4-6-500mm','ss-4-6-550mm','ss-4-6-600mm','ss-7-9-200mm','ss-7-9-250mm','ss-7-9-300mm','ss-7-9-350mm','ss-7-9-400mm','ss-7-9-450mm','ss-7-9-500mm','ss-7-9-550mm','ss-7-9-600mm','ss-7-9-650mm','ss-7-9-700mm','ss-7-9-750mm','ss-7-9-800mm', 'ss-installation-tool'] },
@@ -120,20 +120,20 @@ const ShopPage: React.FC<ShopPageProps> = async ({ selectedCategory }) => {
   // Filter products by category
   const categoryDef = categories[selectedCategory] || categories['all'];
   const baseProducts = categoryDef.slugs.length > 0
-    ? allProducts.filter(p => categoryDef.slugs.includes(p.slug))
+    ? allProducts.filter(p => categoryDef.slugs.includes(p.slug)).sort((a, b) => categoryDef.slugs.indexOf(a.slug) - categoryDef.slugs.indexOf(b.slug))
     : allProducts;
   // "All Products" ordering: group products in a logical category order with
-  // Metal Seals placed above both cable-tie categories (owner request). Stable
-  // sort: within a category the API/DB order is preserved. Category-filter
-  // views (slugs list) are untouched.
+  // Metal Seals above plastic tags and both cable-tie categories (owner order
+  // 2026-09-14). Slug-driven category views are sorted by their slugs array
+  // above, so DB row order never leaks through.
   let products = baseProducts;
   if (categoryDef.slugs.length === 0) {
     const categoryRank = new Map([
       ['Plastic Seals', 0],
-      ['Plastic tags', 1],
-      ['Bolt Seals', 2],
-      ['Cable Seals', 3],
-      ['Metal Seals', 4],
+      ['Bolt Seals', 1],
+      ['Cable Seals', 2],
+      ['Metal Seals', 3],
+      ['Plastic tags', 4],
       ['Security Bags', 5],
       ['Plastic Cable Ties', 6],
       ['Stainless Steel Cable Ties', 7],
