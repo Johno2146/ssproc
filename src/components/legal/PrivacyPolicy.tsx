@@ -51,14 +51,14 @@ const PrivacyPolicy: React.FC = () => {
           <ul className="mt-4 list-disc list-inside space-y-2">
             <li><strong>Payfast</strong> (payment processing).</li>
             <li><strong>The Courier Guy</strong> and other shipping partners (order delivery).</li>
-            <li><strong>SendGrid</strong> (transactional emails, including OTPs).</li>
+            <li><strong>Resend</strong> (resend.com) (transactional emails: order notifications, OTPs, and password resets, sent from orders@ssproc.co.za).</li>
           </ul>
           <p className="mt-2">Where we share your data with third parties, we have agreements in place to ensure they process your data in compliance with POPIA. Some of these third parties may be located outside South Africa.</p>
         </div>
 
         <div>
           <h2 className="text-xl font-bold text-gray-900 border-b border-gray-100 pb-2">6. Cross-Border Data Transfers</h2>
-          <p className="mt-4">Your personal information may be transferred to, and processed in, countries outside South Africa where our service providers are located (e.g., SendGrid in the United States). We ensure that adequate safeguards are in place and that the transfer complies with POPIA Section 72.</p>
+          <p className="mt-4">Your personal information may be transferred to, and processed in, countries outside South Africa where our service providers are located (e.g., Resend in the United States). We ensure that adequate safeguards are in place and that the transfer complies with POPIA Section 72.</p>
         </div>
 
         <div>

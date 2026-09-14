@@ -63,6 +63,14 @@ function brandedEmail(title: string, content: string): string {
 </html>`;
 }
 
+/**
+ * Wrap outreach plain text in the branded email shell (used by /api/outreach/send
+ * when the caller provides plain text instead of pre-built HTML).
+ */
+export function outreachBrandedHtml(title: string, plainText: string): string {
+  return brandedEmail(title, `<p style="margin:0 0 16px;white-space:pre-line;">${esc(plainText)}</p>`);
+}
+
 export async function sendEmail(to: string, subject: string, body: string): Promise<boolean> {
   // Detect if body is already HTML; if not, wrap in branded shell as plain text
   const isHtml = /<[a-z][\s\S]*>/i.test(body);
