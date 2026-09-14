@@ -26,6 +26,7 @@ interface ProductDetailClientProps {
   tiers: QuantityTier[] | null;
   tierColours?: Record<string, string[]>;
   colourImages?: Record<string, string>;
+  tierImages?: Record<string, string>;
   weightKg?: number;
   lengthCm?: number;
   widthCm?: number;
@@ -51,9 +52,14 @@ const colourHexMap: Record<string, string> = {
   'Navy': '#1e3a5f',
   'Lime': '#84cc16',
   'Silver': '#c0c0c0',
+  // Plastic tags colour range (owner 2026-09-14)
+  'Clear': '#ffffff',
+  'Lilac': '#a78bfa',
+  'Florescent Yellow': '#ccff00',
+  'Magenta': '#ff00ff',
 };
 
-const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ productId, name, price, unit, imageUrl, minOrder, colours, tiers, tierColours, colourImages, weightKg, lengthCm, widthCm, heightCm }) => {
+const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ productId, name, price, unit, imageUrl, minOrder, colours, tiers, tierColours, colourImages, tierImages, weightKg, lengthCm, widthCm, heightCm }) => {
   const [added, setAdded] = useState(false);
   const [selectedColour, setSelectedColour] = useState<string | null>(null);
   const [selectedTierIndex, setSelectedTierIndex] = useState(0);
@@ -185,7 +191,14 @@ const ProductDetailClient: React.FC<ProductDetailClientProps> = ({ productId, na
             {tiers.map((tier, index) => (
               <button
                 key={tier.label}
-                onClick={() => { setSelectedTierIndex(index); setQuantity(1); }}
+                onClick={() => {
+                  setSelectedTierIndex(index);
+                  setQuantity(1);
+                  // Tier-aware product images (e.g. Motag Printed / Unprinted)
+                  if (tierImages && tierImages[tier.label]) {
+                    setDisplayImage(tierImages[tier.label]);
+                  }
+                }}
                 className={`px-5 py-3 rounded-xl font-bold text-sm transition-all border-2 ${
                   selectedTierIndex === index
                     ? 'bg-brand-blue text-white border-brand-600 shadow-md'

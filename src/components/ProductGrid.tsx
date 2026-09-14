@@ -5,10 +5,18 @@ const categories = [
   {
     id: 1,
     name: 'Plastic Indicative Seals',
-    href: '/auth/register',
+    href: '/shop?category=plastic',
     imageSrc: '/assets/suretite.jpg',
     imageAlt: 'Various colorful plastic security seals.',
     description: 'Versatile & Cost-effective indicative solutions.',
+  },
+  {
+    id: 5,
+    name: 'Plastic tags',
+    href: '/shop?category=plastic-tags',
+    imageSrc: '/assets/Motag printed.jpg',
+    imageAlt: 'Printed and unprinted plastic tags for identification and marking.',
+    description: 'Flat plastic tags for asset marking and identification.',
   },
   {
     id: 2,

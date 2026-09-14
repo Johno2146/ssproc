@@ -5,7 +5,7 @@ import crypto from "crypto";
 const prisma = new PrismaClient();
 
 // ---------------------------------------------------------------------------
-// Dev-only seed script — mirrors the LIVE 52-product catalog (2026-09-10).
+// Dev-only seed script — mirrors the LIVE 57-product catalog (2026-09-14).
 //
 // Source of truth:
 //   - src/lib/productData.ts quantityTiers (prices are the owner's FINAL NET
@@ -37,7 +37,7 @@ async function main() {
     },
   });
 
-  // Create Products (52 — full live catalog)
+  // Create Products (57 — full live catalog)
   const productsData = [
   {
     name: 'Suretite 320mm',
@@ -610,6 +610,64 @@ async function main() {
     unit: 'Pack of 1',
     minOrder: 1,
     stock: 1,
+  },
+  // Plastic tags (added 2026-09-14, owner request). Motag has two pack
+  // options (Printed/Unprinted); Product.price = MIN tier price (rule since
+  // commit 58cbb10). Sizes are unprinted, sold per 1000.
+  {
+    name: 'Motag',
+    slug: 'motag-35x75',
+    category: 'Plastic tags',
+    price: 390,
+    imageUrl: '/assets/Motag printed.jpg',
+    description: 'Plastic tag 35 x 75 mm. Printed or unprinted, 200 per box. Colours: Clear, White, Yellow, Orange, Red, Pink, Lilac, Blue, Green, Silver, Florescent Yellow, Magenta.',
+    unit: '200 box',
+    minOrder: 200,
+    stock: 100,
+  },
+  {
+    name: 'Tag 62 x 100mm',
+    slug: 'tag-62x100',
+    category: 'Plastic tags',
+    price: 1630,
+    imageUrl: '/assets/62x100.webp',
+    description: 'Unprinted plastic tag 62 x 100 mm. Sold per 1000. Colours: Clear, White, Yellow, Orange, Red, Pink, Lilac, Blue, Green, Silver, Florescent Yellow, Magenta. Contact sales for printing options.',
+    unit: 'Per 1000',
+    minOrder: 1000,
+    stock: 100,
+  },
+  {
+    name: 'Tag 62 x 125mm',
+    slug: 'tag-62x125',
+    category: 'Plastic tags',
+    price: 1790,
+    imageUrl: '/assets/62x125.webp',
+    description: 'Unprinted plastic tag 62 x 125 mm. Sold per 1000. Colours: Clear, White, Yellow, Orange, Red, Pink, Lilac, Blue, Green, Silver, Florescent Yellow, Magenta. Contact sales for printing options.',
+    unit: 'Per 1000',
+    minOrder: 1000,
+    stock: 100,
+  },
+  {
+    name: 'Tag 62 x 150mm',
+    slug: 'tag-62x150',
+    category: 'Plastic tags',
+    price: 2010,
+    imageUrl: '/assets/62x150mm.webp',
+    description: 'Unprinted plastic tag 62 x 150 mm. Sold per 1000. Colours: Clear, White, Yellow, Orange, Red, Pink, Lilac, Blue, Green, Silver, Florescent Yellow, Magenta. Contact sales for printing options.',
+    unit: 'Per 1000',
+    minOrder: 1000,
+    stock: 100,
+  },
+  {
+    name: 'Tag 75 x 150mm',
+    slug: 'tag-75x150',
+    category: 'Plastic tags',
+    price: 2350,
+    imageUrl: '/assets/75x150.webp',
+    description: 'Unprinted plastic tag 75 x 150 mm. Sold per 1000. Colours: Clear, White, Yellow, Orange, Red, Pink, Lilac, Blue, Green, Silver, Florescent Yellow, Magenta. Contact sales for printing options.',
+    unit: 'Per 1000',
+    minOrder: 1000,
+    stock: 100,
   },
   ];
 

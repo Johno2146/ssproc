@@ -41,6 +41,12 @@ const productImages: Record<string, string> = {
   // Metal Seals
   'metal-strap-ball': '/assets/Ball.jpg',
   'metal-strap-flat': '/assets/Flat.jpg',
+  // Plastic Tags
+  'motag-35x75': '/assets/Motag printed.jpg',
+  'tag-62x100': '/assets/62x100.webp',
+  'tag-62x125': '/assets/62x125.webp',
+  'tag-62x150': '/assets/62x150mm.webp',
+  'tag-75x150': '/assets/75x150.webp',
 
   'ct-100mm': '/assets/CT black.jpg',
   'ct-150mm': '/assets/CT black.jpg',
@@ -85,6 +91,7 @@ const productImages: Record<string, string> = {
 const categories: Record<string, { label: string; slugs: string[] }> = {
   'all': { label: 'All Products', slugs: [] },
   'plastic': { label: 'Plastic Seals', slugs: ['suretite-230mm', 'suretite-320mm', 'suretite-barcoded', 'twinlock', 'twinlock-barcoded', 'padlock-seal', 'nylock-seal'] },
+  'plastic-tags': { label: 'Plastic tags', slugs: ['motag-35x75', 'tag-62x100', 'tag-62x125', 'tag-62x150', 'tag-75x150'] },
   'barrier': { label: 'Barrier Seals', slugs: ['bolt-seal', 'cable-seal-500mm', 'abs-cable-lock', 'cable-seal-300mm', 'cable-seal-500mm'] },
   'metal': { label: 'Metal Seals', slugs: ['metal-strap-ball', 'metal-strap-flat'] },
   'security-bags': { label: 'Security Bags', slugs: ['cash-bags', 'till-bag', 'envopoly'] },
@@ -123,12 +130,13 @@ const ShopPage: React.FC<ShopPageProps> = async ({ selectedCategory }) => {
   if (categoryDef.slugs.length === 0) {
     const categoryRank = new Map([
       ['Plastic Seals', 0],
-      ['Bolt Seals', 1],
-      ['Cable Seals', 2],
-      ['Metal Seals', 3],
-      ['Security Bags', 4],
-      ['Plastic Cable Ties', 5],
-      ['Stainless Steel Cable Ties', 6],
+      ['Plastic tags', 1],
+      ['Bolt Seals', 2],
+      ['Cable Seals', 3],
+      ['Metal Seals', 4],
+      ['Security Bags', 5],
+      ['Plastic Cable Ties', 6],
+      ['Stainless Steel Cable Ties', 7],
     ]);
     products = [...baseProducts].sort(
       (a, b) => (categoryRank.get(a.category) ?? 999) - (categoryRank.get(b.category) ?? 999)

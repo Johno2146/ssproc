@@ -39,6 +39,14 @@ export interface ProductOption {
   boxWeight?: string;
 }
 
+// Plastic tags / compression tags — owner-supplied colour range (2026-09-14).
+// Applies to Motag (both Printed and Unprinted pack options) and all four
+// 62x/75x tag sizes.
+export const TAGS_COLOURS = [
+  'Clear', 'White', 'Yellow', 'Orange', 'Red', 'Pink', 'Lilac',
+  'Blue', 'Green', 'Silver', 'Florescent Yellow', 'Magenta',
+];
+
 export const productSpecs: Record<string, ProductSpec> = {
   'suretite-320mm': {
     material: 'High quality polypropylene',
@@ -348,6 +356,37 @@ export const productSpecs: Record<string, ProductSpec> = {
     securityLevel: 'High',
     printing: ['Unique sequential numbers'],
   },
+
+  // --- Plastic tags (owner 2026-09-14) -------------------------------------
+  // Flat compression tags. Owner-supplied: sizes, colours, pack prices.
+  // Motag has two pack options (Printed / Unprinted) under one product;
+  // the 62x100 / 62x125 / 62x150 / 75x150 tags are unprinted (contact sales
+  // for printing — the product page already shows the Laser Printing CTA).
+  'motag-35x75': {
+    material: 'Plastic',
+    dimensions: '35mm x 75mm',
+    colours: TAGS_COLOURS,
+  },
+  'tag-62x100': {
+    material: 'Plastic',
+    dimensions: '62mm x 100mm',
+    colours: TAGS_COLOURS,
+  },
+  'tag-62x125': {
+    material: 'Plastic',
+    dimensions: '62mm x 125mm',
+    colours: TAGS_COLOURS,
+  },
+  'tag-62x150': {
+    material: 'Plastic',
+    dimensions: '62mm x 150mm',
+    colours: TAGS_COLOURS,
+  },
+  'tag-75x150': {
+    material: 'Plastic',
+    dimensions: '75mm x 150mm',
+    colours: TAGS_COLOURS,
+  },
 };
 
 export const quantityTiers: Record<string, QuantityTier[]> = {
@@ -560,6 +599,32 @@ export const quantityTiers: Record<string, QuantityTier[]> = {
   'envopoly': [
     { label: 'Per 1000', unit: '1000 pack', price: 185.00, shipping: { weightKg: 2.80, lengthCm: 30, widthCm: 25, heightCm: 18 } },
   ],
+
+  // --- Plastic tags pack shipping (derived 2026-09-14) ---------------------
+  // Flat plastic tag stock. Per-tag weight = tag area (mm²) × 0.28 mm sheet
+  // thickness × density ~1.0 g/cm³, × pack qty, + ~0.1 kg carton allowance.
+  // Box dims sized to the tag footprint plus stacking allowance. All values
+  // are DERIVED ESTIMATES (no SA supplier publishes pack weights) — the
+  // owner's measured numbers override when available. Prices are the owner's
+  // final NET prices (VAT_RATE=0); Motag Printed/Unprinted = two pack options
+  // of the same product; the four tag sizes are unprinted, sold per 1000.
+  // ---------------------------------------------------------------------------
+  'motag-35x75': [
+    { label: 'Printed', unit: '200 box', price: 410.00, shipping: { weightKg: 0.30, lengthCm: 24, widthCm: 16, heightCm: 9 } },
+    { label: 'Unprinted', unit: '200 box', price: 390.00, shipping: { weightKg: 0.28, lengthCm: 24, widthCm: 16, heightCm: 9 } },
+  ],
+  'tag-62x100': [
+    { label: 'Per 1000', unit: '1000 pack', price: 1630.00, shipping: { weightKg: 1.85, lengthCm: 28, widthCm: 20, heightCm: 12 } },
+  ],
+  'tag-62x125': [
+    { label: 'Per 1000', unit: '1000 pack', price: 1790.00, shipping: { weightKg: 2.30, lengthCm: 30, widthCm: 20, heightCm: 13 } },
+  ],
+  'tag-62x150': [
+    { label: 'Per 1000', unit: '1000 pack', price: 2010.00, shipping: { weightKg: 2.70, lengthCm: 30, widthCm: 22, heightCm: 14 } },
+  ],
+  'tag-75x150': [
+    { label: 'Per 1000', unit: '1000 pack', price: 2350.00, shipping: { weightKg: 3.30, lengthCm: 33, widthCm: 24, heightCm: 16 } },
+  ],
 };
 
 export const colourHexMap: Record<string, string> = {
@@ -576,6 +641,14 @@ export const colourHexMap: Record<string, string> = {
   'Yellow': '#eab308',
   'Pink': '#ec4899',
   'Grey': '#6b7280',
+  // Plastic tags colour range (owner 2026-09-14)
+  'Clear': '#ffffff',
+  'Lilac': '#a78bfa',
+  'Blue': '#2563eb',
+  'Green': '#16a34a',
+  'Silver': '#c0c0c0',
+  'Florescent Yellow': '#ccff00',
+  'Magenta': '#ff00ff',
 };
 
 // Tier-specific colour restrictions for certain products
@@ -628,5 +701,22 @@ export const tierColours: Record<string, Record<string, string[]>> = {
   },
   'envopoly': {
     'Per 1000': ['White'],
+  },
+  // Plastic tags — full colour range on every pack option (owner 2026-09-14)
+  'motag-35x75': {
+    'Printed': TAGS_COLOURS,
+    'Unprinted': TAGS_COLOURS,
+  },
+  'tag-62x100': {
+    'Per 1000': TAGS_COLOURS,
+  },
+  'tag-62x125': {
+    'Per 1000': TAGS_COLOURS,
+  },
+  'tag-62x150': {
+    'Per 1000': TAGS_COLOURS,
+  },
+  'tag-75x150': {
+    'Per 1000': TAGS_COLOURS,
   },
 };
