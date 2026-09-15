@@ -8,10 +8,10 @@ import { createClient } from "@libsql/client";
 // fallback only). Safe to re-run: upsert by slug, UUID ids, idempotent.
 const PRODUCTS = [
   ["Motag", "motag-35x75", "Plastic tag 35 x 75 mm. Printed or unprinted, 200 per box. Colours: Clear, White, Yellow, Orange, Red, Pink, Lilac, Blue, Green, Silver, Florescent Yellow, Magenta.", "Plastic tags", 390.0, "200 box", 200, 100, "/assets/Motag printed.jpg"],
-  ["Tag 62 x 100mm", "tag-62x100", "Unprinted plastic tag 62 x 100 mm. Sold per 1000. Colours: Clear, White, Yellow, Orange, Red, Pink, Lilac, Blue, Green, Silver, Florescent Yellow, Magenta. Contact sales for printing options.", "Plastic tags", 1630.0, "Per 1000", 1000, 100, "/assets/62x100.webp"],
-  ["Tag 62 x 125mm", "tag-62x125", "Unprinted plastic tag 62 x 125 mm. Sold per 1000. Colours: Clear, White, Yellow, Orange, Red, Pink, Lilac, Blue, Green, Silver, Florescent Yellow, Magenta. Contact sales for printing options.", "Plastic tags", 1790.0, "Per 1000", 1000, 100, "/assets/62x125.webp"],
-  ["Tag 62 x 150mm", "tag-62x150", "Unprinted plastic tag 62 x 150 mm. Sold per 1000. Colours: Clear, White, Yellow, Orange, Red, Pink, Lilac, Blue, Green, Silver, Florescent Yellow, Magenta. Contact sales for printing options.", "Plastic tags", 2010.0, "Per 1000", 1000, 100, "/assets/62x150mm.webp"],
-  ["Tag 75 x 150mm", "tag-75x150", "Unprinted plastic tag 75 x 150 mm. Sold per 1000. Colours: Clear, White, Yellow, Orange, Red, Pink, Lilac, Blue, Green, Silver, Florescent Yellow, Magenta. Contact sales for printing options.", "Plastic tags", 2350.0, "Per 1000", 1000, 100, "/assets/75x150.webp"],
+  ["Tag 62 x 100mm", "tag-62x100", "Unprinted plastic tag 62 x 100 mm. Sold per 1000. Colours: Clear, White, Yellow, Orange, Red, Pink, Lilac, Blue, Green, Silver, Florescent Yellow, Magenta. Contact sales for printing options.", "Plastic tags", 1630.0, "Per 1000", 1000, 100, "/assets/62x100.png"],
+  ["Tag 62 x 125mm", "tag-62x125", "Unprinted plastic tag 62 x 125 mm. Sold per 1000. Colours: Clear, White, Yellow, Orange, Red, Pink, Lilac, Blue, Green, Silver, Florescent Yellow, Magenta. Contact sales for printing options.", "Plastic tags", 1790.0, "Per 1000", 1000, 100, "/assets/62x125.png"],
+  ["Tag 62 x 150mm", "tag-62x150", "Unprinted plastic tag 62 x 150 mm. Sold per 1000. Colours: Clear, White, Yellow, Orange, Red, Pink, Lilac, Blue, Green, Silver, Florescent Yellow, Magenta. Contact sales for printing options.", "Plastic tags", 2010.0, "Per 1000", 1000, 100, "/assets/62x150.png"],
+  ["Tag 75 x 150mm", "tag-75x150", "Unprinted plastic tag 75 x 150 mm. Sold per 1000. Colours: Clear, White, Yellow, Orange, Red, Pink, Lilac, Blue, Green, Silver, Florescent Yellow, Magenta. Contact sales for printing options.", "Plastic tags", 2350.0, "Per 1000", 1000, 100, "/assets/75x150.png"],
 ];
 const turso = createClient({
   url: process.env.TURSO_DATABASE_URL || "",

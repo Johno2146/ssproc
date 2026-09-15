@@ -68,10 +68,10 @@ const productImages: Record<string, string> = {
   'metal-strap-flat': '/assets/Flat.jpg',
   // Plastic Tags
   'motag-35x75': '/assets/Motag printed.jpg',
-  'tag-62x100': '/assets/62x100.webp',
-  'tag-62x125': '/assets/62x125.webp',
-  'tag-62x150': '/assets/62x150mm.webp',
-  'tag-75x150': '/assets/75x150.webp',
+  'tag-62x100': '/assets/62x100.png',
+  'tag-62x125': '/assets/62x125.png',
+  'tag-62x150': '/assets/62x150.png',
+  'tag-75x150': '/assets/75x150.png',
   
   'ct-100mm': '/assets/CT white.jpg',
   'ct-150mm': '/assets/CT white.jpg',
@@ -170,7 +170,7 @@ const ProductDetailPage: React.FC<ProductPageProps> = async ({ params }) => {
   // different photo per option (owner 2026-09-14). The client switches the
   // main image when the selected pack option changes.
   const tierImages: Record<string, string> | undefined = product.slug === 'motag-35x75'
-    ? { Printed: '/assets/Motag printed.jpg', Unprinted: '/assets/MOTAG Unprinted.avif' }
+    ? { Printed: '/assets/Motag printed.jpg', Unprinted: '/assets/MOTAG Unprinted.png' }
     : undefined;
 
   return (
