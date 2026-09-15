@@ -11,22 +11,29 @@ const Contact: React.FC = () => {
   });
   const [submitted, setFormDataSubmitted] = useState(false);
   const [sending, setSending] = useState(false);
+  const [error, setError] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSending(true);
+    setError('');
     try {
-      const res = await fetch('https://formspree.io/f/xkodjbzj', {
+      const res = await fetch('/api/contact', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Accept': 'application/json',
         },
         body: JSON.stringify(formData),
       });
-      if (!res.ok) throw new Error('Form submission failed');
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || 'Form submission failed');
+      }
     } catch (err) {
       console.error('Failed to send inquiry:', err);
+      setError(err instanceof Error ? err.message : 'Something went wrong. Please try again or email sales@ssproc.co.za.');
+      setSending(false);
+      return;
     }
     setSending(false);
     setFormDataSubmitted(true);
@@ -176,6 +183,11 @@ const Contact: React.FC = () => {
                     className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 outline-none transition-all"
                   ></textarea>
                 </div>
+                {error && (
+                  <div className="bg-red-50 border border-red-200 text-red-700 text-sm rounded-xl px-4 py-3" role="alert">
+                    {error}
+                  </div>
+                )}
                 <button
                   type="submit"
                   disabled={sending}

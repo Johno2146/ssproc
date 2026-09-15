@@ -71,7 +71,20 @@ export function outreachBrandedHtml(title: string, plainText: string): string {
   return brandedEmail(title, `<p style="margin:0 0 16px;white-space:pre-line;">${esc(plainText)}</p>`);
 }
 
-export async function sendEmail(to: string, subject: string, body: string): Promise<boolean> {
+export interface SendEmailOptions {
+  replyTo?: string;
+}
+
+interface EmailResult {
+  ok: boolean;
+  id?: string;
+}
+
+/**
+ * Core send helper. Returns {ok, id} so callers that need the Resend message
+ * id (e.g. /api/contact verification) can surface it.
+ */
+export async function sendEmailWithResult(to: string, subject: string, body: string, opts?: SendEmailOptions): Promise<EmailResult> {
   // Detect if body is already HTML; if not, wrap in branded shell as plain text
   const isHtml = /<[a-z][\s\S]*>/i.test(body);
   const html = isHtml ? body : brandedEmail(subject, `<p style="margin:0 0 16px;white-space:pre-line;">${esc(body)}</p>`);
@@ -80,7 +93,7 @@ export async function sendEmail(to: string, subject: string, body: string): Prom
   if (!resend) {
     console.log(`[EMAIL DISABLED] To: ${to}, Subject: ${subject}`);
     console.log(body);
-    return false;
+    return { ok: false };
   }
 
   try {
@@ -90,19 +103,24 @@ export async function sendEmail(to: string, subject: string, body: string): Prom
       subject,
       html,
       text,
+      ...(opts?.replyTo ? { replyTo: opts.replyTo } : {}),
     });
 
     if (error) {
       console.error(`[EMAIL ERROR] To: ${to}:`, error);
-      return false;
+      return { ok: false };
     }
 
     console.log(`[EMAIL SENT] To: ${to}, ID: ${data?.id}`);
-    return true;
+    return { ok: true, id: data?.id };
   } catch (e) {
     console.error(`[EMAIL ERROR] To: ${to}:`, e);
-    return false;
+    return { ok: false };
   }
+}
+
+export async function sendEmail(to: string, subject: string, body: string, opts?: SendEmailOptions): Promise<boolean> {
+  return (await sendEmailWithResult(to, subject, body, opts)).ok;
 }
 
 export async function sendOtpEmail(email: string, name: string, otp: string): Promise<boolean> {
