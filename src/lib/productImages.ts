@@ -22,7 +22,7 @@ export const productImages: Record<string, string> = {
   'motag-35x75': '/assets/Motag printed.jpg',
   'tag-62x100': '/assets/62x100.png',
   'tag-62x125': '/assets/62x100.png',
-  'tag-62x150': '/assets/62x150.png',
+  'tag-62x150': '/assets/62x150mm.png',
   'tag-75x150': '/assets/75x150.png',
   // Plastic Cable Ties
   'ct-100mm': '/assets/CT black.jpg',
