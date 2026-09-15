@@ -363,27 +363,27 @@ export const productSpecs: Record<string, ProductSpec> = {
   // the 62x100 / 62x125 / 62x150 / 75x150 tags are unprinted (contact sales
   // for printing — the product page already shows the Laser Printing CTA).
   'motag-35x75': {
-    material: 'Plastic',
+    material: 'Polypropylene',
     dimensions: '35mm x 75mm',
     colours: TAGS_COLOURS,
   },
   'tag-62x100': {
-    material: 'Plastic',
+    material: 'Polypropylene',
     dimensions: '62mm x 100mm',
     colours: TAGS_COLOURS,
   },
   'tag-62x125': {
-    material: 'Plastic',
+    material: 'Polypropylene',
     dimensions: '62mm x 125mm',
     colours: TAGS_COLOURS,
   },
   'tag-62x150': {
-    material: 'Plastic',
+    material: 'Polypropylene',
     dimensions: '62mm x 150mm',
     colours: TAGS_COLOURS,
   },
   'tag-75x150': {
-    material: 'Plastic',
+    material: 'Polypropylene',
     dimensions: '75mm x 150mm',
     colours: TAGS_COLOURS,
   },
