@@ -50,7 +50,7 @@ const PrivacyPolicy: React.FC = () => {
           <p className="mt-4">We do not sell your personal information to third parties. We share your information with trusted third parties only as necessary to provide our services:</p>
           <ul className="mt-4 list-disc list-inside space-y-2">
             <li><strong>Payfast</strong> (payment processing).</li>
-            <li><strong>The Courier Guy</strong> and other shipping partners (order delivery).</li>
+            <li><strong>our delivery partners</strong> (order delivery and tracking).</li>
             <li><strong>Resend</strong> (resend.com) (transactional emails: order notifications, OTPs, and password resets, sent from orders@ssproc.co.za).</li>
           </ul>
           <p className="mt-2">Where we share your data with third parties, we have agreements in place to ensure they process your data in compliance with POPIA. Some of these third parties may be located outside South Africa.</p>

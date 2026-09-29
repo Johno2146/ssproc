@@ -17,7 +17,12 @@ const ShippingPolicy: React.FC = () => {
 
         <div>
           <h2 className="text-xl font-bold text-gray-900 border-b border-gray-100 pb-2">3. Shipping Rates</h2>
-          <p className="mt-4">Shipping rates are calculated based on the weight, volume, and value of your order, as well as the delivery destination. The final shipping cost will be displayed at checkout before you confirm your payment.</p>
+          <p className="mt-4">We charge a simple flat delivery fee per order, displayed at checkout before you confirm payment:</p>
+          <ul className="mt-3 list-disc list-inside space-y-2 text-gray-700">
+            <li><strong>R150 standard delivery</strong> — orders of 1–5 boxes with fewer than 1,000 seal pieces.</li>
+            <li><strong>R300 bulk delivery</strong> — orders containing 1,000 or more seal pieces (plastic, bolt, cable or metal seals) within 5 boxes.</li>
+          </ul>
+          <p className="mt-3">No online delivery is available for orders of more than 5 boxes. For those orders, please email sales@ssproc.co.za or use the contact form for a custom shipping quote.</p>
         </div>
 
         <div>

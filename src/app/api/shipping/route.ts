@@ -1,28 +1,41 @@
 import { NextResponse } from "next/server";
-// Quote logic lives in src/lib/shippingQuotes.ts (shared with /api/checkout so
-// the server can re-validate the customer's selected quote before charging).
-import { getShippingQuotes } from "@/lib/shippingQuotes";
+// Flat-rate delivery — OWNER RULE (2026-09-29). No external quote calls.
+import {
+  computeFlatShipping,
+  parsePackSize,
+  type FlatShippingLine,
+} from "@/lib/shippingFlat";
 
+// Returns the flat-rate delivery fee for the given cart lines. The definitive
+// price is still enforced in POST /api/checkout (server-authoritative); this
+// endpoint exists for display/verification only.
 export async function POST(req: Request) {
   try {
-    const { parcels, weight, destinationPostalCode, destinationCity, destinationZone, parcelValue } = await req.json();
-    if (!destinationPostalCode) {
-      return NextResponse.json({ error: "Destination postal code is required" }, { status: 400 });
+    const { items = [], parcels, weight } = await req.json();
+
+    let lines: FlatShippingLine[] = [];
+    if (Array.isArray(items) && items.length > 0) {
+      lines = items.map((it: any) => ({
+        category: it.category || '',
+        packSize: it.packSize != null ? Number(it.packSize) : parsePackSize(it.unit || it.packLabel || ''),
+        quantity: Number(it.quantity) || (Array.isArray(parcels) ? parcels.length : 0),
+      }));
+    } else if (Array.isArray(parcels) && parcels.length > 0) {
+      // Legacy shape: one line per parcel, quantity 1 each — category/unit
+      // unknown, so no seal pieces; the fee is the standard flat rate (or the
+      // over-5-boxes error if there are more than 5 parcels).
+      lines = parcels.map(() => ({ category: '', packSize: 0, quantity: 1 }));
+    } else if (weight) {
+      lines = [{ category: '', packSize: 0, quantity: 1 }];
     }
-    if ((!parcels || parcels.length === 0) && !weight) {
-      return NextResponse.json({ error: "Parcels data or weight is required" }, { status: 400 });
-    }
-    const shippingParcels = (parcels && parcels.length > 0) ? parcels : [
-      { submitted_length_cm: 20, submitted_width_cm: 20, submitted_height_cm: 10, submitted_weight_kg: weight },
-    ];
-    const quotes = await getShippingQuotes({
-      parcels: shippingParcels,
-      destinationPostalCode,
-      destinationCity,
-      destinationZone,
-      parcelValue,
+
+    const flat = computeFlatShipping(lines);
+    return NextResponse.json({
+      quotes: flat.error
+        ? []
+        : [{ provider: "Flat Rate", service: flat.shippingService, price: flat.shippingCost, estimatedDays: "2-5" }],
+      flat,
     });
-    return NextResponse.json({ quotes });
   } catch (error) {
     console.error("Shipping quote error:", error);
     return NextResponse.json({ error: "Failed to get shipping quotes. Please try again." }, { status: 500 });

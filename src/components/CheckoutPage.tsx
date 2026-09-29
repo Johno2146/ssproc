@@ -7,6 +7,7 @@ import LocationAutocomplete from './LocationAutocomplete';
 import { signIn, useSession } from 'next-auth/react';
 import { isCollectableCategory } from '@/lib/collectionPolicy';
 import { withVat } from '@/lib/vat';
+import { BULK_ORDER_MESSAGE, computeFlatShipping, parsePackSize } from '@/lib/shippingFlat';
 
 interface CartItem {
   productId: string;
@@ -21,13 +22,6 @@ interface CartItem {
   lengthCm?: number;
   widthCm?: number;
   heightCm?: number;
-}
-
-interface ShippingOption {
-  provider: string;
-  service: string;
-  price: number;
-  estimatedDays: string;
 }
 
 const CheckoutPage: React.FC = () => {
@@ -64,9 +58,6 @@ const CheckoutPage: React.FC = () => {
     postalCode: '',
     formatted: '',
   });
-  const [shippingQuotes, setShippingQuotes] = useState<ShippingOption[]>([]);
-  const [selectedShipping, setSelectedShipping] = useState<string>('collection');
-  const [fetchingQuotes, setFetchingQuotes] = useState(false);
   const [rememberDetails, setRememberDetails] = useState(false);
 
   // Load product id → category mapping to determine collection eligibility
@@ -149,7 +140,6 @@ const CheckoutPage: React.FC = () => {
   useEffect(() => {
     if (productsLoaded && cartItems.length > 0 && !collectionAllowed && deliveryMethod === 'collection') {
       setDeliveryMethod('delivery');
-      setSelectedShipping('');
     }
   }, [productsLoaded, cartItems, collectionAllowed, deliveryMethod]);
 
@@ -159,29 +149,27 @@ const CheckoutPage: React.FC = () => {
   // These client numbers are for display only and match that same figure.
   const netTotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
-  // Build parcels array - one per unique product with proper dimensions × quantity
-  const parcels = cartItems.map(item => ({
-    submitted_length_cm: Math.ceil(item.lengthCm || 20),
-    submitted_width_cm: Math.ceil(item.widthCm || 15),
-    submitted_height_cm: Math.ceil(item.heightCm || 10),
-    submitted_weight_kg: Math.round((item.weightKg || 0.1) * item.quantity * 10) / 10,
-  }));
+  // Flat-rate delivery preview (OWNER RULE 2026-09-29). The server recomputes
+  // the exact same numbers in POST /api/checkout from its own catalogue, so
+  // this is display-only: R150 standard, R300 when the cart holds 1,000+ seal
+  // pieces, and no online delivery above 5 boxes (contact sales instead).
+  const flat = cartItems.length > 0
+    ? computeFlatShipping(cartItems.map(item => ({
+        category: productCategories[String(item.productId)] || '',
+        packSize: parsePackSize(item.unit),
+        quantity: item.quantity,
+      })))
+    : { boxCount: 0, sealCount: 0, shippingCost: 0, shippingService: null as string | null, error: null as string | null };
+  const deliveryForbidden = flat.error !== null; // over 5 boxes
 
-  // Calculate total weight for display
-  const totalWeight = cartItems.reduce((sum, item) => sum + (item.weightKg || 0.01) * item.quantity, 0);
-
-  // Calculate max dimensions across all parcels for display
-  const longestLength = Math.max(...cartItems.map(item => item.lengthCm || 20));
-  const totalWidth = cartItems.reduce((sum, item) => sum + (item.widthCm || 10) * item.quantity, 0);
-  const tallestHeight = Math.max(...cartItems.map(item => item.heightCm || 10));
-
-  // Calculate shipping cost
+  // Calculate shipping cost (display-only — the server enforces the charge)
   let shippingCost = 0;
-  if (selectedShipping === 'collection') {
+  let shippingLabel = '';
+  if (deliveryMethod === 'collection') {
     shippingCost = 0;
-  } else if (selectedShipping) {
-    const selected = shippingQuotes.find(q => `${q.provider}-${q.service}` === selectedShipping);
-    if (selected) shippingCost = selected.price;
+  } else if (!deliveryForbidden) {
+    shippingCost = flat.shippingCost;
+    shippingLabel = flat.shippingService || '';
   }
 
   // Display-only grand total: product prices + shipping.
@@ -206,53 +194,6 @@ const CheckoutPage: React.FC = () => {
     setCartItems(updated);
     localStorage.setItem('sealed_cart', JSON.stringify(updated));
     window.dispatchEvent(new Event('cartUpdated'));
-  };
-
-  const fetchShippingQuotes = async () => {
-    const code = deliveryAddress.postalCode || deliveryPostalCode;
-    if (!code || code.length < 4) return;
-    setFetchingQuotes(true);
-    setError('');
-    try {
-      const res = await fetch('/api/shipping', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          parcels,
-          weight: Math.round(totalWeight * 10) / 10,
-          destinationPostalCode: code,
-          destinationCity: deliveryAddress.city || '',
-          destinationZone: deliveryAddress.province || '',
-        }),
-      });
-      const data = await res.json();
-      if (data.error) {
-        setError(data.error);
-        setShippingQuotes([]);
-      } else if (data.quotes && data.quotes.length > 0) {
-        const newQuotes = data.quotes;
-        setShippingQuotes(newQuotes);
-        setError('');
-        // Auto-select the cheapest when nothing is selected, the user was on
-        // Collection, OR the previously selected service is no longer offered
-        // (e.g. after changing the delivery suburb — otherwise the total
-        // silently drops shipping and no option is checked).
-        const selectedStillOffered = newQuotes.some(
-          (q) => `${q.provider}-${q.service}` === selectedShipping
-        );
-        if (!selectedShipping || selectedShipping === 'collection' || !selectedStillOffered) {
-          setSelectedShipping(`${newQuotes[0].provider}-${newQuotes[0].service}`);
-        }
-      } else {
-        setError('No shipping rates available for this postal code. Try Collection instead.');
-        setShippingQuotes([]);
-      }
-    } catch (e) {
-      console.error('Failed to fetch shipping quotes:', e);
-      setError('Failed to get shipping rates. Please try again.');
-    } finally {
-      setFetchingQuotes(false);
-    }
   };
 
   const handleCheckout = async () => {
@@ -281,9 +222,15 @@ const CheckoutPage: React.FC = () => {
       return;
     }
 
-    if (deliveryMethod === 'delivery' && !selectedShipping) {
-      setError('Please select a shipping method');
-      return;
+    if (deliveryMethod === 'delivery') {
+      if (deliveryForbidden) {
+        setError(BULK_ORDER_MESSAGE);
+        return;
+      }
+      if (!deliveryAddress.street || !deliveryAddress.city || !(deliveryAddress.postalCode || deliveryPostalCode)) {
+        setError('Please complete your delivery address (street, city and postal code)');
+        return;
+      }
     }
 
     setLoading(true);
@@ -314,9 +261,7 @@ const CheckoutPage: React.FC = () => {
           } : undefined,
           shipping: {
             method: deliveryMethod,
-            cost: shippingCost,
-            provider: selectedShipping !== 'collection' ? selectedShipping : 'collection',
-            postalCode: deliveryMethod === 'delivery' ? deliveryPostalCode : '1559',
+            postalCode: deliveryMethod === 'delivery' ? (deliveryAddress.postalCode || deliveryPostalCode) : '1559',
             ...(deliveryMethod === 'delivery' && {
               street: deliveryAddress.street,
               premise: deliveryAddress.premise,
@@ -451,7 +396,7 @@ const CheckoutPage: React.FC = () => {
                   <div className="flex justify-between">
                     <span className="text-gray-600">Shipping</span>
                     <span className={`font-semibold ${shippingCost === 0 ? 'text-green-600' : 'text-brand-950'}`}>
-                      {shippingCost === 0 ? 'Free' : `R${shippingCost.toFixed(2)}`}
+                      {shippingCost === 0 ? 'Free' : `R${shippingCost.toFixed(2)}${shippingLabel ? ` · ${shippingLabel}` : ''}`}
                     </span>
                   </div>
                   <div className="border-t pt-3 flex justify-between text-lg">
@@ -483,7 +428,6 @@ const CheckoutPage: React.FC = () => {
                       disabled={!collectionAllowed}
                       onChange={() => {
                         setDeliveryMethod('collection');
-                        setSelectedShipping('collection');
                       }}
                       className="w-4 h-4 text-brand-600"
                     />
@@ -501,10 +445,12 @@ const CheckoutPage: React.FC = () => {
 
                   {/* Delivery option */}
                   <label
-                    className={`flex items-center p-4 rounded-xl border-2 cursor-pointer transition-all ${
-                      deliveryMethod === 'delivery'
-                        ? 'border-brand-600 bg-brand-50'
-                        : 'border-gray-200 hover:border-gray-300'
+                    className={`flex items-center p-4 rounded-xl border-2 transition-all ${
+                      deliveryForbidden
+                        ? 'border-gray-200 bg-gray-50 opacity-60 cursor-not-allowed'
+                        : deliveryMethod === 'delivery'
+                        ? 'border-brand-600 bg-brand-50 cursor-pointer'
+                        : 'border-gray-200 hover:border-gray-300 cursor-pointer'
                     }`}
                   >
                     <input
@@ -512,19 +458,22 @@ const CheckoutPage: React.FC = () => {
                       name="deliveryMethod"
                       value="delivery"
                       checked={deliveryMethod === 'delivery'}
-                      onChange={() => {
-                        setDeliveryMethod('delivery');
-                        if (deliveryPostalCode && shippingQuotes.length > 0) {
-                          setSelectedShipping(`${shippingQuotes[0].provider}-${shippingQuotes[0].service}`);
-                        }
-                      }}
+                      disabled={deliveryForbidden}
+                      onChange={() => setDeliveryMethod('delivery')}
                       className="w-4 h-4 text-brand-600"
                     />
                     <div className="ml-3 flex-1">
                       <span className="font-bold text-brand-950">Delivery</span>
-                      <p className="text-xs text-gray-500">Courier to your door</p>
+                      <p className="text-xs text-gray-500">Flat rate — R150 (or R300 for 1,000+ seal pieces)</p>
                     </div>
+                    {!deliveryForbidden && (
+                      <span className="font-bold text-brand-950">R{flat.shippingCost.toFixed(2)}</span>
+                    )}
                   </label>
+
+                  {deliveryForbidden && (
+                    <p className="text-xs text-red-600 font-medium ml-1">{BULK_ORDER_MESSAGE}</p>
+                  )}
 
                   {/* Delivery address input */}
                   {deliveryMethod === 'delivery' && (
@@ -535,13 +484,6 @@ const CheckoutPage: React.FC = () => {
                           onAddressSelect={(address) => {
                             setDeliveryAddress(address);
                             setDeliveryPostalCode(address.postalCode);
-                            // Auto-fetch rates after address is selected
-                            setTimeout(() => {
-                              if (address.postalCode && address.postalCode.length >= 4) {
-                                const fetchBtn = document.getElementById('get-rates-btn');
-                                if (fetchBtn) fetchBtn.click();
-                              }
-                            }, 500);
                           }}
                           placeholder="Start typing your address..."
                           className="w-full"
@@ -626,74 +568,27 @@ const CheckoutPage: React.FC = () => {
                         </div>
                       </div>
 
-                      <button
-                        id="get-rates-btn"
-                        onClick={fetchShippingQuotes}
-                        disabled={fetchingQuotes || (!deliveryAddress.postalCode && deliveryPostalCode.length < 4)}
-                        className="w-full px-4 py-2.5 bg-brand-blue text-white rounded-xl font-bold text-sm hover:bg-brand-600 transition-all disabled:opacity-50"
-                      >
-                        {fetchingQuotes ? 'Loading...' : 'Get Shipping Rates'}
-                      </button>
-
-                      {/* Parcel dimensions - auto-calculated from cart */}
+                      {/* Flat-rate delivery preview (server-authoritative —
+                          /api/checkout recomputes the same fee from its own
+                          catalogue, so this is display only) */}
                       {cartItems.length > 0 && (
                         <div className="bg-gray-50 rounded-xl p-3">
                           <div className="flex items-center justify-between mb-1">
-                            <span className="text-xs font-medium text-gray-500">Parcel size (auto-calculated)</span>
-                            <span className="text-[10px] text-gray-400">{cartItems.length} item(s)</span>
+                            <span className="text-xs font-medium text-gray-500">
+                              Delivery fee (flat rate · {flat.boxCount} {flat.boxCount === 1 ? 'box' : 'boxes'})
+                            </span>
+                            {!deliveryForbidden && (
+                              <span className="text-sm font-bold text-brand-950">R{flat.shippingCost.toFixed(2)}</span>
+                            )}
                           </div>
-                          <div className="grid grid-cols-4 gap-2 text-center">
-                            <div>
-                              <span className="block text-xs text-gray-400">Weight</span>
-                              <span className="block text-sm font-bold text-brand-950">{Math.round(totalWeight * 10) / 10} kg</span>
-                            </div>
-                            <div>
-                              <span className="block text-xs text-gray-400">Length</span>
-                              <span className="block text-sm font-bold text-brand-950">{Math.ceil(longestLength)} cm</span>
-                            </div>
-                            <div>
-                              <span className="block text-xs text-gray-400">Width</span>
-                              <span className="block text-sm font-bold text-brand-950">{Math.ceil(totalWidth)} cm</span>
-                            </div>
-                            <div>
-                              <span className="block text-xs text-gray-400">Height</span>
-                              <span className="block text-sm font-bold text-brand-950">{Math.ceil(tallestHeight)} cm</span>
-                            </div>
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Shipping quotes */}
-                      {shippingQuotes.length > 0 && (
-                        <div className="space-y-2">
-                          <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Available courier options</p>
-                          {shippingQuotes.map((quote) => {
-                            const quoteId = `${quote.provider}-${quote.service}`;
-                            return (
-                              <label
-                                key={quoteId}
-                                className={`flex items-center p-3 rounded-xl border-2 cursor-pointer transition-all ${
-                                  selectedShipping === quoteId
-                                    ? 'border-brand-600 bg-brand-50'
-                                    : 'border-gray-200 hover:border-gray-300'
-                                }`}
-                              >
-                                <input
-                                  type="radio"
-                                  name="shippingOption"
-                                  value={quoteId}
-                                  checked={selectedShipping === quoteId}
-                                  onChange={() => setSelectedShipping(quoteId)}
-                                  className="w-4 h-4 text-brand-600"
-                                />
-                                <div className="ml-3 flex-1">
-                                  <span className="font-semibold text-sm text-brand-950">{quote.service}</span>
-                                  <p className="text-xs text-gray-500">{quote.provider} · {quote.estimatedDays} days</p>
-                                </div>
-                                <span className="font-bold text-brand-950">R{quote.price.toFixed(2)}</span>
-                              </label>
-                            );
-                          })}
+                          {deliveryForbidden ? (
+                            <p className="text-xs text-red-600 font-medium">{BULK_ORDER_MESSAGE}</p>
+                          ) : (
+                            <p className="text-xs text-gray-500">
+                              {flat.sealCount >= 1000 ? 'Bulk rate — 1,000+ seal pieces' : 'Standard rate — 1–5 boxes'}
+                              {flat.shippingService ? ` · ${flat.shippingService}` : ''}
+                            </p>
+                          )}
                         </div>
                       )}
                     </div>

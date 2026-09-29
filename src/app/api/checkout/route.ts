@@ -4,9 +4,13 @@ import crypto from "crypto";
 
 import { createClient } from "@libsql/client";
 import { isCollectableCategory } from "@/lib/collectionPolicy";
-import { getShippingQuotes } from "@/lib/shippingQuotes";
-import type { ShippingQuote } from "@/lib/shippingQuotes";
 import { quantityTiers } from "@/lib/productData";
+import {
+  computeFlatShipping,
+  FLAT_RATE_PROVIDER,
+  parsePackSize,
+  type FlatShippingLine,
+} from "@/lib/shippingFlat";
 
 const turso = createClient({
   url: process.env.TURSO_DATABASE_URL || "",
@@ -44,7 +48,7 @@ export async function POST(req: Request) {
     if (!items || items.length === 0) {
       return NextResponse.json({ error: "No items in order" }, { status: 400 });
     }
-    // Server-side enforcement: Collection is only available for non-cable-tie products.
+    // Server-side enforcement: Collection is only available for non-delivery-only products.
     if (shipping?.method === 'collection') {
       for (const item of items) {
         const productRes = await turso.execute({
@@ -84,10 +88,11 @@ export async function POST(req: Request) {
     const total = items.reduce((acc: number, item: any) => acc + item.price * item.quantity, 0);
 
     // ------------------------------------------------------------------
-    // Server-side shipping validation — NEVER trust the browser's cost.
-    // Re-quote against the live GearUp/Winfreight API using the cart's own
-    // parcels (dims/weights sourced from the server's Product catalogue via
-    // the tier data), then match the customer-selected provider+service.
+    // Flat-rate shipping — OWNER RULE (2026-09-29). No external quote calls.
+    // The fee is computed server-side from the cart's own line items and the
+    // server's Product catalogue (slug → quantityTiers), so the browser cannot
+    // tamper with the cost. Charges: R150 standard, R300 when >= 1000 seal
+    // pieces, no online delivery above 5 boxes (400 with a contact-us message).
     // ------------------------------------------------------------------
     const shippingMethod: string = shipping?.method || 'collection';
     let shippingCost = 0;
@@ -95,60 +100,40 @@ export async function POST(req: Request) {
     let shippingService: string | null = null;
 
     if (shippingMethod === 'delivery') {
-      const selectedProvider = shipping?.provider || '';
-      const postalCode = shipping?.postalCode || '';
-      const city = shipping?.city || '';
-      const zone = shipping?.province || '';
-
-      // Build parcels from the selected cart items with their real dims/weight.
-      // Dims come from the server-side Product catalogue (id → slug →
-      // quantityTiers), so the browser cannot understate weight or dimensions
-      // to get a cheaper quote. Falls back to the client-sent dims; either
-      // way the final price is the server's fresh quote, never the browser's.
-      const parcels = [];
+      const flatLines: FlatShippingLine[] = [];
       for (const item of items) {
         const q = Math.max(1, Math.floor(Number(item.quantity) || 1));
         let slug = (item as any).slug || '';
-        if (!slug && item.productId) {
+        let category = (item as any).category || '';
+        if (!slug || !category) {
           const prodRes = await turso.execute({
-            sql: "SELECT slug FROM Product WHERE id = ?",
+            sql: "SELECT slug, category FROM Product WHERE id = ?",
             args: [item.productId],
           });
-          slug = (prodRes.rows[0]?.slug as string) || '';
+          slug = slug || (prodRes.rows[0]?.slug as string) || '';
+          category = category || (prodRes.rows[0]?.category as string) || '';
         }
-        const tierSlug = slug ? (quantityTiers as Record<string, any[]>)[slug] : undefined;
-        const tier = tierSlug && tierSlug.length ? tierSlug[0] : null;
-        parcels.push({
-          submitted_length_cm: Math.ceil(tier?.shipping?.lengthCm || item.lengthCm || 20),
-          submitted_width_cm: Math.ceil(tier?.shipping?.widthCm || item.widthCm || 15),
-          submitted_height_cm: Math.ceil(tier?.shipping?.heightCm || item.heightCm || 10),
-          // Mirror the client's parcel math exactly (round weight to 1dp) so
-          // the validated quote list matches what the customer saw/selected.
-          submitted_weight_kg: Math.round(Number(tier?.shipping?.weightKg || item.weightKg || 0.1) * q * 10) / 10,
+        // Find the selected tier by matching the client's unit price so the
+        // pack size (pieces per box) is the real one the customer chose.
+        const tiers = slug ? (quantityTiers as Record<string, any[]>)[slug] : undefined;
+        let tier: any = null;
+        if (tiers && tiers.length) {
+          tier = tiers.find((t: any) => Math.abs(Number(t.price) - Number(item.price)) < 0.005) || tiers[0];
+        }
+        flatLines.push({
+          category: category || '',
+          packSize: tier ? parsePackSize(tier.unit) : 0,
+          quantity: q,
         });
       }
 
-      const quotes: ShippingQuote[] = await getShippingQuotes({
-        parcels,
-        destinationPostalCode: postalCode,
-        destinationCity: city,
-        destinationZone: zone,
-      });
-
-      // Match the selected quote: provider + service must exist in the fresh
-      // server-side quote list, and the price charged is the server-validated one.
-      const selected = quotes.find(
-        (q) => `${q.provider}-${q.service}` === selectedProvider
-      );
-      if (!selected) {
-        return NextResponse.json(
-          { error: "Shipping selection is no longer valid. Please re-select a shipping method." },
-          { status: 400 }
-        );
+      const flat = computeFlatShipping(flatLines);
+      if (flat.error) {
+        return NextResponse.json({ error: flat.error }, { status: 400 });
       }
-      shippingCost = selected.price;
-      shippingProvider = selected.provider;
-      shippingService = selected.service;
+      shippingCost = flat.shippingCost;
+      shippingProvider = FLAT_RATE_PROVIDER;
+      shippingService = flat.shippingService;
     } else if (shippingMethod !== 'collection') {
       return NextResponse.json({ error: "Invalid shipping method" }, { status: 400 });
     }
@@ -266,6 +251,9 @@ export async function POST(req: Request) {
     return NextResponse.json({
       orderId,
       orderNumber,
+      shippingCost,
+      shippingProvider,
+      shippingService,
       payfastUrl: PAYFAST_URL,
       payfastData,
     });
