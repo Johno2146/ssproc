@@ -11,6 +11,11 @@ import {
   parsePackSize,
   type FlatShippingLine,
 } from "@/lib/shippingFlat";
+import {
+  createStitchPaymentRequest,
+  isStitchConfigured,
+  StitchError,
+} from "@/lib/stitch";
 
 const turso = createClient({
   url: process.env.TURSO_DATABASE_URL || "",
@@ -42,7 +47,23 @@ export async function POST(req: Request) {
     }
 
     const body = await req.json();
-    const { items, shippingDetails, companyDetails, billingAddress, shipping } = body;
+    const { items, shippingDetails, companyDetails, billingAddress, shipping, paymentMethod } = body;
+
+    // Payment gateway selection — default PayFast (existing live gateway).
+    // Stitch runs ALONGSIDE PayFast: the owner keeps PayFast until Stitch is
+    // proven live, so a Stitch failure must never take the store offline —
+    // the client falls back to PayFast on any Stitch error response.
+    const gateway: 'payfast' | 'stitch' = paymentMethod === 'stitch' ? 'stitch' : 'payfast';
+
+    // Fail fast when Stitch was requested but isn't configured — do this BEFORE
+    // creating the order so we never create an orphan pending order for a
+    // payment we cannot take. (PayFast keeps its existing behaviour.)
+    if (gateway === 'stitch' && !isStitchConfigured()) {
+      return NextResponse.json(
+        { error: "Stitch payment is not configured yet. Please select PayFast or try again shortly." },
+        { status: 400 }
+      );
+    }
 
     // Validate items
     if (!items || items.length === 0) {
@@ -161,6 +182,12 @@ export async function POST(req: Request) {
     try {
       await turso.execute({ sql: `ALTER TABLE "Order" ADD COLUMN shippingService TEXT` });
     } catch (e) { /* column already exists */ }
+    try {
+      await turso.execute({ sql: `ALTER TABLE "Order" ADD COLUMN paymentProvider TEXT` });
+    } catch (e) { /* column already exists */ }
+    try {
+      await turso.execute({ sql: `ALTER TABLE "Order" ADD COLUMN stitchPaymentRequestId TEXT` });
+    } catch (e) { /* column already exists */ }
     // Build notes with company/vat/address if provided
     const notesParts = [];
     if (companyDetails?.companyName) notesParts.push('Company: ' + companyDetails.companyName);
@@ -170,8 +197,8 @@ export async function POST(req: Request) {
     const notes = notesParts.join(' | ') || null;
     
     await turso.execute({
-      sql: `INSERT INTO "Order" (id, orderNumber, userId, status, total, shippingName, shippingPhone, shippingEmail, shippingCost, shippingProvider, shippingService, notes, createdAt, updatedAt) VALUES (?, ?, ?, 'pending', ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))`,
-      args: [orderId, orderNumber, (session.user as any).id, grandTotal, shippingDetails.name, shippingDetails.phone, shippingDetails.email, shippingCost, shippingProvider, shippingService, notes],
+      sql: `INSERT INTO "Order" (id, orderNumber, userId, status, total, shippingName, shippingPhone, shippingEmail, shippingCost, shippingProvider, shippingService, paymentProvider, notes, createdAt, updatedAt) VALUES (?, ?, ?, 'pending', ?, ?, ?, ?, ?, ?, ?, ?, ?, datetime('now'), datetime('now'))`,
+      args: [orderId, orderNumber, (session.user as any).id, grandTotal, shippingDetails.name, shippingDetails.phone, shippingDetails.email, shippingCost, shippingProvider, shippingService, gateway === 'stitch' ? 'Stitch' : 'PayFast', notes],
     });
     // Create order items
     for (const item of items) {
@@ -213,6 +240,67 @@ export async function POST(req: Request) {
       return `https://${hostOnly}`;
     };
     const canonicalBase = normalizeBase(siteUrl);
+
+    // ===== Stitch path: create hosted-card payment request =====
+    // Runs ALONGSIDE PayFast. Redirect the customer to Stitch's hosted UI
+    // (card capture + 3DS). The order is only marked paid by the SIGNED
+    // /api/webhooks/stitch webhook — never by the return redirect.
+    if (gateway === 'stitch') {
+      try {
+        const stitchReq = await createStitchPaymentRequest({
+          amount: grandTotal,
+          externalReference: orderNumber,           // returned by redirect + webhook for reconciliation
+          payerReference: orderId,
+          payerEmail: shippingDetails.email || (session.user as any).email || undefined,
+          payerFullName: shippingDetails.name || (session.user as any).name || undefined,
+          metadata: {
+            orderId,
+            orderNumber,
+            deliveryMethod: shippingMethod,
+            source: 'ssproc-checkout',
+          },
+          redirectUri: `${canonicalBase}/checkout/stitch-return`,
+          failureRedirectUri: `${canonicalBase}/checkout/stitch-return`,
+        });
+
+        // Persist the Stitch payment request id against the order so the
+        // webhook (and admin) can cross-reference it.
+        try {
+          await turso.execute({
+            sql: `UPDATE "Order" SET stitchPaymentRequestId = ? WHERE id = ?`,
+            args: [stitchReq.id, orderId],
+          });
+        } catch (e) {
+          console.error("[Checkout] Failed to persist stitchPaymentRequestId:", e);
+        }
+        console.log(`[Checkout] Stitch payment request created for ${orderNumber}: ${stitchReq.id}`);
+
+        return NextResponse.json({
+          orderId,
+          orderNumber,
+          shippingCost,
+          shippingProvider,
+          shippingService,
+          paymentMethod: 'stitch',
+          stitch: {
+            redirectUrl: stitchReq.url,
+            paymentRequestId: stitchReq.id,
+          },
+        });
+      } catch (err) {
+        // Roll back the order so nothing lingers as "pending" for a payment we
+        // couldn't start — the customer can retry (or choose PayFast).
+        console.error("[Checkout] Stitch create failed, rolling back order:", err);
+        try {
+          await turso.execute({ sql: `DELETE FROM OrderItem WHERE orderId = ?`, args: [orderId] });
+          await turso.execute({ sql: `DELETE FROM "Order" WHERE id = ?`, args: [orderId] });
+        } catch (e) {
+          console.error("[Checkout] Rollback cleanup failed:", e);
+        }
+        const message = err instanceof StitchError ? err.message : "Stitch payment could not be started. Please try PayFast or contact us.";
+        return NextResponse.json({ error: message }, { status: err instanceof StitchError ? err.status : 502 });
+      }
+    }
 
     // 2. Prepare PayFast payment data
     const payfastData: Record<string, string> = {

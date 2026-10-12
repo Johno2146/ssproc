@@ -47,6 +47,7 @@ const CheckoutPage: React.FC = () => {
     postalCode: '',
   });
   const [deliveryMethod, setDeliveryMethod] = useState<'collection' | 'delivery'>('collection');
+  const [paymentMethod, setPaymentMethod] = useState<'payfast' | 'stitch'>('payfast');
   const [deliveryPostalCode, setDeliveryPostalCode] = useState('');
   const [deliveryAddress, setDeliveryAddress] = useState({
     street: '',
@@ -271,6 +272,7 @@ const CheckoutPage: React.FC = () => {
               province: deliveryAddress.province,
             }),
           },
+          paymentMethod,
         }),
       });
 
@@ -293,7 +295,13 @@ const CheckoutPage: React.FC = () => {
         }));
       }
 
-      // Create a form and submit to PayFast
+      // Stitch path: redirect the customer to Stitch's hosted card page.
+      // Stitch's signed webhook (not this redirect) marks the order paid.
+      if (data.stitch?.redirectUrl) {
+        window.location.assign(data.stitch.redirectUrl);
+        return;
+      }
+      // PayFast path: create a form and submit to PayFast
       const form = document.createElement('form');
       form.method = 'POST';
       form.action = data.payfastUrl;
@@ -737,12 +745,44 @@ const CheckoutPage: React.FC = () => {
                 </div>
               )}
 
+              {/* Payment method — PayFast (existing) alongside Stitch card payments */}
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-2">Payment Method</label>
+                <div className="space-y-3">
+                  <label className="flex items-center p-4 rounded-xl border border-gray-200 cursor-pointer hover:border-brand-600 transition-colors">
+                    <input
+                      type="radio"
+                      name="paymentMethod"
+                      checked={paymentMethod === 'payfast'}
+                      onChange={() => setPaymentMethod('payfast')}
+                      className="w-4 h-4 text-brand-600"
+                    />
+                    <div className="ml-3 flex-1">
+                      <span className="font-bold text-brand-950">PayFast</span>
+                      <p className="text-xs text-gray-500">EFT / instant redirect payment</p>
+                    </div>
+                  </label>
+                  <label className="flex items-center p-4 rounded-xl border border-gray-200 cursor-pointer hover:border-brand-600 transition-colors">
+                    <input
+                      type="radio"
+                      name="paymentMethod"
+                      checked={paymentMethod === 'stitch'}
+                      onChange={() => setPaymentMethod('stitch')}
+                      className="w-4 h-4 text-brand-600"
+                    />
+                    <div className="ml-3 flex-1">
+                      <span className="font-bold text-brand-950">Card (Stitch)</span>
+                      <p className="text-xs text-gray-500">Pay with a credit or debit card</p>
+                    </div>
+                  </label>
+                </div>
+              </div>
               <button
                 onClick={handleCheckout}
                 disabled={loading}
                 className="w-full bg-brand-blue text-white px-8 py-4 rounded-xl font-bold hover:bg-brand-600 transition-all text-lg disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {loading ? 'Processing...' : `Pay R${grandTotal.toFixed(2)} with PayFast`}
+                {loading ? 'Processing...' : `Pay R${grandTotal.toFixed(2)} ${paymentMethod === 'stitch' ? 'with Card (Stitch)' : 'with PayFast'}`}
               </button>
 
               <div className="flex items-center justify-center gap-2 mt-4">
@@ -750,7 +790,7 @@ const CheckoutPage: React.FC = () => {
                   <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z"/>
                 </svg>
                 <span className="text-xs text-gray-400">Secured by</span>
-                <span className="text-xs font-bold text-gray-600">PayFast</span>
+                <span className="text-xs font-bold text-gray-600">{paymentMethod === 'stitch' ? 'Stitch' : 'PayFast'}</span>
               </div>
             </div>
           </div>
