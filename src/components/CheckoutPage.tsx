@@ -60,6 +60,21 @@ const CheckoutPage: React.FC = () => {
     formatted: '',
   });
   const [rememberDetails, setRememberDetails] = useState(false);
+  // Stitch card payments are offered only when the backend has credentials
+  // (STITCH_CLIENT_ID/SECRET). Config endpoint is public, boolean-only.
+  const [stitchAvailable, setStitchAvailable] = useState(false);
+
+  // Load payment-gateway availability to decide whether to show the Stitch
+  // option. Safe default: PayFast-only (store keeps selling without Stitch).
+  useEffect(() => {
+    fetch('/api/payments/config', { cache: 'no-store' })
+      .then(r => (r.ok ? r.json() : null))
+      .then((cfg: any) => {
+        setStitchAvailable(Boolean(cfg?.stitch?.enabled));
+        if (!cfg?.stitch?.enabled) setPaymentMethod('payfast');
+      })
+      .catch(() => setStitchAvailable(false));
+  }, []);
 
   // Load product id → category mapping to determine collection eligibility
   useEffect(() => {
@@ -762,19 +777,21 @@ const CheckoutPage: React.FC = () => {
                       <p className="text-xs text-gray-500">EFT / instant redirect payment</p>
                     </div>
                   </label>
-                  <label className="flex items-center p-4 rounded-xl border border-gray-200 cursor-pointer hover:border-brand-600 transition-colors">
-                    <input
-                      type="radio"
-                      name="paymentMethod"
-                      checked={paymentMethod === 'stitch'}
-                      onChange={() => setPaymentMethod('stitch')}
-                      className="w-4 h-4 text-brand-600"
-                    />
-                    <div className="ml-3 flex-1">
-                      <span className="font-bold text-brand-950">Card (Stitch)</span>
-                      <p className="text-xs text-gray-500">Pay with a credit or debit card</p>
-                    </div>
-                  </label>
+                  {stitchAvailable && (
+                    <label className="flex items-center p-4 rounded-xl border border-gray-200 cursor-pointer hover:border-brand-600 transition-colors">
+                      <input
+                        type="radio"
+                        name="paymentMethod"
+                        checked={paymentMethod === 'stitch'}
+                        onChange={() => setPaymentMethod('stitch')}
+                        className="w-4 h-4 text-brand-600"
+                      />
+                      <div className="ml-3 flex-1">
+                        <span className="font-bold text-brand-950">Card (Stitch)</span>
+                        <p className="text-xs text-gray-500">Pay with a credit or debit card</p>
+                      </div>
+                    </label>
+                  )}
                 </div>
               </div>
               <button
