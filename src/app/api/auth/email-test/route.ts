@@ -56,10 +56,28 @@ function redact(s: string): string {
     .replace(/Bearer\s+[A-Za-z0-9._-]+/gi, "Bearer ***");
 }
 
-function leg(r: EmailResult) {
+/** Ask Resend what actually happened to a message (queued/sent/delivered/bounced). */
+async function resendStatus(id: string | undefined): Promise<string | null> {
+  const key = process.env.RESEND_API_KEY;
+  if (!key || !id) return null;
+  try {
+    const res = await fetch(`https://api.resend.com/emails/${encodeURIComponent(id)}`, {
+      headers: { Authorization: `Bearer ${key}` },
+      cache: "no-store",
+    });
+    const body: any = await res.json().catch(() => null);
+    if (!res.ok) return `lookup-failed(${res.status}): ${redact(String(body?.message || ""))}`;
+    return String(body?.last_event ?? body?.status ?? "unknown");
+  } catch (e: any) {
+    return `lookup-error: ${redact(String(e?.message || e))}`;
+  }
+}
+
+function leg(r: EmailResult, deliveryStatus?: string | null) {
   return {
     ok: r.ok,
     resendId: r.id ?? null,
+    deliveryStatus: deliveryStatus ?? null,
     from: r.from ?? null,
     usedFallbackFrom: r.usedFallbackFrom ?? false,
     error: r.error
@@ -143,8 +161,8 @@ export async function GET(req: NextRequest) {
   return NextResponse.json({
     env,
     to,
-    otpPath: leg(otpResult),
-    appPath: leg(appResult),
+    otpPath: leg(otpResult, await resendStatus(otpResult.id)),
+    appPath: leg(appResult, await resendStatus(appResult.id)),
     diagnosis: diagnose(Boolean(apiKey), otpResult),
   });
 }
