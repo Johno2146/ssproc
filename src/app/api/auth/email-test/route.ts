@@ -148,6 +148,13 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ env, dryRun: true });
   }
 
+  // ?checkId=<resend message id> — no send, just the delivery state of a
+  // message this endpoint already sent (queued → sent → delivered/bounced).
+  const checkId = url.searchParams.get("checkId");
+  if (checkId) {
+    return NextResponse.json({ env, checkId, deliveryStatus: await resendStatus(checkId) });
+  }
+
   // Leg 1: the exact call /api/auth/register makes.
   const otpResult = await sendOtpEmailWithResult(to, "Email diagnostic", "000000");
   // Leg 2: the generic app path (order confirmations / contact notifications).
