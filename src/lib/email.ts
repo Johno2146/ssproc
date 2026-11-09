@@ -1,11 +1,31 @@
 import { Resend } from 'resend';
 import { withVat } from '@/lib/vat';
 
-const resend = process.env.RESEND_API_KEY
-  ? new Resend(process.env.RESEND_API_KEY)
-  : null;
+/**
+ * Resend client. Created lazily so a key added/changed in the environment is
+ * picked up without depending on module-load order.
+ */
+let resendClient: Resend | null | undefined;
+function getResend(): Resend | null {
+  if (resendClient === undefined) {
+    resendClient = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
+  }
+  return resendClient;
+}
 
-const FROM_EMAIL = process.env.RESEND_EMAIL_FROM || 'orders@ssproc.co.za';
+/**
+ * The sender that is verified in Resend and already proven to deliver mail
+ * (it is the same identity /api/outreach/send uses successfully).
+ * Never change this to an address that has not been verified in Resend —
+ * Resend rejects unverified senders and the mail is silently dropped.
+ */
+export const VERIFIED_FROM = 'Sealed and Secured <sales@ssproc.co.za>';
+
+/** Sender actually used for app mail (OTP, order, contact notifications). */
+export function getFromEmail(): string {
+  return process.env.RESEND_EMAIL_FROM || VERIFIED_FROM;
+}
+
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://ssproc.vercel.app';
 const LOGO_URL = `${SITE_URL}/assets/LOGO%20WHITE%20TRANS.png`;
 
@@ -75,14 +95,56 @@ export interface SendEmailOptions {
   replyTo?: string;
 }
 
-interface EmailResult {
+export interface EmailError {
+  name: string;
+  message: string;
+  statusCode?: number;
+}
+
+export interface EmailResult {
   ok: boolean;
   id?: string;
+  /** Present when ok === false — the real reason from Resend (never a secret). */
+  error?: EmailError;
+  /** Sender that actually delivered the message (may differ from the primary). */
+  from?: string;
+  /** True when the primary sender failed and the verified sender was used. */
+  usedFallbackFrom?: boolean;
+}
+
+/** Normalise anything thrown/returned by the Resend SDK into a plain object. */
+function toEmailError(e: unknown): EmailError {
+  const anyE = e as any;
+  return {
+    name: String(anyE?.name || 'Error'),
+    message: String(anyE?.message || anyE?.error || e || 'unknown error'),
+    ...(typeof anyE?.statusCode === 'number' ? { statusCode: anyE.statusCode } : {}),
+  };
+}
+
+/** Errors that mean "this sender is not allowed", i.e. worth retrying as sales@. */
+function isSenderRejection(err: EmailError): boolean {
+  const m = `${err.name} ${err.message}`.toLowerCase();
+  return (
+    err.statusCode === 403 ||
+    err.statusCode === 422 ||
+    m.includes('not verified') ||
+    m.includes('unverified') ||
+    m.includes('domain') ||
+    m.includes('from address') ||
+    m.includes('sender') ||
+    m.includes('validation_error')
+  );
 }
 
 /**
- * Core send helper. Returns {ok, id} so callers that need the Resend message
- * id (e.g. /api/contact verification) can surface it.
+ * Core send helper. Returns {ok, id, error} so callers that need the Resend
+ * message id (e.g. /api/contact verification) can surface it, and so failures
+ * are diagnosable instead of being swallowed.
+ *
+ * If the configured sender is rejected by Resend (e.g. RESEND_EMAIL_FROM points
+ * at an address that is not verified on the account), the message is retried
+ * once from VERIFIED_FROM so customer mail still goes out.
  */
 export async function sendEmailWithResult(to: string, subject: string, body: string, opts?: SendEmailOptions): Promise<EmailResult> {
   // Detect if body is already HTML; if not, wrap in branded shell as plain text
@@ -90,40 +152,56 @@ export async function sendEmailWithResult(to: string, subject: string, body: str
   const html = isHtml ? body : brandedEmail(subject, `<p style="margin:0 0 16px;white-space:pre-line;">${esc(body)}</p>`);
   const text = body.replace(/<[^>]+>/g, '');
 
-  if (!resend) {
-    console.log(`[EMAIL DISABLED] To: ${to}, Subject: ${subject}`);
-    console.log(body);
-    return { ok: false };
+  const client = getResend();
+  if (!client) {
+    console.error(`[EMAIL DISABLED] RESEND_API_KEY is not set — To: ${to}, Subject: ${subject}`);
+    return { ok: false, error: { name: 'MissingApiKey', message: 'RESEND_API_KEY is not set in the server environment' } };
   }
 
-  try {
-    const { data, error } = await resend.emails.send({
-      from: FROM_EMAIL,
-      to,
-      subject,
-      html,
-      text,
-      ...(opts?.replyTo ? { replyTo: opts.replyTo } : {}),
-    });
+  const primaryFrom = getFromEmail();
 
-    if (error) {
-      console.error(`[EMAIL ERROR] To: ${to}:`, error);
-      return { ok: false };
+  const attempt = async (from: string): Promise<{ ok: boolean; id?: string; error?: EmailError }> => {
+    try {
+      const { data, error } = await client.emails.send({
+        from,
+        to,
+        subject,
+        html,
+        text,
+        ...(opts?.replyTo ? { replyTo: opts.replyTo } : {}),
+      });
+      if (error) {
+        const err = toEmailError(error);
+        console.error(`[EMAIL ERROR] from=${from} to=${to}: ${err.name} ${err.statusCode ?? ''} ${err.message}`);
+        return { ok: false, error: err };
+      }
+      console.log(`[EMAIL SENT] from=${from} to=${to} id=${data?.id}`);
+      return { ok: true, id: data?.id };
+    } catch (e) {
+      const err = toEmailError(e);
+      console.error(`[EMAIL ERROR] from=${from} to=${to}: ${err.name} ${err.statusCode ?? ''} ${err.message}`);
+      return { ok: false, error: err };
     }
+  };
 
-    console.log(`[EMAIL SENT] To: ${to}, ID: ${data?.id}`);
-    return { ok: true, id: data?.id };
-  } catch (e) {
-    console.error(`[EMAIL ERROR] To: ${to}:`, e);
-    return { ok: false };
+  const first = await attempt(primaryFrom);
+  if (first.ok) return { ok: true, id: first.id, from: primaryFrom };
+
+  if (primaryFrom !== VERIFIED_FROM && isSenderRejection(first.error!)) {
+    console.error(`[EMAIL RETRY] primary sender rejected; retrying from ${VERIFIED_FROM}`);
+    const second = await attempt(VERIFIED_FROM);
+    if (second.ok) return { ok: true, id: second.id, from: VERIFIED_FROM, usedFallbackFrom: true };
+    return { ok: false, error: second.error, from: VERIFIED_FROM, usedFallbackFrom: true };
   }
+
+  return { ok: false, error: first.error, from: primaryFrom };
 }
 
 export async function sendEmail(to: string, subject: string, body: string, opts?: SendEmailOptions): Promise<boolean> {
   return (await sendEmailWithResult(to, subject, body, opts)).ok;
 }
 
-export async function sendOtpEmail(email: string, name: string, otp: string): Promise<boolean> {
+export async function sendOtpEmailWithResult(email: string, name: string, otp: string): Promise<EmailResult> {
   const content = `
     <p style="margin:0 0 16px;">Hi ${esc(name)},</p>
     <p style="margin:0 0 20px;">Your verification code for Sealed &amp; Secured is:</p>
@@ -133,7 +211,12 @@ export async function sendOtpEmail(email: string, name: string, otp: string): Pr
     <p style="margin:0 0 8px;color:#6B7280;font-size:13px;">This code expires in 15 minutes.</p>
     <p style="margin:0;color:#6B7280;font-size:13px;">If you didn't create an account, please ignore this email.</p>
   `;
-  return sendEmail(email, `Your verification code: ${otp}`, brandedEmail('Verify your email', content));
+  return sendEmailWithResult(email, `Your verification code: ${otp}`, brandedEmail('Verify your email', content));
+}
+
+/** Boolean wrapper kept for existing callers (register / forgot-password / resend-otp). */
+export async function sendOtpEmail(email: string, name: string, otp: string): Promise<boolean> {
+  return (await sendOtpEmailWithResult(email, name, otp)).ok;
 }
 
 // Build an HTML order items table
