@@ -9,6 +9,7 @@ const corePages: MetadataRoute.Sitemap = [
   { url: `${CANONICAL_BASE}/`, changeFrequency: "weekly", priority: 1.0 },
   { url: `${CANONICAL_BASE}/shop`, changeFrequency: "daily", priority: 0.9 },
   { url: `${CANONICAL_BASE}/about`, changeFrequency: "monthly", priority: 0.6 },
+  { url: `${CANONICAL_BASE}/company-profile`, changeFrequency: "monthly", priority: 0.6 },
   { url: `${CANONICAL_BASE}/contact`, changeFrequency: "monthly", priority: 0.6 },
   { url: `${CANONICAL_BASE}/services`, changeFrequency: "monthly", priority: 0.6 },
 ];

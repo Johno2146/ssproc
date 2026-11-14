@@ -30,6 +30,7 @@ const PAGES: { path: string; title: string; note: string }[] = [
   { path: "/shop?category=steel-cable-ties", title: "Stainless Steel Cable Ties", note: "SS304 cable ties from 150mm to 800mm and an installation tool." },
   { path: "/shop?category=plastic-tags", title: "Plastic tags", note: "Motag and compression tags in a range of colours (delivery only)." },
   { path: "/about", title: "About", note: "Company background and what we supply." },
+  { path: "/company-profile", title: "Company profile", note: "Citable one-pager: legal name, registration number, address, contact details, catalogue, delivery model and payment methods." },
   { path: "/services", title: "Services", note: "Laser printing, barcoding and branding options." },
   { path: "/shipping", title: "Shipping & delivery", note: "Flat-rate delivery charges and collection rules." },
   { path: "/contact", title: "Contact", note: "Phone, email, address and contact form." },

@@ -6,6 +6,7 @@ import ProductDetailClient from './ProductDetailClient';
 import JsonLd from "@/components/JsonLd";
 import { notFound } from "next/navigation";
 import { absoluteUrl, CANONICAL_BASE, buildMetadata, SITE_NAME } from '@/lib/seo';
+import { LEGAL_NAME } from '@/lib/llms';
 import { withVat } from '@/lib/vat';
 import type { Metadata } from 'next';
 
@@ -173,6 +174,16 @@ const ProductDetailPage: React.FC<ProductPageProps> = async ({ params }) => {
     ? { Printed: '/assets/Motag printed.jpg', Unprinted: '/assets/MOTAG Unprinted.png' }
     : undefined;
 
+  // Base (entry) pack price for the Product structured data: the smallest pack
+  // price for products priced per pack size — the same "From R…" figure the page
+  // shows and the same value /api/products returns — otherwise the product price.
+  // Prices displayed are the owner's final prices (no VAT mark-up), so the
+  // structured-data price is identical to the one charged at checkout.
+  const tiers = quantityTiers[product.slug];
+  const basePrice = withVat(
+    tiers && tiers.length > 0 ? Math.min(...tiers.map((t) => t.price)) : Number(product.price)
+  );
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Product + Breadcrumb structured data */}
@@ -182,18 +193,24 @@ const ProductDetailPage: React.FC<ProductPageProps> = async ({ params }) => {
             "@context": "https://schema.org",
             "@type": "Product",
             name: product.name,
-            image: imageUrl ? absoluteUrl(imageUrl) : undefined,
+            // The catalogue slug is the stable product identifier used in every
+            // product URL, the feeds and /api/products.
+            sku: product.slug,
+            image: imageUrl ? [absoluteUrl(imageUrl)] : undefined,
             description: product.description || `${product.name} security seal`,
             brand: { "@type": "Brand", name: SITE_NAME },
             category: product.category,
             offers: {
-              "@type": "AggregateOffer",
-              priceCurrency: "ZAR",
-              // Display prices are the owner's final prices (no VAT mark-up).
-              lowPrice: withVat(Math.min(...(quantityTiers[product.slug] || [{ price: Number(product.price) }]).map((t) => t.price))),
-              highPrice: withVat(Math.max(...(quantityTiers[product.slug] || [{ price: Number(product.price) }]).map((t) => t.price))),
-              availability: product.stock > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+              // Single Offer at the base (entry) pack price. Products priced per
+              // pack size are listed from their smallest pack upwards, so the
+              // offer states that price rather than an aggregate range.
+              "@type": "Offer",
               url: absoluteUrl(`/shop/${product.slug}`),
+              priceCurrency: "ZAR",
+              price: Number(basePrice.toFixed(2)),
+              itemCondition: "https://schema.org/NewCondition",
+              availability: product.stock > 0 ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+              seller: { "@type": "Organization", name: LEGAL_NAME },
             },
           },
           {
