@@ -23,12 +23,15 @@ export const metadata = buildMetadata({
 export default function HomePage() {
   const orgJsonLd = {
     "@context": "https://schema.org",
-    "@type": ["Organization", "Store"],
+    "@type": ["Organization", "Store", "LocalBusiness"],
     name: SITE_NAME,
+    legalName: "Sealed and Secured (Pty) Ltd",
     url: CANONICAL_BASE,
     logo: `${CANONICAL_BASE}/assets/logo.png`,
+    image: `${CANONICAL_BASE}/assets/logo.png`,
     description: DEFAULT_DESCRIPTION,
     telephone: CONTACT_PHONE,
+    email: "sales@ssproc.co.za",
     address: {
       "@type": "PostalAddress",
       streetAddress: "23 Wright Street, Eastwood Business Park",
@@ -43,6 +46,7 @@ export default function HomePage() {
     contactPoint: {
       "@type": "ContactPoint",
       telephone: CONTACT_PHONE,
+      email: "sales@ssproc.co.za",
       contactType: "sales",
       areaServed: "ZA",
       availableLanguage: "English",

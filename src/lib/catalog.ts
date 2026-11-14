@@ -1,0 +1,76 @@
+import { createClient } from "@libsql/client";
+
+/**
+ * Single source of truth for the shop catalog.
+ *
+ * Both the public shop (`/api/products`, which `/shop` renders from) and the
+ * AI-discoverability files (`/llms.txt`, `/llms-full.txt`) read products through
+ * this module, so product names, categories and pack prices cannot drift apart.
+ * Prices themselves live in `src/lib/productData.ts` (`quantityTiers`) — the same
+ * module the shop renders from.
+ */
+
+/** Owner-approved "All Products" ordering (category display order 2026-09-14). */
+export const CATEGORY_ORDER = [
+  "Plastic Seals",
+  "Bolt Seals",
+  "Cable Seals",
+  "Metal Seals",
+  "Plastic tags",
+  "Security Bags",
+  "Plastic Cable Ties",
+  "Stainless Steel Cable Ties",
+] as const;
+
+export const PRODUCT_ORDER_BY =
+  "ORDER BY CASE slug " +
+  // 1. Plastic Seals
+  "WHEN 'suretite-320mm' THEN 0 WHEN 'suretite-230mm' THEN 1 WHEN 'suretite-barcoded' THEN 2 WHEN 'twinlock' THEN 3 WHEN 'twinlock-barcoded' THEN 4 WHEN 'padlock-seal' THEN 5 WHEN 'nylock-seal' THEN 6 WHEN 'suregas-seal' THEN 7 " +
+  // 2. Barrier Seals
+  "WHEN 'bolt-seal' THEN 8 WHEN 'cable-lock-500mm' THEN 9 WHEN 'cable-seal-300mm' THEN 10 WHEN 'cable-seal-500mm' THEN 11 WHEN 'abs-cable-lock' THEN 12 " +
+  // 3. Security Bags
+  "WHEN 'cash-bags' THEN 13 WHEN 'till-bag' THEN 14 WHEN 'envopoly' THEN 15 " +
+  // 4. Plastic Cable Ties
+  "WHEN 'heavy-duty-double-zip-tie-handcuff' THEN 16 WHEN 'ct-100mm' THEN 17 WHEN 'ct-150mm' THEN 18 WHEN 'ct-slim-200mm' THEN 19 WHEN 'ct-200mm' THEN 20 WHEN 'ct-heavy-duty-200mm' THEN 21 WHEN 'ct-300mm' THEN 22 WHEN 'ct-heavy-duty-300mm' THEN 23 WHEN 'ct-400mm' THEN 24 WHEN 'ct-heavy-duty-400mm' THEN 25 WHEN 'ct-heavy-duty-500mm' THEN 26 WHEN 'ct-extra-heavy-duty-540mm' THEN 27 " +
+  // 5. Stainless Steel Cable Ties
+  "WHEN 'ss-4-6-150mm' THEN 28 WHEN 'ss-4-6-200mm' THEN 29 WHEN 'ss-4-6-250mm' THEN 30 WHEN 'ss-4-6-300mm' THEN 31 WHEN 'ss-4-6-350mm' THEN 32 WHEN 'ss-4-6-400mm' THEN 33 WHEN 'ss-4-6-450mm' THEN 34 WHEN 'ss-4-6-500mm' THEN 35 WHEN 'ss-4-6-550mm' THEN 36 WHEN 'ss-4-6-600mm' THEN 37 " +
+  "WHEN 'ss-7-9-200mm' THEN 38 WHEN 'ss-7-9-250mm' THEN 39 WHEN 'ss-7-9-300mm' THEN 40 WHEN 'ss-7-9-350mm' THEN 41 WHEN 'ss-7-9-400mm' THEN 42 WHEN 'ss-7-9-450mm' THEN 43 WHEN 'ss-7-9-500mm' THEN 44 WHEN 'ss-7-9-550mm' THEN 45 WHEN 'ss-7-9-600mm' THEN 46 WHEN 'ss-7-9-650mm' THEN 47 WHEN 'ss-7-9-700mm' THEN 48 WHEN 'ss-7-9-750mm' THEN 49 WHEN 'ss-7-9-800mm' THEN 50 WHEN 'ss-installation-tool' THEN 51 " +
+  "ELSE 100 END, createdAt DESC";
+
+export interface CatalogProduct {
+  id: string;
+  name: string;
+  slug: string;
+  description: string;
+  category: string;
+  price: number;
+  unit: string;
+  minOrder: number;
+  stock: number;
+  imageUrl: string | null;
+  isActive: boolean;
+}
+
+/** Live catalog rows from Turso, in the owner-approved display order. */
+export async function getShopProducts(): Promise<CatalogProduct[]> {
+  const client = createClient({
+    url: process.env.DATABASE_URL || "",
+    authToken: process.env.TURSO_AUTH_TOKEN,
+  });
+  const result = await client.execute(
+    `SELECT * FROM Product WHERE isActive = 1 ${PRODUCT_ORDER_BY}`
+  );
+  return result.rows.map((row: any) => ({
+    id: row.id,
+    name: row.name,
+    slug: row.slug,
+    description: row.description,
+    category: row.category,
+    price: row.price,
+    unit: row.unit,
+    minOrder: row.minOrder,
+    stock: row.stock,
+    imageUrl: row.imageUrl,
+    isActive: row.isActive,
+  }));
+}
